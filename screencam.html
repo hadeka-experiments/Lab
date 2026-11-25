@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>الشاشة بتصوّر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+#pat{position:fixed;inset:0;width:100vw;height:100dvh;z-index:50;background:#000;display:none}
+#pat.on{display:block}
+#prog{position:fixed;left:0;right:0;bottom:0;height:4px;z-index:51;background:#300;display:none}#prog i{display:block;height:100%;background:#f33;width:0}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.res figure{margin:0}.res canvas{width:100%;aspect-ratio:1;border-radius:10px;background:#000;image-rendering:auto}
+.res figcaption{font-size:13px;color:var(--mute);margin-top:4px}
+.seg{display:flex;gap:8px;margin-top:8px}.seg button{flex:1}.seg button[aria-pressed=false]{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.vid{position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;bottom:0;left:0}
+</style>
+</head>
+<body>
+<canvas id="pat"></canvas><div id="prog"><i></i></div>
+<video id="vid" class="vid" playsinline muted autoplay></video>
+<div class="wrap">
+<h1>الشاشة بتصوّر</h1>
+<p class="sub">الكاميرا هنا هتبقى متغطية ومش شايفة أي صورة، هي بس بتحس النور الكلي زيادة ولا نقصان، زي عين مقفولة بتحس بالشمس. الشاشة بتنوّر الورقة اللي قدامها بمئات الأنماط الأبيض والأسود ورا بعض، ومن تغيّر كمية النور الكلي مع كل نمط بتتبني صورة للورقة. الطريقة دي اسمها single-pixel camera.</p>
+
+<div class="card">
+  <b>جهّز التجربة</b>
+  <ol>
+  <li>اطفي نور الأوضة. لازم تبقى ضلمة على قد ما تقدر.</li>
+  <li>ارسم على ورقة بيضا شكل كبير وتقيل بقلم أسود عريض، زي حرف X أو دايرة، يملا الورقة تقريباً.</li>
+  <li><b>غطي الكاميرا الأمامية</b> بحتة منديل أو ورقة رفيعة متطبقة ومتلزقة بشريط لاصق، عشان الكاميرا ما تشوفش الرسمة. هي محتاجة تحس بالنور بس.</li>
+  <li>حط التليفون على ضهره والشاشة لفوق، وحط علبتين كبريت أو أي حاجة بارتفاع ٢–٤ سم على الطرفين، ونيّم الورقة عليهم والرسمة لتحت ناحية الشاشة.</li>
+  </ol>
+</div>
+
+<div class="row"><button id="b-cam">شغّل الكاميرا</button></div>
+<div class="msg" id="msg"></div>
+
+<div class="seg"><button id="r8" aria-pressed="true">سريع ٨×٨ (حوالي ٢٠ ث)</button><button id="r16" aria-pressed="false">أوضح ١٦×١٦ (حوالي دقيقة ونص)</button></div>
+<div class="row">
+  <button class="ghost" id="b-base" disabled>١. من غير الورقة</button>
+  <button id="b-shot" disabled>٢. صوّر الورقة</button>
+</div>
+<p class="lbl">الخطوة الأولى اختيارية بس بتفرق: من غير الورقة، والشاشة باصة لفراغ أو للسقف، الصفحة بتسجّل النور اللي بيتسرّب من الشاشة للكاميرا مباشرة، وبتطرحه من الصورة بعدين.</p>
+
+<div class="res">
+  <figure><canvas id="out"></canvas><figcaption>الصورة اللي اتبنت من النور الكلي</figcaption></figure>
+  <figure><canvas id="raw"></canvas><figcaption>نفس الصورة بالبكسلات من غير تنعيم</figcaption></figure>
+</div>
+<div class="row"><button class="ghost" id="b-flip" disabled>اقلب يمين وشمال</button><button class="ghost" id="b-inv" disabled>اعكس الألوان</button></div>
+<p class="lbl" id="note"></p>
+
+<details><summary>إزاي بتطلع صورة من غير كاميرا؟</summary>
+<ul>
+<li>الشاشة بتتقسم لمربعات، وكل نمط بينوّر نص المربعات ويطفي النص التاني بترتيب معين اسمه Hadamard.</li>
+<li>المربعات اللي قدام حتة بيضا في الورقة بترجّع نور أكتر من اللي قدام الحبر الأسود. فكل نمط بيدّي رقم واحد: قد إيه نور رجع.</li>
+<li>كل نمط ليه نمط معكوس بيتعرض بعده على طول، والفرق بينهم بيلغي النور اللي في الأوضة وتغيرات الكاميرا. ومن مئات الأرقام دي بتتحل معادلة بتطلّع صورة.</li>
+<li>الصورة بتطلع مبهمة، لأن كل مربع في الشاشة بينوّر مساحة أكبر منه من الورقة. وكل ما الورقة تقرّب، الصورة بتوضح.</li>
+<li>الصورة بتبقى من «وجهة نظر الشاشة»، فممكن تحتاج تقلبها يمين وشمال عشان تطابق الورقة.</li>
+<li>⚠ دي أصعب تجربة. لو الكاميرا عدّلت إضاءتها لوحدها في النص، أو التليفون اتحرك، الصورة هتطلع مشوشة.</li>
+</ul></details>
+</div>
+<script>
+
+// Sylvester Hadamard row k of size N (entries +1/-1): sign = (-1)^popcount(k & j)
+function hadRow(k, N) { const r = new Int8Array(N); for (let j = 0; j < N; j++) { let v = k & j, c = 0; while (v) { c ^= 1; v &= v - 1; } r[j] = c ? -1 : 1; } return r; }
+// order patterns coarse-to-fine-ish: by number of sign changes (sequency) along the 1D row
+function hadOrder(N) { const ks = []; for (let k = 1; k < N; k++) { const r = hadRow(k, N); let s = 0; for (let j = 1; j < N; j++) if (r[j] !== r[j - 1]) s++; ks.push({ k, s }); } return ks.sort((a, b) => a.s - b.s).map(x => x.k); }
+// meas: [{k, plus, minus}] -> image (n*n), DC set to 0 (contrast only)
+function reconstruct(meas, n) {
+  const N = n * n, img = new Float64Array(N);
+  for (const m of meas) { const r = hadRow(m.k, N), d = m.plus - m.minus; for (let j = 0; j < N; j++) img[j] += r[j] * d; }
+  for (let j = 0; j < N; j++) img[j] /= N;
+  return img;
+}
+
+{
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let n = 8, video = $('vid'), frames = [], base = {}, last = null, flip = false, inv = false;
+const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+const pat = $('pat'), pg = pat.getContext('2d');
+$('r8').addEventListener('click', () => { n = 8; $('r8').setAttribute('aria-pressed', 'true'); $('r16').setAttribute('aria-pressed', 'false'); });
+$('r16').addEventListener('click', () => { n = 16; $('r16').setAttribute('aria-pressed', 'true'); $('r8').setAttribute('aria-pressed', 'false'); });
+
+function onFrame(nowT) {
+  if (video.readyState >= 2) {
+    cv.width = 32; cv.height = 24; cx.drawImage(video, 0, 0, 32, 24);
+    const d = cx.getImageData(0, 0, 32, 24).data; let s = 0, mx = 0; for (let i = 0; i < d.length; i += 4) { const v = d[i] + d[i + 1] + d[i + 2]; s += v; if (v > mx) mx = v; }
+    frames.push({ t: performance.now(), v: s / (d.length / 4) / 3, mx: mx / 3 }); if (frames.length > 200) frames.shift();
+  }
+  video.requestVideoFrameCallback ? video.requestVideoFrameCallback(onFrame) : requestAnimationFrame(onFrame);
+}
+$('b-cam').addEventListener('click', async () => {
+  try {
+    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 }, frameRate: { ideal: 30 } }, audio: false });
+    video.srcObject = st; await video.play(); onFrame();
+    $('b-cam').style.display = 'none'; $('b-base').disabled = $('b-shot').disabled = false;
+    $('msg').textContent = 'الكاميرا شغالة. جهّز الورقة وغطي الكاميرا، وعلّي سطوع الشاشة للآخر.';
+  } catch (e) { $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e)) + '</span>'; }
+});
+
+function show(row) {
+  const d = devicePixelRatio || 1, W = innerWidth, H = innerHeight; if (pat.width !== W * d) { pat.width = W * d; pat.height = H * d; }
+  pg.setTransform(d, 0, 0, d, 0, 0); pg.fillStyle = '#000'; pg.fillRect(0, 0, W, H);
+  if (row === 'white') { pg.fillStyle = '#fff'; pg.fillRect(0, 0, W, H); return; } if (row === 'black') return;
+  const cw = W / n, ch = H / n; pg.fillStyle = '#fff';
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (row[y * n + x] > 0) pg.fillRect(Math.floor(x * cw), Math.floor(y * ch), Math.ceil(cw), Math.ceil(ch));
+}
+async function bucket(row) {
+  show(row); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const t = performance.now() + 60; const t0 = performance.now();
+  while (frames.filter(f => f.t > t).length < 2) { await wait(8); if (performance.now() - t0 > 1500) break; }
+  const fs = frames.filter(f => f.t > t).slice(0, 2); return fs.length ? { v: fs.reduce((s, f) => s + f.v, 0) / fs.length, mx: Math.max(...fs.map(f => f.mx)) } : { v: NaN, mx: 0 };
+}
+async function run() {
+  pat.classList.add('on'); $('prog').style.display = 'block';
+  try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
+  await wait(800);
+  const w = await bucket('white'), b = await bucket('black');
+  const order = hadOrder(n * n), meas = [];
+  for (let i = 0; i < order.length; i++) {
+    const r = hadRow(order[i], n * n), p = await bucket(r), m = await bucket(r.map(v => -v));
+    meas.push({ k: order[i], plus: p.v, minus: m.v }); $('prog').firstChild.style.width = (100 * (i + 1) / order.length) + '%';
+  }
+  pat.classList.remove('on'); $('prog').style.display = 'none';
+  return { meas, white: w, black: b };
+}
+function render() {
+  if (!last) return;
+  let img = Float64Array.from(last.img);
+  if (base[n] && last.useBase) { const b = reconstruct(base[n], n); for (let j = 0; j < img.length; j++) img[j] -= b[j]; }
+  const s = Array.from(img).sort((a, b) => a - b), lo = s[Math.floor(s.length * 0.02)], hi = s[Math.floor(s.length * 0.98)] || lo + 1;
+  const small = document.createElement('canvas'); small.width = small.height = n; const sg = small.getContext('2d'), id = sg.createImageData(n, n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    let v = (img[y * n + x] - lo) / (hi - lo); v = Math.max(0, Math.min(1, v)); if (inv) v = 1 - v;
+    const X = flip ? n - 1 - x : x, k = (y * n + X) * 4; id.data[k] = id.data[k + 1] = id.data[k + 2] = Math.round(255 * v); id.data[k + 3] = 255;
+  }
+  sg.putImageData(id, 0, 0);
+  for (const [c, smooth] of [[$('out'), true], [$('raw'), false]]) { c.width = c.height = 256; const g = c.getContext('2d'); g.imageSmoothingEnabled = smooth; g.imageSmoothingQuality = 'high'; g.drawImage(small, 0, 0, 256, 256); }
+}
+async function capture(isBase) {
+  $('b-base').disabled = $('b-shot').disabled = true; $('msg').textContent = 'ما تلمسش التليفون لحد ما الشاشة ترجع.';
+  const r = await run();
+  const span = r.white.v - r.black.v;
+  if (!(span > 2)) { $('msg').innerHTML = `<span class="bad">الكاميرا مش حاسة بنور الشاشة كفاية (الفرق بين أبيض وأسود ${isFinite(span) ? span.toFixed(1) : '؟'}). اتأكد إن الأوضة ضلمة، وإن الغطا مش تقيل أوي، وإن السطوع على الآخر.</span>`; }
+  else if (r.white.mx > 250) { $('msg').innerHTML = '<span class="bad">الكاميرا متشبّعة من النور، والصورة ممكن تبوظ. خلي الغطا أتقل شوية.</span>'; }
+  else $('msg').textContent = `خلص. الفرق بين شاشة بيضا وسودا ${span.toFixed(1)} درجة.`;
+  if (isBase) { base[n] = r.meas; $('msg').textContent += ' اتسجل النور المتسرّب. حط الورقة ودوس «صوّر الورقة».'; }
+  else { last = { img: reconstruct(r.meas, n), useBase: !!base[n] }; render(); $('b-flip').disabled = $('b-inv').disabled = false;
+    $('note').textContent = (base[n] ? 'اتطرح منها النور المتسرّب.' : 'من غير طرح النور المتسرّب، فممكن تلاقي بقعة منورة ناحية مكان الكاميرا.') + ` الصورة ${n}×${n} من ${r.meas.length * 2} نمط.`; }
+  $('b-base').disabled = $('b-shot').disabled = false;
+}
+$('b-base').addEventListener('click', () => capture(true));
+$('b-shot').addEventListener('click', () => capture(false));
+$('b-flip').addEventListener('click', () => { flip = !flip; render(); });
+$('b-inv').addEventListener('click', () => { inv = !inv; render(); });
+}
+</script>
+</body>
+</html>

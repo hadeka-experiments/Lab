@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اللي في عينك</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.seg{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.seg button{flex:1;min-width:0}.seg button[aria-pressed=false]{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.stage{position:relative;width:100%;background:#000;border-radius:14px;overflow:hidden;margin-top:10px}
+.stage video,.stage canvas{display:block;width:100%;height:auto}
+.outs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.outs figure{margin:0}.outs img{width:100%;aspect-ratio:1;object-fit:contain;background:#000;border-radius:10px;display:block}
+.outs figcaption{font-size:13px;color:var(--mute);margin-top:4px}
+input[type=file]{font:inherit;font-size:16px;width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>اللي في عينك</h1>
+<p class="sub">قرنية العين مراية كروية صغيرة، والنضارة الشمس مراية أكبر. الاتنين فيهم انعكاس للمكان اللي قدام الشخص. الصفحة بتلاقي العينين أو عدسات النضارة، وتكبّر الانعكاس وتوضّحه، وفي العين بتفرد التقوّس عشان يبان المكان اللي الشخص باصص عليه.</p>
+
+<div class="seg" role="group" aria-label="المصدر"><button id="s-cam" aria-pressed="true">صوّر بالكاميرا</button><button id="s-up" aria-pressed="false">ارفع صورة</button></div>
+<div class="seg" role="group" aria-label="نوع الانعكاس"><button id="m-eye" aria-pressed="true">قرنية العين</button><button id="m-gl" aria-pressed="false">نضارة شمس</button><button id="m-man" aria-pressed="false">أي مكان (يدوي)</button></div>
+
+<div id="camBox">
+  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button class="ghost" id="b-flip" disabled>الكاميرا الخلفية</button></div>
+  <div class="stage"><video id="vid" playsinline muted autoplay></video></div>
+  <div class="row"><button id="b-shot" disabled>صوّر وجمّع ٢٠ صورة</button></div>
+  <p class="lbl">قرّب الكاميرا من العين على قد ما الكاميرا تقدر تركّز، حوالي ٢٠–٣٠ سم، والمكان قدام الشخص منوّر. الصفحة بتجمع ٢٠ صورة ورا بعض وتاخد متوسطهم، عشان الضوضاء تقل والانعكاس يوضح.</p>
+</div>
+<div id="upBox" hidden>
+  <input type="file" id="file" accept="image/*">
+  <p class="lbl">الصور اللي متصوّرة بكاميرا التليفون الخلفية من قريب بتطلع أحسن نتيجة، لأن العين بتبقى بكسلات أكتر. الصورة مش بتترفع لأي مكان، كله بيتعمل على التليفون.</p>
+</div>
+
+<div class="stage" id="picBox" hidden><canvas id="pic"></canvas></div>
+<div id="manBox" hidden>
+  <p class="lbl">دوس على مكان الانعكاس في الصورة (عين، نضارة، معلقة، شباك عربية…)، وظبط حجم المربع.</p>
+  <label>حجم المربع <b id="vZ"></b><input type="range" id="Z" min="1" max="40" step="0.5" value="8"></label>
+</div>
+
+<div class="msg" id="msg"></div>
+<div class="row"><button class="ghost" id="b-mir">اقلب زي المراية</button><button class="ghost" id="b-boost" aria-pressed="true">وضّح التفاصيل: شغال</button></div>
+<div class="outs" id="outs"></div>
+<p class="lbl" id="note"></p>
+
+<details><summary>بيعمل إيه بالظبط؟ وإيه حدوده؟</summary>
+<ul>
+<li>موديل تتبع الوش بيحدد مكان القزحية ونص قطرها في كل عين بالبكسل، ومكان العينين عشان يقدّر مكان عدسات النضارة.</li>
+<li>الصفحة بتقص المنطقة، وتكبّرها، وتمد الألوان من أغمق لأفتح نقطة، وتوضّح الحواف.</li>
+<li>في القرنية، الانعكاس متضغوط ناحية الأطراف لأنها كروية. الصفحة بتحسب كل نقطة جاية من أنهي اتجاه وتفردها، فتطلع صورة زي عدسة «عين السمكة» للمكان قدام الشخص.</li>
+<li>الانعكاس مقلوب زي المراية، وزرار «اقلب» بيرجّعه لاتجاهه الحقيقي.</li>
+<li><b>حدوده:</b> التفاصيل محدودة بعدد البكسلات اللي القزحية واخداها في الصورة. لو القزحية ٤٠ بكسل، الانعكاس كله ٤٠ بكسل. هتبان الشبابيك والشاشات واللمبات والأشكال الكبيرة، مش الوشوش ولا الكلام. ولون القزحية نفسه بيبان تحت الانعكاس.</li>
+<li>استخدمها على صورك، أو صور ناس موافقين. الانعكاس ممكن يبيّن مكان الشخص.</li>
+</ul></details>
+</div>
+<script>
+
+// src: {w,h,data(RGBA)}; crop a square of side s around (cx,cy), resample to out x out (bilinear)
+function cropSq(src, cx, cy, s, out) {
+  const o = new Float32Array(out * out * 3);
+  for (let y = 0; y < out; y++) for (let x = 0; x < out; x++) {
+    const fx = cx - s / 2 + (x + 0.5) * s / out - 0.5, fy = cy - s / 2 + (y + 0.5) * s / out - 0.5;
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), ax = fx - x0, ay = fy - y0;
+    for (let c = 0; c < 3; c++) {
+      const P = (X, Y) => { X = Math.max(0, Math.min(src.w - 1, X)); Y = Math.max(0, Math.min(src.h - 1, Y)); return src.data[(Y * src.w + X) * 4 + c]; };
+      o[(y * out + x) * 3 + c] = (P(x0, y0) * (1 - ax) + P(x0 + 1, y0) * ax) * (1 - ay) + (P(x0, y0 + 1) * (1 - ax) + P(x0 + 1, y0 + 1) * ax) * ay;
+    }
+  }
+  return o;
+}
+// convex spherical mirror -> equidistant view of reflected directions (still mirrored)
+function unwarpSphere(img, n, maxRho) {
+  const o = new Float32Array(n * n * 3), pm = 2 * Math.asin(maxRho), c = (n - 1) / 2;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const dx = (x - c) / c, dy = (y - c) / c, q = Math.hypot(dx, dy); if (q > 1) continue;
+    const phi = q * pm, rho = Math.sin(phi / 2), s = q ? rho / maxRho / q : 0;
+    const sx = c + dx * s * c, sy = c + dy * s * c, X = Math.round(sx), Y = Math.round(sy);
+    if (X < 0 || Y < 0 || X >= n || Y >= n) continue;
+    for (let k = 0; k < 3; k++) o[(y * n + x) * 3 + k] = img[(Y * n + X) * 3 + k];
+  }
+  return o;
+}
+// contrast stretch + optional local detail boost
+function enhance(img, n, mask, boost) {
+  const vals = []; for (let i = 0; i < n * n; i++) if (!mask || mask[i]) vals.push((img[i * 3] + img[i * 3 + 1] + img[i * 3 + 2]) / 3);
+  vals.sort((a, b) => a - b); const lo = vals[Math.floor(vals.length * 0.01)] || 0, hi = vals[Math.floor(vals.length * 0.995)] || 255;
+  let src = img;
+  if (boost) { // unsharp mask with a 5x5 box blur
+    const bl = new Float32Array(img.length);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) for (let k = 0; k < 3; k++) { let s = 0, m = 0; for (let v = -2; v <= 2; v++) for (let u = -2; u <= 2; u++) { const X = x + u, Y = y + v; if (X < 0 || Y < 0 || X >= n || Y >= n) continue; s += img[(Y * n + X) * 3 + k]; m++; } bl[(y * n + x) * 3 + k] = s / m; }
+    src = img.map((v, i) => v + 1.2 * (v - bl[i]));
+  }
+  const out = new Uint8ClampedArray(n * n * 4);
+  for (let i = 0; i < n * n; i++) { for (let k = 0; k < 3; k++) { let v = (src[i * 3 + k] - lo) / (hi - lo || 1); v = Math.pow(Math.max(0, Math.min(1, v)), 0.8); out[i * 4 + k] = 255 * v; } out[i * 4 + 3] = !mask || mask[i] ? 255 : 0; }
+  return out;
+}
+function circleMask(n, r) { const m = new Uint8Array(n * n), c = (n - 1) / 2; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) m[y * n + x] = Math.hypot(x - c, y - c) <= r * c ? 1 : 0; return m; }
+
+</script>
+<script type="module">
+{
+const $ = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let src = 'cam', mode = 'eye', facing = 'user', stream = null, V = null, files = null, lmV = null, lmI = null, mirror = true, boost = true, last = null, manPt = null, picData = null;
+const video = $('vid'), pic = $('pic'), pg = pic.getContext('2d', { willReadFrequently: true });
+const seg = (ids, on) => ids.forEach(i => $(i).setAttribute('aria-pressed', i === on ? 'true' : 'false'));
+const say = (t, bad) => { $('msg').innerHTML = bad ? `<span class="bad">${t}</span>` : t; };
+$('s-cam').onclick = () => { src = 'cam'; seg(['s-cam', 's-up'], 's-cam'); $('camBox').hidden = false; $('upBox').hidden = true; $('picBox').hidden = mode !== 'man' || !picData; };
+$('s-up').onclick = () => { src = 'up'; seg(['s-cam', 's-up'], 's-up'); $('camBox').hidden = true; $('upBox').hidden = false; $('picBox').hidden = !picData; };
+const setMode = m => { mode = m; seg(['m-eye', 'm-gl', 'm-man'], { eye: 'm-eye', gl: 'm-gl', man: 'm-man' }[m]); $('manBox').hidden = m !== 'man'; if (picData) $('picBox').hidden = false; process(); };
+$('m-eye').onclick = () => setMode('eye'); $('m-gl').onclick = () => setMode('gl'); $('m-man').onclick = () => setMode('man');
+$('Z').oninput = () => { $('vZ').textContent = $('Z').value + '%'; if (mode === 'man') process(); }; $('vZ').textContent = $('Z').value + '%';
+$('b-mir').onclick = () => { mirror = !mirror; render(); };
+$('b-boost').onclick = () => { boost = !boost; $('b-boost').textContent = 'وضّح التفاصيل: ' + (boost ? 'شغال' : 'مقفول'); render(); };
+
+async function models() {
+  if (lmV) return;
+  say('بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…');
+  V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
+  files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
+  const o = (d, rm) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: rm, numFaces: 1 });
+  const mk = async rm => { try { return await V.FaceLandmarker.createFromOptions(files, o('GPU', rm)); } catch (e) { return await V.FaceLandmarker.createFromOptions(files, o('CPU', rm)); } };
+  lmV = await mk('VIDEO'); lmI = await mk('IMAGE'); say('');
+}
+async function openCam() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing === 'user' ? 'user' : { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } }, audio: false });
+  video.srcObject = stream; await video.play(); $('b-flip').textContent = facing === 'user' ? 'الكاميرا الخلفية' : 'الكاميرا الأمامية';
+}
+$('b-cam').onclick = async () => {
+  $('b-cam').disabled = true;
+  try { if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.'); await openCam(); await models(); $('b-cam').style.display = 'none'; $('b-shot').disabled = $('b-flip').disabled = false; say(`الكاميرا شغالة بدقة ${video.videoWidth}×${video.videoHeight}.`); }
+  catch (e) { $('b-cam').disabled = false; say(e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e), true); }
+};
+$('b-flip').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; try { await openCam(); say(`الكاميرا شغالة بدقة ${video.videoWidth}×${video.videoHeight}.`); } catch (e) { say('مقدرتش أفتح الكاميرا التانية.', true); } };
+
+// regions from landmarks, in pixels
+function regions(pts, W, H) {
+  const P = i => ({ x: pts[i].x * W, y: pts[i].y * H }), d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), out = [];
+  if (mode === 'eye') for (const [c, rim] of [[468, [469, 470, 471, 472]], [473, [474, 475, 476, 477]]]) {
+    if (pts.length <= c) continue; const C = P(c), r = rim.reduce((s, i) => s + d(C, P(i)), 0) / 4; out.push({ x: C.x, y: C.y, s: 2 * r * 1.02, r });
+  }
+  if (mode === 'gl') for (const [a, b] of [[33, 133], [362, 263]]) { const A = P(a), B = P(b), ew = d(A, B); out.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 - 0.1 * ew, s: 2.1 * ew }); }
+  return out;
+}
+const N = 192;
+function extract(img, regs) { return regs.map(g => cropSq(img, g.x, g.y, g.s, N)); }
+
+$('b-shot').onclick = async () => {
+  if (mode === 'man') { snapshot(); return; }
+  $('b-shot').disabled = true; say('اثبت… بيجمّع.');
+  const W = video.videoWidth, H = video.videoHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true });
+  let acc = null, cnt = 0, rr = [];
+  for (let k = 0; k < 20; k++) {
+    await new Promise(r => requestAnimationFrame(r));
+    const res = lmV.detectForVideo(video, performance.now()), pts = res.faceLandmarks && res.faceLandmarks[0]; if (!pts) continue;
+    const regs = regions(pts, W, H); if (!regs.length) continue;
+    g.drawImage(video, 0, 0, W, H); const im = { w: W, h: H, data: g.getImageData(0, 0, W, H).data }, cr = extract(im, regs);
+    if (!acc) acc = cr.map(a => new Float32Array(a.length)); if (acc.length !== cr.length) continue;
+    cr.forEach((a, i) => { for (let j = 0; j < a.length; j++) acc[i][j] += a[j]; }); cnt++; rr = regs; picData = im;
+  }
+  $('b-shot').disabled = false;
+  if (!cnt) { say('ما لقيتش وش في الصورة. قرّب وخلي الوش كله باين.', true); return; }
+  last = { crops: acc.map(a => a.map(v => v / cnt)), regs: rr, n: cnt }; drawPic(rr); $('picBox').hidden = false; say(`اتجمعت ${cnt} صورة.`); render();
+};
+function snapshot() {
+  const W = video.videoWidth, H = video.videoHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true });
+  g.drawImage(video, 0, 0, W, H); picData = { w: W, h: H, data: g.getImageData(0, 0, W, H).data }; drawPic(); $('picBox').hidden = false; say('دوس على مكان الانعكاس في الصورة.');
+}
+$('file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    await models(); const bmp = await createImageBitmap(f), sc = Math.min(1, 4096 / Math.max(bmp.width, bmp.height)), W = Math.round(bmp.width * sc), H = Math.round(bmp.height * sc);
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(bmp, 0, 0, W, H);
+    picData = { w: W, h: H, data: g.getImageData(0, 0, W, H).data, canvas: c }; drawPic(); $('picBox').hidden = false; process();
+  } catch (err) { say('مقدرتش أفتح الصورة.', true); }
+};
+function drawPic(box) {
+  if (!picData) return; pic.width = picData.w; pic.height = picData.h;
+  pg.putImageData(new ImageData(new Uint8ClampedArray(picData.data), picData.w, picData.h), 0, 0);
+  if (box) { pg.strokeStyle = '#e8251a'; pg.lineWidth = Math.max(2, picData.w / 300); for (const b of box) pg.strokeRect(b.x - b.s / 2, b.y - b.s / 2, b.s, b.s); }
+}
+pic.addEventListener('click', e => {
+  if (mode !== 'man' || !picData) return; const r = pic.getBoundingClientRect();
+  manPt = { x: (e.clientX - r.left) / r.width * picData.w, y: (e.clientY - r.top) / r.height * picData.h }; process();
+});
+function process() {
+  if (!picData) return;
+  let regs = [];
+  if (mode === 'man') { if (!manPt) { drawPic(); return; } regs = [{ x: manPt.x, y: manPt.y, s: picData.w * $('Z').value / 100 }]; }
+  else {
+    const c = picData.canvas || (() => { const t = document.createElement('canvas'); t.width = picData.w; t.height = picData.h; t.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(picData.data), picData.w, picData.h), 0, 0); return t; })();
+    const res = lmI.detect(c), pts = res.faceLandmarks && res.faceLandmarks[0];
+    if (!pts) { drawPic(); $('outs').innerHTML = ''; say('ما لقيتش وش في الصورة. جرّب «أي مكان (يدوي)» وحدد الانعكاس بنفسك.', true); return; }
+    regs = regions(pts, picData.w, picData.h); say('');
+  }
+  drawPic(regs); last = { crops: extract(picData, regs), regs, n: 1 }; render();
+}
+function toUrl(px, n) { const c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'); const id = g.createImageData(n, n); id.data.set(px); g.putImageData(id, 0, 0);
+  if (mirror) { const m = document.createElement('canvas'); m.width = m.height = n; const mg = m.getContext('2d'); mg.translate(n, 0); mg.scale(-1, 1); mg.drawImage(c, 0, 0); return m.toDataURL('image/png'); } return c.toDataURL('image/png'); }
+function render() {
+  if (!last) return; const cards = [];
+  last.crops.forEach((cr, i) => {
+    const side = last.regs.length > 1 ? (i === 0 ? 'العين/العدسة اللي على يمين الصورة' : 'العين/العدسة اللي على شمال الصورة') : 'المنطقة اللي اخترتها';
+    if (mode === 'eye') {
+      cards.push(`<figure><img alt="" src="${toUrl(enhance(cr, N, circleMask(N, 0.98), boost), N)}"><figcaption>${side}: الانعكاس متكبّر</figcaption></figure>`);
+      cards.push(`<figure><img alt="" src="${toUrl(enhance(unwarpSphere(cr, N, 0.95), N, circleMask(N, 1), boost), N)}"><figcaption>بعد فرد التقوّس: المكان قدامه</figcaption></figure>`);
+    } else cards.push(`<figure><img alt="" src="${toUrl(enhance(cr, N, null, boost), N)}"><figcaption>${side}</figcaption></figure>`);
+  });
+  $('outs').innerHTML = cards.join('');
+  const px = last.regs.map(g => Math.round(g.r ? 2 * g.r : g.s));
+  $('note').textContent = (mode === 'eye' ? `قطر القزحية في الصورة حوالي ${px.join(' و')} بكسل، وده أقصى تفاصيل ممكن تطلع من الانعكاس.` + (Math.min(...px) < 40 ? ' العين صغيرة في الصورة، فقرّب أو استخدم صورة أوضح.' : '') : `المنطقة حوالي ${px.join(' و')} بكسل.`) + (last.n > 1 ? ` متوسط ${last.n} صورة.` : '') + ' اضغط مطوّل على أي صورة عشان تحفظها.';
+}
+}
+</script>
+</body>
+</html>

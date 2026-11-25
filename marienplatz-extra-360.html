@@ -394,7 +394,8 @@ void main(){
           vec4 sk=texture2D(tPanoSky,vec2(up,0.5));
           float hRay=uPanoPos.y+pd.y*(sk.x/distH);
           float occ=(sk.x>0.01&&sk.x<distH-0.3&&sk.y>hRay)?1.0:0.0;
-          visPa=smoothstep(0.02,0.15,dot(n,normalize(-pd)))*(1.0-occ)*smoothstep(1.2,2.6,vW.y);
+          float detach=(sk.x>0.01&&sk.x<distH-0.3)?smoothstep(10.0,22.0,hRay-sk.y):0.0;
+          visPa=smoothstep(0.02,0.15,dot(n,normalize(-pd)))*(1.0-occ)*(1.0-detach*0.92)*smoothstep(1.2,2.6,vW.y);
           visPa*=smoothstep(0.0,0.004,up)*smoothstep(0.0,0.004,1.0-up)*smoothstep(0.0,0.01,vp)*smoothstep(0.0,0.01,1.0-vp);
           paimg=texture2D(tPano,vec2(up,1.0-vp)).rgb;
         }

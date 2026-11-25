@@ -62,6 +62,8 @@ button:disabled{opacity:.5;cursor:default}
 #wx .cl{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
 #wx .sub{font-size:11px;color:#d8dde8}
 #hint{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:4;pointer-events:none;background:rgba(0,0,0,.6);border-radius:10px;padding:6px 14px;font-size:14px;text-align:center;max-width:calc(100% - 24px);transition:opacity .6s}
+#legend{position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:6;display:flex;gap:12px;background:rgba(0,0,0,.65);border-radius:10px;padding:6px 12px;font-size:13px;pointer-events:none}
+#legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px}
 #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.75);box-shadow:0 0 0 1px rgba(0,0,0,.5);pointer-events:none;z-index:3}
 #joy{position:fixed;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);pointer-events:none;z-index:7}
 #knob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(255,255,255,.45)}
@@ -102,7 +104,8 @@ button:disabled{opacity:.5;cursor:default}
     <p id="srcLine">إطار حقيقي من الكاميرا · Real webcam frame</p>
   </div>
   <div class="btns">
-    <button id="bDown" class="pri" disabled>انزل إلى الميدان <small>Go down</small></button>
+    <button id="bLive2" class="pri">▶ شغّل الحركة الحية <small>Live motion</small></button>
+    <button id="bDown" disabled>انزل إلى الميدان <small>Go down</small></button>
     <button id="bCam" hidden>زاوية الكاميرا <small>Webcam view</small></button>
     <button id="bSnd" aria-pressed="true">الصوت: يعمل <small>Sound</small></button>
     <button id="bInfo">ما الحقيقي هنا؟ <small>Info</small></button>
@@ -126,6 +129,7 @@ button:disabled{opacity:.5;cursor:default}
       <label><input type="checkbox" id="cbGuides"> خطوط المعايرة</label>
       <label><input type="checkbox" id="cbBoxes" checked> مربعات الكشف</label>
       <label><input type="checkbox" id="cbFull" checked> كشف كامل (أبطأ)</label>
+      <label><input type="checkbox" id="cbCov"> لوّن حسب المصدر</label>
     </div>
     <div id="crop" hidden>
       <p style="margin:2px 0 4px">طابق الإطار الملتقط مع الكاميرا: حرّك القيم حتى تنطبق خطوط المعايرة على المبنى والنافورة.</p>
@@ -146,6 +150,7 @@ button:disabled{opacity:.5;cursor:default}
 
 <div id="wx" dir="ltr"><span><span class="cl" id="clk">--:--</span><br><span class="sub" id="clkSub">München</span></span></div>
 <div id="hint"></div>
+<div id="legend" hidden><span><i style="background:#3ef25a"></i>البث الحي الآن</span><span><i style="background:#4d8cff"></i>صورة حقيقية من زاوية أخرى</span><span><i style="background:#ff9a26"></i>مستنتَج من أسطح مشابهة</span></div>
 <div id="cross" hidden></div>
 <div id="joy" hidden><div id="knob"></div></div>
 
@@ -164,7 +169,8 @@ button:disabled{opacity:.5;cursor:default}
     <h3>تقديري أو تقريبي</h3>
     <ul>
       <li><b>حدود لا يمكن تجاوزها بكاميرا واحدة:</b> ما تراه من الناس هو جانبهم المواجه للكاميرا فقط؛ ظهورهم وما خلفهم لم تلتقطه أي كاميرا، فلا يمكن عرضه حقيقيًا. والصورة الثانية قديمة (ليست لحظية)، فتظهر فيها واجهات صحيحة لكن إضاءتها ومحالّها قد تختلف عن اليوم. والأسطح التي لا تراها أي من الصورتين تبقى بلون محايد. لذلك هذا أقرب ما يمكن للواقع من المصادر المتاحة، وليس نسخة طبق الأصل من كل زاوية.</li>
-      <li>الأكشاك رسمتُها يدويًا من أسطحها الظاهرة في الإطار (صناديق تقريبية)، والشجرة مخروط موضعه وطوله (~18 م) مستنتجان من الصورة.</li>
+      <li><b>الاستنتاج للأسطح التي لا تراها أي كاميرا:</b> تُكسى بقصاصات حقيقية من أسطح مشابهة ظاهرة (واجهة البلدية، واجهات الصف الجنوبي، واجهات المحلات المضيئة، رصيف الميدان، واجهات الأكشاك وأسطحها، أضواء الشجرة) بمقاسها الحقيقي بالمتر. فعّل «لوّن حسب المصدر» لترى: أخضر = البث الآن، أزرق = صورة حقيقية من زاوية أخرى، برتقالي = مستنتَج.</li>
+            <li>الأكشاك رسمتُها يدويًا من أسطحها الظاهرة في الإطار (صناديق تقريبية)، والشجرة مخروط موضعه وطوله (~18 م) مستنتجان من الصورة.</li>
       <li>بعض ارتفاعات المباني مقدّرة من عدد الطوابق، والأسطح مسطحة. الأسطح التي لا تراها الكاميرا ملوّنة بلون محايد لأنه لا توجد صورة لها.</li>
       <li>الناس قصاصات مسطحة تواجهك، والأشخاص الأصغر من نحو 12 بكسل (بعيدًا عند العمود) لا يُكشفون، والمحجوبون خلف الأكشاك قد يفوتون. توجد أحيانًا كشوفات خاطئة.</li>
       <li>لا يستطيع أي موقع قراءة بكسلات فيديو يوتيوب مباشرة (حماية المتصفح). لذلك يعمل الوضع الحي عبر مشاركة الشاشة/التبويب، على الكمبيوتر فقط (Chrome أو Edge أو Firefox)، وعبر https مثل GitHub Pages.</li>
@@ -299,20 +305,33 @@ projUniforms.uPhV.value.copy(phCam.matrixWorldInverse);
 function maskVec(m){return new THREE.Vector4(m[0]/RW,1-m[3]/RH,m[2]/RW,1-m[1]/RH);}
 projUniforms.uM0.value.copy(maskVec(MASKS[0])); projUniforms.uM1.value.copy(maskVec(MASKS[1]));
 srcCam.updateMatrixWorld(); projUniforms.uSrcV.value.copy(srcCam.matrixWorldInverse); projUniforms.uSrcVP.value.multiplyMatrices(srcCam.projectionMatrix,srcCam.matrixWorldInverse);
-const PROJ_VS=`attribute vec3 aCol; varying vec3 vW; varying vec3 vN; varying vec3 vC;
-void main(){ vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz; vN=normalize(mat3(modelMatrix)*normal); vC=aCol; gl_Position=projectionMatrix*viewMatrix*w; }`;
+const PROJ_VS=`attribute vec3 aCol; attribute vec3 aEx; varying vec3 vW; varying vec3 vN; varying vec3 vC; varying vec3 vEx;
+void main(){ vec4 w=modelMatrix*vec4(position,1.0); vW=w.xyz; vN=normalize(mat3(modelMatrix)*normal); vC=aCol; vEx=aEx; gl_Position=projectionMatrix*viewMatrix*w; }`;
 const PROJ_FS=`#include <packing>
 uniform sampler2D tImg; uniform sampler2D tDepth; uniform mat4 uSrcVP; uniform mat4 uSrcV; uniform vec3 uSrcPos; uniform float uNear; uniform float uFar; uniform float uReal;
 uniform vec4 uM0; uniform vec4 uM1; uniform vec3 uFogCol; uniform float uFogNear; uniform float uFogFar;
 uniform sampler2D tPh; uniform sampler2D tPhDepth; uniform mat4 uPhV; uniform vec3 uPhPos; uniform vec4 uPhK; uniform vec2 uPhWH; uniform float uPhOn;
-varying vec3 vW; varying vec3 vN; varying vec3 vC;
+uniform sampler2D tEx; uniform sampler2D tPave; uniform vec2 uExS[16]; uniform float uDebug;
+varying vec3 vW; varying vec3 vN; varying vec3 vC; varying vec3 vEx;
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+vec3 exSample(float cell, vec2 p, bool mirrorV){
+  cell=floor(cell+0.5); vec2 q=p/uExS[int(cell)]; vec2 m=vec2(abs(fract(q.x*0.5)*2.0-1.0), mirrorV?abs(fract(q.y*0.5)*2.0-1.0):fract(q.y));
+  float c=cell-4.0*floor(cell/4.0+0.01), r=floor(cell/4.0+0.01); float pad=0.02;
+  return texture2D(tEx,vec2((c+pad+m.x*(1.0-2.0*pad))/4.0, 1.0-(r+pad+(1.0-m.y)*(1.0-2.0*pad))/4.0)).rgb; }
 bool inM(vec2 uv, vec4 m){ return uv.x>m.x && uv.x<m.z && uv.y>m.y && uv.y<m.w; }
 void main(){
   vec3 n=normalize(vN);
   float lit=0.62+0.38*max(dot(n,normalize(vec3(-0.5,0.75,0.4))),0.0);
   vec3 base=vC*lit;
-  if(n.y>0.9 && vW.y<0.05){ vec2 q=floor(vW.xz*vec2(3.5,4.0)); base*=0.88+0.2*hash(q); }
+  vec3 ex=floor(vEx+0.5);
+  if(ex.x>=0.0){
+    if(n.y>0.6) base=(ex.y==4.0?texture2D(tPave,vW.xz/vec2(6.0,4.0)).rgb:exSample(ex.y,vW.xz,true))*(0.9+0.1*lit);
+    else if(n.y<-0.6) base=vC*0.35;
+    else { vec2 t2=vec2(-n.z,n.x); t2=length(t2)>0.01?normalize(t2):vec2(1.0,0.0); float u=dot(vW.xz,t2);
+      if(ex.z>=0.0 && vW.y<4.5) base=exSample(ex.z,vec2(u,vW.y),false);
+      else base=exSample(ex.x,vec2(u,vW.y-(ex.z>=0.0?4.5:0.0)),false);
+      base*=0.85+0.15*lit; }
+  }
   float vis=0.0; vec3 img=vec3(0.0);
   vec4 c=uSrcVP*vec4(vW,1.0);
   if(c.w>0.0){
@@ -323,6 +342,7 @@ void main(){
       float zF=-(uSrcV*vec4(vW,1.0)).z;
       float occ=step(zS+0.3+zF*0.015,zF);
       vis=smoothstep(0.03,0.2,facing)*(1.0-occ);
+      if(n.y>0.9 && vW.y<0.05) vis*=1.0-smoothstep(0.05,0.09,zF/664.0); // far ground: too few pixels per metre, fall back to real pavement texture
       vis*=smoothstep(0.0,0.006,uv.x)*smoothstep(0.0,0.006,1.0-uv.x)*smoothstep(0.0,0.006,uv.y)*smoothstep(0.0,0.006,1.0-uv.y);
       img=texture2D(tImg,uv).rgb;
     }
@@ -344,18 +364,40 @@ void main(){
       } } }
   vec3 col=mix(base,pimg,visP);
   col=mix(col,img,vis*uReal);
+  if(uDebug>0.5){ float wL=vis, wP=visP*(1.0-vis), wI=max(0.0,1.0-wL-wP); vec3 dc=wL*vec3(0.25,0.95,0.35)+wP*vec3(0.3,0.55,1.0)+wI*vec3(1.0,0.6,0.15);
+    float l=dot(col,vec3(0.3,0.59,0.11)); col=mix(col,dc*(0.35+0.9*l),0.6); }
   float d=length(vW-cameraPosition); col=mix(col,uFogCol,smoothstep(uFogNear,uFogFar,d)*0.85);
   gl_FragColor=vec4(col,1.0);
 }`;
+// Exemplar atlas: 16 crops of real imagery (webcam frame, clean plate, second photo). Surfaces that neither source sees are
+// textured with the crop of the most similar surface type, at real-world scale (metres per tile below).
+const EX=[['fr',[1050,120,1280,420],14,14],['fr',[20,90,150,250],10,10],['fr',[470,150,660,270],24,14],['fr',[10,300,110,375],8,4.5],
+  ['pl',[560,520,700,600],6,4],['fr',[245,465,355,515],3.3,2.6],['fr',[385,505,470,555],3.5,3.5],['fr',[650,200,720,330],4,6],
+  ['ph',[1000,262,1250,318],8,8],['ph',[360,540,560,700],14,9],['ph',[1030,380,1260,560],12,9],['ph',[680,620,800,700],7,5],
+  ['ph',[20,350,250,600],14,14],['ph',[295,300,325,500],2,6],['fr',[150,150,300,280],14,12],['ph',[560,560,650,720],6,9]];
+const exCv=document.createElement('canvas'); exCv.width=exCv.height=2048; const exG=exCv.getContext('2d');
+const exTex=new THREE.CanvasTexture(exCv); exTex.minFilter=THREE.LinearFilter; exTex.generateMipmaps=false;
+const paveCv=document.createElement('canvas'); paveCv.width=paveCv.height=512; const paveG=paveCv.getContext('2d');
+const paveTex=new THREE.CanvasTexture(paveCv); paveTex.wrapS=paveTex.wrapT=THREE.RepeatWrapping; paveTex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+function buildAtlas(frame,photo){ EX.forEach((e,i)=>{ if(e[0]==='pl') return; const src=e[0]==='fr'?frame:photo; const b=e[1]; exG.drawImage(src,b[0],b[1],b[2]-b[0],b[3]-b[1],(i%4)*512,Math.floor(i/4)*512,512,512); });
+  // pavement: colour measured on the real (people-removed) pavement in the frame, laid as granite slabs (the square's paving pattern)
+  const pts=[[600,600],[650,560],[720,520],[560,650],[700,600],[300,560],[250,620],[830,560],[640,480],[760,470]]; const cols=[];
+  for(const [x,y] of pts){ try{ const d=plateG.getImageData(x-3,y-3,6,6).data; let r=0,g=0,b=0; for(let k=0;k<d.length;k+=4){r+=d[k];g+=d[k+1];b+=d[k+2];} cols.push([r/9/4*1,g/9/4,b/9/4].map(v=>v)); }catch(err){} }
+  cols.sort((a,b)=>(a[0]+a[1]+a[2])-(b[0]+b[1]+b[2])); const m=cols.length?cols[Math.floor(cols.length/2)]:[95,92,95];
+  const ox=0, oy=0, rr=mulberryLocal(7); const exG0=exG; { const exG=paveG; exG.fillStyle=`rgb(${m[0]*0.8|0},${m[1]*0.8|0},${m[2]*0.8|0})`; exG.fillRect(ox,oy,512,512);
+  for(let y=0;y<8;y++) for(let x=0;x<6;x++){ const v=0.85+rr()*0.3; exG.fillStyle=`rgb(${Math.min(255,m[0]*v)|0},${Math.min(255,m[1]*v)|0},${Math.min(255,m[2]*v)|0})`; exG.fillRect(ox+x*85.3+2,oy+y*64+2,81,60); } }
+  paveTex.needsUpdate=true; exTex.needsUpdate=true; }
+function mulberryLocal(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+projUniforms.tEx={value:exTex}; projUniforms.tPave={value:paveTex}; projUniforms.uExS={value:EX.map(e=>new THREE.Vector2(e[2],e[3]))}; projUniforms.uDebug={value:0};
 const projMat=new THREE.ShaderMaterial({uniforms:projUniforms,vertexShader:PROJ_VS,fragmentShader:PROJ_FS});
 const projMatDS=new THREE.ShaderMaterial({uniforms:projUniforms,vertexShader:PROJ_VS,fragmentShader:PROJ_FS,side:THREE.DoubleSide});
 
 /* ================================================================ geometry helpers */
-function colorize(geo,col){const n=geo.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=col[0];a[i*3+1]=col[1];a[i*3+2]=col[2];}geo.setAttribute('aCol',new THREE.BufferAttribute(a,3));return geo;}
+function colorize(geo,col,ex=[-1,-1,-1]){const n=geo.attributes.position.count,a=new Float32Array(n*3),e=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=col[0];a[i*3+1]=col[1];a[i*3+2]=col[2];e[i*3]=ex[0];e[i*3+1]=ex[1];e[i*3+2]=ex[2];}geo.setAttribute('aCol',new THREE.BufferAttribute(a,3));geo.setAttribute('aEx',new THREE.BufferAttribute(e,3));return geo;}
 function mergeCol(list){let t=0;const parts=list.map(g=>{const n=g.index?g.toNonIndexed():g;t+=n.attributes.position.count;return n;});
-  const P=new Float32Array(t*3),N=new Float32Array(t*3),C=new Float32Array(t*3);let o=0;
-  for(const g of parts){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);C.set(g.attributes.aCol.array,o*3);o+=g.attributes.position.count;}
-  const out=new THREE.BufferGeometry();out.setAttribute('position',new THREE.BufferAttribute(P,3));out.setAttribute('normal',new THREE.BufferAttribute(N,3));out.setAttribute('aCol',new THREE.BufferAttribute(C,3));out.computeBoundingSphere();return out;}
+  const P=new Float32Array(t*3),N=new Float32Array(t*3),C=new Float32Array(t*3),E=new Float32Array(t*3);let o=0;
+  for(const g of parts){P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);C.set(g.attributes.aCol.array,o*3);E.set(g.attributes.aEx.array,o*3);o+=g.attributes.position.count;}
+  const out=new THREE.BufferGeometry();out.setAttribute('position',new THREE.BufferAttribute(P,3));out.setAttribute('normal',new THREE.BufferAttribute(N,3));out.setAttribute('aCol',new THREE.BufferAttribute(C,3));out.setAttribute('aEx',new THREE.BufferAttribute(E,3));out.computeBoundingSphere();return out;}
 function cleanPoly(p){const o=[];for(const q of p){const l=o[o.length-1];if(!l||Math.hypot(q[0]-l[0],q[1]-l[1])>0.08)o.push(q);}if(o.length>2&&Math.hypot(o[0][0]-o[o.length-1][0],o[0][1]-o[o.length-1][1])<0.08)o.pop();return o;}
 function extrudePoly(p,h0,h1){const s=new THREE.Shape(p.map(q=>new THREE.Vector2(q[0],q[1])));const g=new THREE.ExtrudeGeometry(s,{depth:Math.max(0.1,h1-h0),bevelEnabled:false});g.rotateX(-Math.PI/2);g.translate(0,h0,0);return g;}
 function hash1(n){const s=Math.sin(n*12.9898)*43758.5453;return s-Math.floor(s);}
@@ -363,7 +405,7 @@ const staticGroup=[];
 function addStatic(mesh){mesh.layers.enable(1);scene.add(mesh);staticGroup.push(mesh);return mesh;}
 
 /* ================================================================ ground */
-{const g=colorize(new THREE.PlaneGeometry(900,900,1,1).rotateX(-Math.PI/2),[0.29,0.29,0.31]);addStatic(new THREE.Mesh(g,projMat));}
+{const g=colorize(new THREE.PlaneGeometry(900,900,1,1).rotateX(-Math.PI/2),[0.29,0.29,0.31],[4,4,-1]);addStatic(new THREE.Mesh(g,projMat));}
 
 /* ================================================================ buildings from OpenStreetMap */
 const colliders=[]; // {p:[[x,z]...] three-plane polygon (x=E, z=-N), bb}
@@ -375,7 +417,10 @@ const colliders=[]; // {p:[[x,z]...] three-plane polygon (x=E, z=-N), bb}
     const rath=(cx>-35&&cx<100&&cy>0&&cy<110);
     const k=hash1(i+1);
     const col=rath?[0.33+k*0.04,0.29+k*0.03,0.26]:[0.62+k*0.12,0.58+k*0.1,0.5+k*0.08];
-    try{ list.push(colorize(extrudePoly(p,b.mh,b.h),col)); }catch(err){}
+    let ex; if(rath) ex=[k<0.5?0:12,8,-1]; else if(i===17||i===8) ex=[k<0.5?9:15,8,3]; else if(i===2||i===5) ex=[10,8,3];
+    else if(cx>90&&cx<145&&cy<-20&&cy>-75) ex=[11,8,-1]; else ex=[[1,2,14][Math.floor(k*3)],8,3];
+    if(b.mh>2.5) ex[2]=-1;
+    try{ list.push(colorize(extrudePoly(p,b.mh,b.h),col,ex)); }catch(err){}
     if(b.mh<2.5 && b.h>2.5){ const pp=p.map(q=>[q[0],-q[1]]); let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9; pp.forEach(q=>{x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);z0=Math.min(z0,q[1]);z1=Math.max(z1,q[1]);}); colliders.push({p:pp,x0,x1,z0,z1}); }
   });
   addStatic(new THREE.Mesh(mergeCol(list),projMat));
@@ -390,22 +435,22 @@ const colliders=[]; // {p:[[x,z]...] three-plane polygon (x=E, z=-N), bb}
   const outer=new THREE.Shape(fp.map(q=>new THREE.Vector2(q[0],q[1])));
   const inner=new THREE.Path(fp.map(q=>new THREE.Vector2(cx+(q[0]-cx)*0.86,cy+(q[1]-cy)*0.86)).reverse());
   outer.holes.push(inner);
-  const rim=new THREE.ExtrudeGeometry(outer,{depth:0.7,bevelEnabled:false}); rim.rotateX(-Math.PI/2); parts.push(colorize(rim,[0.55,0.52,0.48]));
+  const rim=new THREE.ExtrudeGeometry(outer,{depth:0.7,bevelEnabled:false}); rim.rotateX(-Math.PI/2); parts.push(colorize(rim,[0.55,0.52,0.48],[11,11,-1]));
   const water=extrudePoly(fp.map(q=>[cx+(q[0]-cx)*0.87,cy+(q[1]-cy)*0.87]),0,0.35); parts.push(colorize(water,[0.2,0.5,0.48]));
-  const col=new THREE.CylinderGeometry(0.55,0.75,3.0,12).translate(cx,1.5,-cy); parts.push(colorize(col,[0.5,0.47,0.43]));
+  const col=new THREE.CylinderGeometry(0.55,0.75,3.0,12).translate(cx,1.5,-cy); parts.push(colorize(col,[0.5,0.47,0.43],[11,11,-1]));
   colliders.push({circle:true,x:cx,z:-cy,r:3.4});
   // Mariensäule
-  parts.push(colorize(new THREE.BoxGeometry(3.2,3.2,3.2).translate(COLUMN.x,1.6,-COLUMN.y),[0.62,0.6,0.57]));
-  parts.push(colorize(new THREE.CylinderGeometry(0.45,0.55,COLUMN.h-3.2,14).translate(COLUMN.x,3.2+(COLUMN.h-3.2)/2,-COLUMN.y),[0.66,0.64,0.6]));
+  parts.push(colorize(new THREE.BoxGeometry(3.2,3.2,3.2).translate(COLUMN.x,1.6,-COLUMN.y),[0.62,0.6,0.57],[11,11,-1]));
+  parts.push(colorize(new THREE.CylinderGeometry(0.45,0.55,COLUMN.h-3.2,14).translate(COLUMN.x,3.2+(COLUMN.h-3.2)/2,-COLUMN.y),[0.66,0.64,0.6],[13,13,-1]));
   colliders.push({circle:true,x:COLUMN.x,z:-COLUMN.y,r:2.2});
   // tree (position and height estimated from the frame)
-  const T=ANNO.tree; parts.push(colorize(new THREE.ConeGeometry(4.2,T[2]-1.5,16).translate(T[0],1.5+(T[2]-1.5)/2,-T[1]),[0.15,0.25,0.17]));
+  const T=ANNO.tree; parts.push(colorize(new THREE.ConeGeometry(4.2,T[2]-1.5,16).translate(T[0],1.5+(T[2]-1.5)/2,-T[1]),[0.15,0.25,0.17],[7,7,-1]));
   parts.push(colorize(new THREE.CylinderGeometry(0.4,0.5,1.6,8).translate(T[0],0.8,-T[1]),[0.25,0.2,0.15]));
   colliders.push({circle:true,x:T[0],z:-T[1],r:3.0});
   // stalls traced from the frame
   ANNO.stalls.forEach(s=>{
     let p=s.map(q=>[q[0],q[1]]); if(THREE.ShapeUtils.isClockWise(p.map(q=>new THREE.Vector2(q[0],q[1])))) p=p.reverse();
-    parts.push(colorize(extrudePoly(p,0,3.0),[0.2,0.22,0.22]));
+    parts.push(colorize(extrudePoly(p,0,3.0),[0.2,0.22,0.22],[5,6,-1]));
     const pp=p.map(q=>[q[0],-q[1]]); let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9; pp.forEach(q=>{x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);z0=Math.min(z0,q[1]);z1=Math.max(z1,q[1]);}); colliders.push({p:pp,x0,x1,z0,z1});
   });
   addStatic(new THREE.Mesh(mergeCol(parts),projMatDS));
@@ -490,7 +535,7 @@ const srcCv=$('srcCv'), srcG=srcCv.getContext('2d');
 const frameImg=new Image();
 let source={kind:'snapshot',el:frameImg,label:'لقطة حقيقية · '+FRAME_INFO};
 let crop={x:0,y:0,w:1}; // fractions of source
-let lastDets=[], lastBoxes=[], detInfo={status:'loading',ms:0,when:null,precomputed:false};
+let lastDets=[], lastBoxes=[], detInfo={status:'idle',ms:0,when:null,precomputed:false};
 function srcSize(el){ if(el instanceof HTMLVideoElement) return [el.videoWidth,el.videoHeight]; return [el.naturalWidth||el.width,el.naturalHeight||el.height]; }
 function cropRect(el){ const [sw,sh]=srcSize(el); const w=sw*crop.w, h=w*RH/RW; const x=sw*crop.x, y=sh*crop.y; return [x,y,w,Math.min(h,sh-y)]; }
 function grabFrame(target,g,w,h){ const el=source.el; const [sw,sh]=srcSize(el); if(!sw||!sh) return false; const [x,y,cw,ch]=cropRect(el); g.drawImage(el,x,y,cw,ch,0,0,w,h*(ch/(cw*RH/RW))); return true; }
@@ -547,7 +592,7 @@ async function runDetection(){
       tileG.drawImage(hiCv,sx*scale,sy*scale,S*scale,S*scale,0,0,448,448);
       const res=detector.detect(tileCv); const k=S/448;
       for(const d of res.detections){ const b=d.boundingBox; const bb={x:sx+b.originX*k,y:sy+b.originY*k,w:b.width*k,h:b.height*k,s:d.categories[0].score}; if(bb.h<S*0.9) all.push(bb); }
-      if(i%4===3) await new Promise(r=>setTimeout(r,0));
+      await new Promise(r=>setTimeout(r,0));
     }
     all.sort((a,b)=>b.s-a.s); const keep=[];
     const ov=(a,b)=>{const x0=Math.max(a.x,b.x),y0=Math.max(a.y,b.y),x1=Math.min(a.x+a.w,b.x+b.w),y1=Math.min(a.y+a.h,b.y+b.h);return Math.max(0,x1-x0)*Math.max(0,y1-y0)/Math.min(a.w*a.h,b.w*b.h);};
@@ -569,7 +614,7 @@ async function processSource(first){
   updateStat(); drawSrcPanel();
 }
 let liveLoop=false;
-async function liveTick(){ if(!liveLoop) return; if(source.kind==='live'||source.kind==='video'){ await processSource(false); } setTimeout(liveTick, detector?120:1000); }
+async function liveTick(){ if(!liveLoop) return; if(source.kind==='live'||source.kind==='video'){ if(detector) await processSource(false); else if(source.kind!=='live') {} } setTimeout(liveTick, detector?150:500); }
 
 /* ---------------- live video: texture every frame + background model (running median) */
 let videoTex=null;
@@ -610,7 +655,7 @@ function drawSrcPanel(){
 function fmtMunich(d){ try{ return new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(d);}catch(err){return d.toISOString().slice(11,19);} }
 function updateStat(){
   const st=$('stat'); const n=lastDets.length;
-  let det = detInfo.status==='loading'?'يجري تحميل نموذج الكشف…':detInfo.status==='unavailable'?'تعذّر تحميل النموذج هنا':'EfficientDet‑Lite2 على '+(detInfo.delegate||'');
+  let det = detInfo.status==='idle'?'النموذج يُحمَّل عند تشغيل الحركة الحية':detInfo.status==='loading2'?'يجري تحميل نموذج الكشف…':detInfo.status==='loading'?'يجري تحميل نموذج الكشف…':detInfo.status==='unavailable'?'تعذّر تحميل النموذج هنا':'EfficientDet‑Lite2 على '+(detInfo.delegate||'');
   let when = detInfo.precomputed?'نتائج محسوبة مسبقًا على هذه اللقطة بنفس النموذج':(detInfo.when?('آخر تحليل '+fmtMunich(detInfo.when)+' · '+Math.round(detInfo.ms)+' ms'):'');
   st.innerHTML=`<span class="n">${n}</span> شخصًا مكتشفًا ومثبتًا على الأرض<br><b>المصدر:</b> ${escapeHtml(source.label)}<br><b>الكشف:</b> ${escapeHtml(det)}${when?'<br>'+escapeHtml(when):''}`;
   $('srcLine').textContent = source.kind==='live'?'بث حي ملتقط · Live capture':(source.kind==='snapshot'?'إطار حقيقي من الكاميرا · '+FRAME_INFO:'ملف من جهازك · Local file');
@@ -620,24 +665,30 @@ function updateStat(){
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* ---------------- source switching */
-function setSourceButtons(){ $('bSnap').classList.toggle('on',source.kind==='snapshot'); $('bLive').classList.toggle('on',source.kind==='live'); $('bFile').classList.toggle('on',source.kind==='video'||source.kind==='image'); $('crop').hidden=!(source.kind==='live'||source.kind==='video'||source.kind==='image'); }
+function setSourceButtons(){ $('bLive2').classList.toggle('on',source.kind==='live'); $('bLive2').innerHTML=source.kind==='live'?'● الحركة الحية تعمل <small>Live</small>':'▶ شغّل الحركة الحية <small>Live motion</small>'; $('bSnap').classList.toggle('on',source.kind==='snapshot'); $('bLive').classList.toggle('on',source.kind==='live'); $('bFile').classList.toggle('on',source.kind==='video'||source.kind==='image'); $('crop').hidden=!(source.kind==='live'||source.kind==='video'||source.kind==='image'); }
 let liveStream=null;
 function stopLive(){ liveLoop=false; if(liveStream){ liveStream.getTracks().forEach(t=>t.stop()); liveStream=null; } }
 async function useSnapshot(){ stopLive(); useStillTextures(); source={kind:'snapshot',el:frameImg,label:'لقطة حقيقية · '+FRAME_INFO}; crop={x:0,y:0,w:1}; setCropUI(); setSourceButtons(); await processSource(true); }
+function openPlayer(){ const p=$('player'); if(p.hidden){ p.hidden=false; $('yt').src='https://www.youtube.com/embed/VAS9A0LRGHA?autoplay=1&mute=1&playsinline=1&controls=0&modestbranding=1&rel=0'; } $('bPlayer').classList.add('on'); }
+async function ensureDetector(){ if(detector||detInfo.status==='loading2') return; detInfo.status='loading2'; updateStat(); await loadDetector(); }
 async function useLive(){
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){ flash('مشاركة الشاشة غير متاحة في هذا المتصفح أو هذه الصفحة. جرّب Chrome/Edge على الكمبيوتر عبر https (مثل GitHub Pages).'); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){ flash('مشاركة الشاشة غير متاحة هنا. افتح الصفحة على الكمبيوتر في Chrome أو Edge عبر https (مثل GitHub Pages)؛ الموبايل لا يدعمها.'); return; }
+  openPlayer(); ensureDetector();
   try{
-    const stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:false,selfBrowserSurface:'include',surfaceSwitching:'include'});
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,preferCurrentTab:true,selfBrowserSurface:'include',surfaceSwitching:'include'});
     stopLive(); liveStream=stream; const track=stream.getVideoTracks()[0];
-    if(!$('player').hidden && window.CropTarget && track.cropTo){ try{ const ct=await CropTarget.fromElement($('yt')); await track.cropTo(ct); }catch(err){ console.info('cropTo not applied',err); } }
+    let cropped=false;
+    if(window.CropTarget && track.cropTo){ try{ const ct=await CropTarget.fromElement($('yt')); await track.cropTo(ct); cropped=true; }catch(err){ console.info('cropTo not applied (another tab was shared?)',err); } }
     const v=document.createElement('video'); v.muted=true; v.playsInline=true; v.srcObject=stream; await v.play();
     track.addEventListener('ended',()=>{ if(source.kind==='live') useSnapshot(); });
-    source={kind:'live',el:v,label:'التقاط حي للشاشة/التبويب'}; crop={x:0,y:0,w:1}; autoCrop(v); setCropUI(); setSourceButtons(); $('cbGuides').checked=true; useVideoTextures(v);
-    liveLoop=true; liveTick(); flash('يعمل التحليل الحي. إن لم تنطبق الخطوط الوردية على النافورة وخط المبنى، عدّل القص.');
+    source={kind:'live',el:v,label:'التقاط حي للشاشة/التبويب'}; crop={x:0,y:0,w:1}; autoCrop(v); setCropUI(); setSourceButtons(); $('cbGuides').checked=true; useVideoTextures(v); tracks=[]; lastDets=[]; lastBoxes=[]; pGeo.instanceCount=0;
+    if(cropped){ crop={x:0,y:0,w:1}; setCropUI(); }
+    liveLoop=true; liveTick(); flash(cropped?'الحركة الحية تعمل: الناس في المشهد يُحدَّثون من البث الآن. اترك المشغّل ظاهرًا ولا تغلقه.':'الحركة الحية تعمل من التبويب المشارَك. إن لم تنطبق الخطوط الوردية على النافورة وخط المبنى، عدّل القص.');
   }catch(err){ console.warn(err); flash('لم تبدأ المشاركة: '+(err&&err.name==='NotAllowedError'?'رُفض الإذن أو أن الصفحة لا تسمح بالمشاركة هنا.':(err&&err.message||err))); }
 }
 function autoCrop(v){ const w=v.videoWidth,h=v.videoHeight; if(!w||!h) return; const ar=w/h; if(ar>RW/RH+0.01){ const cw=h*RW/RH/w; crop={x:(1-cw)/2,y:0,w:cw}; } else if(ar<RW/RH-0.01){ const ch=w*RH/RW/h; crop={x:0,y:(1-ch)/2,w:1}; } }
 $('fileIn').addEventListener('change',async e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; stopLive(); const url=URL.createObjectURL(f);
+  ensureDetector();
   if(f.type.startsWith('image/')){ const im=new Image(); im.src=url; await im.decode(); useStillTextures(); source={kind:'image',el:im,label:'صورة: '+f.name}; crop={x:0,y:0,w:1}; setCropUI(); setSourceButtons(); await processSource(true); }
   else { const v=document.createElement('video'); v.muted=true; v.loop=true; v.playsInline=true; v.src=url; await v.play(); source={kind:'video',el:v,label:'فيديو: '+f.name}; crop={x:0,y:0,w:1}; autoCrop(v); setCropUI(); setSourceButtons(); useVideoTextures(v); liveLoop=true; liveTick(); }
   e.target.value=''; });
@@ -646,16 +697,17 @@ for(const id of ['cx','cy','cw']) $(id).addEventListener('input',()=>{ crop={x:+
 let flashT=0; function flash(t){ const h=$('hint'); h.textContent=t; h.hidden=false; h.style.opacity='1'; clearTimeout(flashT); flashT=setTimeout(()=>{h.style.opacity='0';},9000); }
 
 $('bSnap').addEventListener('click',useSnapshot);
-$('bLive').addEventListener('click',useLive);
+$('bLive').addEventListener('click',useLive); $('bLive2').addEventListener('click',useLive);
 $('bFile').addEventListener('click',()=>$('fileIn').click());
 $('bPlayer').addEventListener('click',()=>{ const p=$('player'); p.hidden=!p.hidden; $('yt').src=p.hidden?'about:blank':'https://www.youtube.com/embed/VAS9A0LRGHA?autoplay=1&mute=1&playsinline=1'; $('bPlayer').classList.toggle('on',!p.hidden); });
 $('bPlayerX').addEventListener('click',()=>{ $('player').hidden=true; $('yt').src='about:blank'; $('bPlayer').classList.remove('on'); });
+$('cbCov').addEventListener('change',e=>{ projUniforms.uDebug.value=e.target.checked?1:0; $('legend').hidden=!e.target.checked; });
 $('cbBoxes').addEventListener('change',drawSrcPanel); $('cbGuides').addEventListener('change',drawSrcPanel);
 $('bSrcCol').addEventListener('click',()=>{ const s=$('src'); s.classList.toggle('col'); const open=!s.classList.contains('col'); $('bSrcCol').textContent=open?'طيّ':'المصدر ▸'; $('bSrcCol').setAttribute('aria-expanded',String(open)); });
 
 /* ================================================================ camera modes & input */
 let mode='cam';
-const START={x:57,z:6,yaw:Math.PI/2-0.35,pitch:-0.02}; // three coords (x=E, z=-N), near the fountain looking west
+const START={x:5,z:12,yaw:-1.38,pitch:0.06}; // three coords (x=E, z=-N): south of the column, facing Ludwig Beck / Altes Rathaus (the side the webcam cannot see)
 const player={x:START.x,z:START.z,yaw:START.yaw,pitch:START.pitch,bob:0};
 const euler=new THREE.Euler(0,0,0,'YXZ');
 let camOffY=0,camOffP=0, fly=null;
@@ -777,15 +829,18 @@ function frame(now){ requestAnimationFrame(frame);
   const phImg=new Image(); phImg.src=window.__PH1; await phImg.decode(); ph1Tex.image=phImg; ph1Tex.needsUpdate=true;
   renderDepth();
   await processSource(true);
+  buildAtlas(frameImg,phImg);
   applyCamView();
   requestAnimationFrame(frame);
   window.__sceneReady=true; clearTimeout(window.__loadTimer);
   const bs=$('bStart'); bs.disabled=false; bs.innerHTML='ابدأ <small>Start</small>';
-  bs.addEventListener('click',()=>{ $('splash').hidden=true; initAudio(); updateSnd(); updateUI(); showHint(); canvas.focus({preventScroll:true}); });
+  bs.addEventListener('click',()=>{ $('splash').hidden=true; initAudio(); updateSnd();
+    Object.assign(player,{x:START.x,z:START.z,yaw:START.yaw,pitch:START.pitch}); mode='walk'; camera.fov=walkFov(); camera.updateProjectionMatrix(); updateWalk(0);
+    updateUI(); flash('أنت الآن في الميدان تنظر نحو الجهة التي لا تراها كاميرا البث (لودفيغ بيك والبلدية القديمة) — مصدرها صورة حقيقية. لِفّ لترى جهة البث. للحركة الحية: «▶ شغّل الحركة الحية».'); canvas.focus({preventScroll:true}); });
   updateUI(); setSourceButtons();
-  loadDetector().then(()=>{ if(detector&&source.kind==='snapshot') processSource(true); });
+  updateStat();
   if(isTouch){ $('src').classList.add('col'); $('bSrcCol').textContent='المصدر ▸'; $('cbFull').checked=false; }
-  window.__app={get mode(){return mode;},player,goDown,goUp,get tracks(){return tracks;},get detInfo(){return detInfo;}};
+  window.__dbg=projUniforms; window.__scene=scene; window.__app={get mode(){return mode;},player,goDown,goUp,get tracks(){return tracks;},get detInfo(){return detInfo;}};
 })();
 </script>
 </body>

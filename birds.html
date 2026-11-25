@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>محادثة مع طائر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+#spec{width:100%;height:150px;display:block;background:#000;border-radius:12px;margin-top:10px}
+.now{display:grid;gap:6px;margin-top:8px}
+.sp{display:grid;grid-template-columns:minmax(0,1fr) 4em;gap:8px;align-items:center}
+.sp .bar{height:10px;background:var(--bg);border-radius:5px;overflow:hidden}.sp .bar i{display:block;height:100%;background:var(--ok)}
+.sp b{font-weight:600}.sp small{color:var(--mute)}
+ul.log{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}
+ul.log li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.log li.me{border-color:var(--red)}
+ul.log .h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+ul.log .d{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+ul.log button{min-height:36px;padding:0 12px;margin-top:6px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>محادثة مع طائر</h1>
+<p class="sub">التليفون بيسمع. موديل BirdNET من مختبر كورنيل بيعرف نوع الطائر (وكمان ضفادع وحشرات وكلاب وصوت إنسان) من بين أكتر من ٦٥٠٠ نوع. وكل صوت بيتسجل لوحده: وقته، ومدته، وتردده، وشكله. وتقدر ترد على الطائر بإنك تعيدله نفس الصوت بتاعه.</p>
+
+<div class="card">
+  <div class="row"><button id="b-go">ابدأ الاستماع</button><button class="ghost" id="b-geo">فلتر حسب مكاني</button></div>
+  <div class="lbl" id="st">الموديل حجمه حوالي ٦٥ ميجا، وبيتحمّل مرة واحدة. الأحسن على واي فاي.</div>
+  <canvas id="spec"></canvas>
+  <div class="lbl" style="margin-top:8px">بيسمع دلوقتي (آخر ٣ ثواني)</div>
+  <div class="now" id="now"></div>
+</div>
+
+<h2>المحادثة</h2>
+<ul class="log" id="log"><li class="lbl">لسه مفيش أصوات.</li></ul>
+<div class="row"><button class="ghost" id="b-wav" disabled>حمّل التسجيل الخام (WAV)</button><button class="ghost" id="b-csv" disabled>حمّل السجل (CSV)</button><button class="ghost" id="b-json" disabled>حمّل كل البيانات (JSON)</button></div>
+
+<label>أقل ثقة عشان النوع يتكتب <b id="vT"></b><input type="range" id="T" min="0.2" max="0.9" step="0.05" value="0.5"></label>
+<label>علو الرد <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.7"></label>
+
+<details><summary>إيه اللي حقيقي هنا؟ وإيه حدوده؟</summary>
+<ul>
+<li><b>نوع الطائر:</b> من موديل BirdNET (Kahl وآخرين، 2021)، ودقته عالية مع الأصوات الواضحة. الرقم جنب الاسم هو ثقة الموديل. لو شغّلت «فلتر حسب مكاني»، الأنواع اللي مش متوقع وجودها في مصر في الأسبوع ده بتتشال.</li>
+<li><b>شكل الصوت:</b> الصفحة بتوصف الصوت من الطيف بتاعه: نداء قصير، تريل، مقطع غنا، نداء متكرر. ده <b>وصف للشكل</b>، مش ترجمة لمعنى.</li>
+<li><b>الترجمة:</b> مفيش موديل في العالم بيترجم كلام الطيور لجمل. العلماء يعرفوا وظايف عامة للأصوات في أنواع قليلة اتدرست كويس، زي نداء إنذار أو غنا تزاوج، بس ده بيختلف من نوع للتاني ومحتاج دراسة لكل نوع. عشان كده العمود الإنجليزي في السجل فيه اسم النوع وشكل الصوت، مش ترجمة.</li>
+<li><b>الرد:</b> زرار «رد» بيعيد للطائر نفس صوته. الطيور غالباً بترد لأنها فاكرة إن فيه طائر تاني في منطقتها، وده بيضايقها، خصوصاً في موسم التعشيش. استخدمه مرات قليلة، ووقف لو الطائر باين عليه متوتر.</li>
+<li><b>البيانات:</b> التسجيل الخام بيتحفظ على التليفون بس (لحد ٣٠ دقيقة)، وما بيترفعش لأي مكان.</li>
+<li>الموديل: BirdNET Live من BirdNET-Team (الكود MIT، والموديل CC BY-SA 4.0).</li>
+</ul></details>
+</div>
+<script>
+
+function fftBd(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+}
+const BD_WIN = (() => { const w = new Float64Array(1024); for (let i = 0; i < 1024; i++) w[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / 1023); return w; })();
+// one 1024-sample frame -> {e: band energy 1-12 kHz, f: peak frequency}
+function frameFeat(x, sr) {
+  const re = new Float64Array(1024), im = new Float64Array(1024);
+  for (let i = 0; i < 1024; i++) re[i] = x[i] * BD_WIN[i];
+  fftBd(re, im);
+  const k0 = Math.ceil(1000 * 1024 / sr), k1 = Math.floor(12000 * 1024 / sr); let e = 0, bk = k0, bp = 0;
+  for (let k = k0; k <= k1; k++) { const p = re[k] * re[k] + im[k] * im[k]; e += p; if (p > bp) { bp = p; bk = k; } }
+  return { e, f: bk * sr / 1024 };
+}
+// streaming segmenter: feed frames {t, e, f}; returns finished segments
+function Segmenter() {
+  let floor = null, cur = null, quiet = 0; const out = [];
+  return {
+    push(fr, muted) {
+      if (floor == null) floor = fr.e;
+      if (!cur) floor = fr.e < floor ? fr.e : floor * 0.995 + fr.e * 0.005; // slow-rising noise floor
+      const on = fr.e > floor * 8, keep = fr.e > floor * 3;
+      if (!cur && on && !muted) { cur = { t0: fr.t, frames: [], muted: false }; quiet = 0; }
+      if (cur) {
+        if (muted) cur.muted = true;
+        cur.frames.push(fr);
+        if (keep) quiet = 0; else quiet += 1;
+        if (quiet * 0.0213 > 0.15 || cur.frames.length > 47 * 6) {
+          const fs = cur.frames.slice(0, cur.frames.length - quiet), s = describe(cur.t0, fs, floor);
+          if (s && !cur.muted) out.push(s); cur = null;
+        }
+      }
+      return out.splice(0);
+    }
+  };
+}
+function describe(t0, fs, floor) {
+  if (fs.length < 3) return null;
+  const dur = fs[fs.length - 1].t - t0 + 0.0213, loud = fs.filter(f => f.e > floor * 3), fq = loud.map(f => f.f).sort((a, b) => a - b);
+  if (!fq.length) return null;
+  const lo = fq[Math.floor(fq.length * 0.1)], hi = fq[Math.floor(fq.length * 0.9)], peak = fq[Math.floor(fq.length / 2)];
+  // syllables: rises above 50 % of segment max after a dip below 20 %
+  const mx = Math.max(...fs.map(f => f.e)); let syl = 0, down = true;
+  for (const f of fs) { if (down && f.e > mx * 0.5) { syl++; down = false; } else if (!down && f.e < mx * 0.2) down = true; }
+  const range = hi - lo; let pat;
+  if (dur < 0.35 && syl <= 1) pat = ['نداء قصير', 'short call'];
+  else if (syl >= 4 && range < 1500 && dur / syl < 0.15) pat = ['تريل: تكرار سريع لنفس النغمة', 'trill'];
+  else if (syl >= 3 && range >= 1500 && dur >= 0.8) pat = ['مقطع غنا متنوّع', 'song phrase'];
+  else if (syl >= 2) pat = ['نداء متكرر', 'repeated call'];
+  else pat = ['نداء', 'call'];
+  return { t0, t1: t0 + dur, dur, peak, lo, hi, syl, pat };
+}
+
+{
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const SR = 48000, MODELS = 'https://birdnet-team.github.io/real-time-pwa/models', TF = 'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.14.0/tf.min.js';
+for (const [k, s] of [['T', ''], ['V', '']]) { const f = () => $('v' + k).textContent = $(k).value + s; $(k).addEventListener('input', f); f(); }
+let ctx, stream, worker, ready = false, busy = false, running = false, t0 = 0, ring = new Float32Array(SR * 3), ringPos = 0, filled = 0;
+let store = [], storeLen = 0, frameBuf = new Float32Array(1024), fbN = 0, seg = Segmenter(), log = [], dets = [], geo = null, mutedUntil = 0, playCount = [], analyser;
+let proc0 = 0, sentAt = 0, procNode = null, srcNode = null;
+const now = () => proc0 / SR;
+const name = p => (p.commonNameI18n && p.commonNameI18n !== p.commonName ? p.commonNameI18n : p.commonName);
+const NONBIRD = /^(Dog|Engine|Fireworks|Gun|Human non-vocal|Human vocal|Human whistle|Noise|Power tools|Siren|Environmental)$/;
+
+function startWorker() {
+  return new Promise((res, rej) => {
+    const q = new URLSearchParams({ tf: TF, root: MODELS, lang: 'ar' });
+    worker = new Worker('birdnet-worker.js?' + q.toString());
+    worker.onerror = e => rej(new Error('الموديل ما اتحمّلش.'));
+    worker.onmessage = ({ data }) => {
+      if (data.message === 'load_model') $('st').textContent = `بيحمّل الموديل… ${data.progress}%`;
+      else if (data.message === 'warmup') $('st').textContent = 'بيجهّز الموديل…';
+      else if (data.message === 'loaded') { ready = true; res(); }
+      else if (data.message === 'segments') onPred(data.segments[0]);
+      else if (data.message === 'area-scores') $('st').textContent = 'الفلتر شغال: الأنواع المتوقعة في مكانك والأسبوع ده بس.';
+    };
+  });
+}
+function onPred(s) {
+  busy = false; if (!s) return;
+  const th = +$('T').value, t = sentAt;
+  const list = s.preds.filter(p => !geo || NONBIRD.test(p.scientificName) || p.geoscore >= 0.03).sort((a, b) => b.confidence - a.confidence).slice(0, 4);
+  $('now').innerHTML = list.filter(p => p.confidence > 0.1).map(p => `<div class="sp"><span><b>${esc(name(p))}</b> <small>${esc(p.scientificName)}</small><div class="bar"><i style="width:${Math.round(p.confidence * 100)}%"></i></div></span><span>${Math.round(p.confidence * 100)}%</span></div>`).join('') || '<div class="lbl">مفيش صوت متعرف عليه.</div>';
+  for (const p of list) if (p.confidence >= th) dets.push({ t0: t - 3, t1: t, p: { sci: p.scientificName, en: p.commonName, ar: name(p), conf: p.confidence } });
+  // attach species to recent segments that fall inside this window
+  for (const e of log) if (e.who === 'sound' && !e.sp && e.t0 >= t - 3.2 && e.t1 <= t + 0.2) { const d = dets.filter(d => d.t0 <= e.t0 + 0.2 && d.t1 >= e.t1 - 0.2).sort((a, b) => b.p.conf - a.p.conf)[0]; if (d) { e.sp = d.p; draw(); } }
+}
+function onAudio(x) {
+  // ring for BirdNET, storage (24 kHz int16), segmenter frames
+  for (let i = 0; i < x.length; i++) { ring[ringPos] = x[i]; ringPos = (ringPos + 1) % ring.length; }
+  filled = Math.min(ring.length, filled + x.length);
+  if (storeLen < 24000 * 60 * 30) { const h = new Int16Array(x.length >> 1); for (let i = 0; i < h.length; i++) h[i] = Math.max(-32768, Math.min(32767, (x[2 * i] + x[2 * i + 1]) * 16383)); store.push(h); storeLen += h.length; }
+  for (let i = 0; i < x.length; i++) { frameBuf[fbN++] = x[i]; if (fbN === 1024) { fbN = 0; const f = frameFeat(frameBuf, SR); f.t = (proc0 + i - 1023) / SR; for (const s of seg.push(f, f.t < mutedUntil)) addSeg(s); } }
+  proc0 += x.length;
+}
+function addSeg(s) { log.push({ who: 'sound', ...s, id: log.length }); draw(); }
+function window3() { const w = new Float32Array(ring.length); w.set(ring.subarray(ringPos)); w.set(ring.subarray(0, ringPos), ring.length - ringPos); return w; }
+function tick() { if (!ready || busy || filled < ring.length) return; busy = true; sentAt = now(); worker.postMessage({ message: 'predict', pcmAudio: window3(), overlapSec: 0, sensitivity: 1.0 }); }
+
+function draw() {
+  const items = log.slice().reverse().slice(0, 60);
+  $('log').innerHTML = items.length ? items.map(e => {
+    const tm = fmtT(e.t0);
+    if (e.who === 'me') return `<li class="me"><div class="h"><span>انت: رديت بصوت ${esc(e.of)}</span><span>${tm}</span></div><div class="d">مدة ${e.dur.toFixed(2)} ث</div></li>`;
+    const sp = e.sp ? `${esc(e.sp.ar)} <small class="lbl">${Math.round(e.sp.conf * 100)}%</small>` : 'صوت (النوع مش مؤكد)';
+    const human = e.sp && /^Human/.test(e.sp.sci);
+    return `<li><div class="h"><span>${sp}</span><span>${tm}</span></div><div class="d">${e.pat[0]} · ${e.dur.toFixed(2)} ث · ${(e.peak / 1000).toFixed(1)} كيلوهرتز (${(e.lo / 1000).toFixed(1)}–${(e.hi / 1000).toFixed(1)}) · ${e.syl} مقطع</div>${human ? '' : `<button class="ghost" data-reply="${e.id}">رد بنفس الصوت</button>`}</li>`;
+  }).join('') : '<li class="lbl">لسه مفيش أصوات.</li>';
+  $('b-wav').disabled = $('b-csv').disabled = $('b-json').disabled = !storeLen;
+}
+const fmtT = s => { s = Math.max(0, s); const m = Math.floor(s / 60), r = (s % 60).toFixed(1); return `${m}:${r.padStart(4, '0')}`; };
+function slice(a, b) { const S = Math.round(a * 24000), E = Math.round(b * 24000), out = new Int16Array(Math.max(0, E - S)); let pos = 0; for (const c of store) { const cs = pos, ce = pos + c.length; if (ce > S && cs < E) { const from = Math.max(S, cs), to = Math.min(E, ce); out.set(c.subarray(from - cs, to - cs), from - S); } pos = ce; if (pos >= E) break; } return out; }
+$('log').addEventListener('click', e => {
+  const b = e.target.closest('[data-reply]'); if (!b || !ctx) return;
+  const s = log[+b.dataset.reply]; const tNow = Date.now(); playCount = playCount.filter(x => tNow - x < 600000);
+  if (playCount.length >= 5) { $('st').innerHTML = '<span class="bad">رديت ٥ مرات في آخر ١٠ دقايق. استنى شوية عشان ما تضايقش الطائر.</span>'; return; }
+  const pcm = slice(Math.max(0, s.t0 - 0.05), s.t1 + 0.05), buf = ctx.createBuffer(1, pcm.length, 24000), ch = buf.getChannelData(0), g = +$('V').value;
+  for (let i = 0; i < pcm.length; i++) ch[i] = g * pcm[i] / 32767;
+  const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.start();
+  mutedUntil = now() + buf.duration + 0.3; playCount.push(tNow);
+  log.push({ who: 'me', t0: now(), t1: now() + buf.duration, dur: buf.duration, of: s.sp ? s.sp.ar : 'الصوت', ofId: s.id, id: log.length }); draw();
+});
+$('b-geo').addEventListener('click', () => {
+  if (!navigator.geolocation) { $('st').textContent = 'المتصفح ما بيدّيش المكان.'; return; }
+  navigator.geolocation.getCurrentPosition(p => { geo = { lat: p.coords.latitude, lon: p.coords.longitude }; if (ready) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); else $('st').textContent = 'المكان اتحفظ، والفلتر هيشتغل لما الموديل يخلص تحميل.'; },
+    () => { $('st').textContent = 'إذن المكان اترفض. الأنواع هتظهر من غير فلتر.'; }, { maximumAge: 600000, timeout: 15000 });
+});
+$('b-go').addEventListener('click', async () => {
+  if (running) { running = false; stream.getTracks().forEach(t => t.stop()); try { srcNode.disconnect(); procNode.disconnect(); } catch (e) {} $('b-go').textContent = 'كمّل الاستماع'; $('st').textContent = 'وقف.'; return; }
+  try {
+    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR });
+    await ctx.resume();
+    if (ctx.sampleRate !== SR) throw new Error('المتصفح ما رضيش يشتغل على ٤٨ كيلوهرتز، والموديل محتاجها.');
+    const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
+    analyser = ctx.createAnalyser(); analyser.fftSize = 1024; src.connect(analyser);
+    proc.onaudioprocess = e => { if (running) onAudio(e.inputBuffer.getChannelData(0)); };
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination); srcNode = src; procNode = proc;
+    running = true; $('b-go').textContent = 'وقّف'; specLoop();
+    try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
+    if (!worker) { await startWorker(); $('st').textContent = 'بيسمع.'; if (geo) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); setInterval(tick, 1500); }
+    else $('st').textContent = 'بيسمع.';
+  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : (e.message || e))}</span>`; }
+});
+function specLoop() {
+  const c = $('spec'), d = devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
+  if (c.width !== Math.round(W * d)) { c.width = Math.round(W * d); c.height = Math.round(H * d); }
+  const g = c.getContext('2d'), arr = new Uint8Array(analyser.frequencyBinCount);
+  const step = () => {
+    if (!running) return; analyser.getByteFrequencyData(arr);
+    g.drawImage(c, -2, 0); const bins = Math.floor(arr.length * 12000 / (SR / 2));
+    for (let y = 0; y < c.height; y++) { const v = arr[Math.floor((1 - y / c.height) * bins)]; g.fillStyle = `rgb(${v},${Math.round(v * 0.8)},${Math.round(60 + v * 0.3)})`; g.fillRect(c.width - 2, y, 2, 1); }
+    requestAnimationFrame(step);
+  };
+  step();
+}
+function dl(name, blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+const stamp = () => new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+$('b-wav').addEventListener('click', () => {
+  const n = storeLen, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf); let o = 0;
+  const w = s => { for (const ch of s) v.setUint8(o++, ch.charCodeAt(0)); }, u32 = x => { v.setUint32(o, x, true); o += 4; }, u16 = x => { v.setUint16(o, x, true); o += 2; };
+  w('RIFF'); u32(36 + n * 2); w('WAVE'); w('fmt '); u32(16); u16(1); u16(1); u32(24000); u32(48000); u16(2); u16(16); w('data'); u32(n * 2);
+  for (const c of store) for (let i = 0; i < c.length; i++) { v.setInt16(o, c[i], true); o += 2; }
+  dl(`bird-session-${stamp()}.wav`, new Blob([buf], { type: 'audio/wav' }));
+});
+const rows = () => log.map(e => e.who === 'me'
+  ? { time_s: e.t0.toFixed(2), speaker: 'human (playback)', species_sci: '', species_en: '', species_ar: '', confidence: '', duration_s: e.dur.toFixed(2), peak_hz: '', low_hz: '', high_hz: '', syllables: '', sound_shape_en: `replayed segment #${e.ofId}`, sound_shape_ar: 'رد بنفس الصوت' }
+  : { time_s: e.t0.toFixed(2), speaker: e.sp ? (/^Human/.test(e.sp.sci) ? 'human' : 'animal') : 'unknown', species_sci: e.sp ? e.sp.sci : '', species_en: e.sp ? e.sp.en : '', species_ar: e.sp ? e.sp.ar : '', confidence: e.sp ? e.sp.conf.toFixed(3) : '', duration_s: e.dur.toFixed(2), peak_hz: Math.round(e.peak), low_hz: Math.round(e.lo), high_hz: Math.round(e.hi), syllables: e.syl, sound_shape_en: e.pat[1], sound_shape_ar: e.pat[0] });
+$('b-csv').addEventListener('click', () => {
+  const r = rows(); if (!r.length) return; const keys = Object.keys(r[0]), q = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;
+  dl(`bird-log-${stamp()}.csv`, new Blob(['﻿' + [keys.join(','), ...r.map(x => keys.map(k => q(x[k])).join(','))].join('\n')], { type: 'text/csv' }));
+});
+$('b-json').addEventListener('click', () => dl(`bird-session-${stamp()}.json`, new Blob([JSON.stringify({ started: new Date(Date.now() - now() * 1000).toISOString(), location: geo, model: 'BirdNET (BirdNET Live, CC BY-SA 4.0)', events: rows(), detections: dets.map(d => ({ t0: +d.t0.toFixed(2), t1: +d.t1.toFixed(2), ...d.p })) }, null, 1)], { type: 'application/json' })));
+}
+</script>
+</body>
+</html>

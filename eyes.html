@@ -36,29 +36,31 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .seg{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.seg button{flex:1;min-width:0}.seg button[aria-pressed=false]{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .stage{position:relative;width:100%;background:#000;border-radius:14px;overflow:hidden;margin-top:10px}
 .stage video,.stage canvas{display:block;width:100%;height:auto}
-.outs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.res{margin-top:14px}.res h3{font-size:17px;margin:14px 0 6px}
+.outs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .outs figure{margin:0}.outs img{width:100%;aspect-ratio:1;object-fit:contain;background:#000;border-radius:10px;display:block}
 .outs figcaption{font-size:13px;color:var(--mute);margin-top:4px}
+.outs figure.ai figcaption{color:var(--red)}
 input[type=file]{font:inherit;font-size:16px;width:100%}
 </style>
 </head>
 <body>
 <div class="wrap">
 <h1>اللي في عينك</h1>
-<p class="sub">قرنية العين مراية كروية صغيرة، والنضارة الشمس مراية أكبر. الاتنين فيهم انعكاس للمكان اللي قدام الشخص. الصفحة بتلاقي العينين أو عدسات النضارة، وتكبّر الانعكاس وتوضّحه، وفي العين بتفرد التقوّس عشان يبان المكان اللي الشخص باصص عليه.</p>
+<p class="sub">قرنية العين مراية كروية صغيرة، والنضارة الشمس مراية أكبر، والاتنين فيهم انعكاس للمكان اللي قدام الشخص. الصفحة بتطلّع الانعكاس ده <b>صورة عادية</b> للمكان: بتجمع صور كتير بدقة أعلى من البكسل، وبتفرد تقوّس القرنية لمنظر مسطح، وبتشيل نقشة القزحية. وفيه تحسين بالـ AI اختياري، بيظهر جنب الصورة الحقيقية مش مكانها.</p>
 
-<div class="seg" role="group" aria-label="المصدر"><button id="s-cam" aria-pressed="true">صوّر بالكاميرا</button><button id="s-up" aria-pressed="false">ارفع صورة</button></div>
+<div class="seg" role="group" aria-label="المصدر"><button id="s-cam" aria-pressed="true">صوّر بالكاميرا</button><button id="s-up" aria-pressed="false">ارفع صور أو فيديو</button></div>
 <div class="seg" role="group" aria-label="نوع الانعكاس"><button id="m-eye" aria-pressed="true">قرنية العين</button><button id="m-gl" aria-pressed="false">نضارة شمس</button><button id="m-man" aria-pressed="false">أي مكان (يدوي)</button></div>
 
 <div id="camBox">
-  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button class="ghost" id="b-flip" disabled>الكاميرا الخلفية</button></div>
+  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button class="ghost" id="b-flip" disabled>الكاميرا الأمامية</button></div>
   <div class="stage"><video id="vid" playsinline muted autoplay></video></div>
   <div class="row"><button id="b-shot" disabled>صوّر وجمّع ٢٠ صورة</button></div>
-  <p class="lbl">قرّب الكاميرا من العين على قد ما الكاميرا تقدر تركّز، حوالي ٢٠–٣٠ سم، والمكان قدام الشخص منوّر. الصفحة بتجمع ٢٠ صورة ورا بعض وتاخد متوسطهم، عشان الضوضاء تقل والانعكاس يوضح.</p>
+  <p class="lbl">أحسن نتيجة: الكاميرا الخلفية بزوم ٢x، على بعد ٢٠–٣٠ سم من العين، والمكان اللي الشخص باصص عليه منوّر. الصفحة بتجمع ٢٠ صورة وتظبطهم على بعض بدقة أقل من البكسل.</p>
 </div>
 <div id="upBox" hidden>
-  <input type="file" id="file" accept="image/*">
-  <p class="lbl">الصور اللي متصوّرة بكاميرا التليفون الخلفية من قريب بتطلع أحسن نتيجة، لأن العين بتبقى بكسلات أكتر. الصورة مش بتترفع لأي مكان، كله بيتعمل على التليفون.</p>
+  <input type="file" id="file" accept="image/*,video/*" multiple>
+  <p class="lbl">ارفع <b>كذا صورة</b> لنفس الشخص ورا بعض (زي صور الـ Burst)، أو <b>فيديو قصير</b> ثابت للوش. الصفحة هتاخد لحد ٣٠ صورة منه وتجمعهم، وده بيدّي دقة أعلى بجد. الصورة الواحدة بتشتغل برضه، بس من غير التجميع. وكله بيتعمل على التليفون، ومفيش حاجة بتترفع لأي مكان.</p>
 </div>
 
 <div class="stage" id="picBox" hidden><canvas id="pic"></canvas></div>
@@ -66,19 +68,24 @@ input[type=file]{font:inherit;font-size:16px;width:100%}
   <p class="lbl">دوس على مكان الانعكاس في الصورة (عين، نضارة، معلقة، شباك عربية…)، وظبط حجم المربع.</p>
   <label>حجم المربع <b id="vZ"></b><input type="range" id="Z" min="1" max="40" step="0.5" value="8"></label>
 </div>
-
 <div class="msg" id="msg"></div>
-<div class="row"><button class="ghost" id="b-mir">اقلب زي المراية</button><button class="ghost" id="b-boost" aria-pressed="true">وضّح التفاصيل: شغال</button></div>
-<div class="outs" id="outs"></div>
+
+<div id="viewCtl" hidden>
+  <label>بص يمين وشمال <b id="vY"></b><input type="range" id="Y" min="-60" max="60" step="1" value="0"></label>
+  <label>بص فوق وتحت <b id="vP"></b><input type="range" id="P" min="-45" max="45" step="1" value="0"></label>
+  <label>زاوية الرؤية <b id="vF"></b><input type="range" id="F" min="40" max="120" step="5" value="75"></label>
+</div>
+<div class="row"><button class="ghost" id="b-mir">اقلب زي المراية: شغال</button><button class="ghost" id="b-iris">شيل نقشة القزحية: شغال</button><button class="ghost" id="b-ai" disabled>تحسين AI ×٤</button></div>
+<div class="res" id="res"></div>
 <p class="lbl" id="note"></p>
 
-<details><summary>بيعمل إيه بالظبط؟ وإيه حدوده؟</summary>
+<details><summary>إيه الحقيقي وإيه التخمين؟</summary>
 <ul>
-<li>موديل تتبع الوش بيحدد مكان القزحية ونص قطرها في كل عين بالبكسل، ومكان العينين عشان يقدّر مكان عدسات النضارة.</li>
-<li>الصفحة بتقص المنطقة، وتكبّرها، وتمد الألوان من أغمق لأفتح نقطة، وتوضّح الحواف.</li>
-<li>في القرنية، الانعكاس متضغوط ناحية الأطراف لأنها كروية. الصفحة بتحسب كل نقطة جاية من أنهي اتجاه وتفردها، فتطلع صورة زي عدسة «عين السمكة» للمكان قدام الشخص.</li>
-<li>الانعكاس مقلوب زي المراية، وزرار «اقلب» بيرجّعه لاتجاهه الحقيقي.</li>
-<li><b>حدوده:</b> التفاصيل محدودة بعدد البكسلات اللي القزحية واخداها في الصورة. لو القزحية ٤٠ بكسل، الانعكاس كله ٤٠ بكسل. هتبان الشبابيك والشاشات واللمبات والأشكال الكبيرة، مش الوشوش ولا الكلام. ولون القزحية نفسه بيبان تحت الانعكاس.</li>
+<li><b>تجميع الصور (حقيقي):</b> كل صورة الانعكاس فيها مزحوح جزء صغير من البكسل عن التانية. الصفحة بتحسب الزحزحة دي بالظبط (phase correlation) وتظبط الصور على بعض قبل ما تجمعهم، فالضوضاء بتقل والتفاصيل الحقيقية بتزيد شوية. ده بيحتاج كذا صورة أو فيديو.</li>
+<li><b>الصورة العادية (حقيقي):</b> القرنية كروية، فكل نقطة فيها بتعكس اتجاه مختلف. الصفحة بتحسب لكل بكسل في الصورة الناتجة جه من أنهي اتجاه، وتطلّع منظر مسطح زي كاميرا عادية. وتقدر تلف بالـ sliders يمين وشمال وفوق وتحت.</li>
+<li><b>شيل نقشة القزحية (تقريبي):</b> القزحية أغمق من الانعكاس، ونقشتها بتتغير ببطء. الصفحة بتقدّرها وتطرحها، وبتظبط الألوان عشان لون العين ما يصبغش الصورة. ده ممكن ياكل جزء من الحاجات الكبيرة الغامقة في الانعكاس.</li>
+<li><b>تحسين AI (تخمين):</b> موديل ESRGAN بيكبّر ٤ مرات، وبيرسم تفاصيل شبه اللي اتعلمها من صور تانية. أي حاجة تظهر في نسخة الـ AI ومش موجودة في النسخة الحقيقية تبقى <b>تأليف من الموديل</b>، زي وش أو كلام أو نقشة. عشان كده النسختين جنب بعض، ونسخة الـ AI مكتوب عليها بالأحمر.</li>
+<li><b>الحد الحقيقي:</b> عدد البكسلات اللي القزحية واخداها في الصورة. الصفحة بتكتبه تحت. قزحية ٤٠ بكسل بتدّي انعكاس فيه أشكال كبيرة بس، و١٥٠ بكسل بتدّي تفاصيل أوضح بكتير.</li>
 <li>استخدمها على صورك، أو صور ناس موافقين. الانعكاس ممكن يبيّن مكان الشخص.</li>
 </ul></details>
 </div>
@@ -125,31 +132,111 @@ function enhance(img, n, mask, boost) {
 }
 function circleMask(n, r) { const m = new Uint8Array(n * n), c = (n - 1) / 2; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) m[y * n + x] = Math.hypot(x - c, y - c) <= r * c ? 1 : 0; return m; }
 
+
+function fft2(re, im, n, inv) { // in-place 2D FFT on n*n arrays (n power of 2)
+  const r = new Float64Array(n), i2 = new Float64Array(n);
+  const f1 = (a, b) => { const m = a.length; for (let i = 1, j = 0; i < m; i++) { let bit = m >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { let t = a[i]; a[i] = a[j]; a[j] = t; t = b[i]; b[i] = b[j]; b[j] = t; } }
+    for (let len = 2; len <= m; len <<= 1) { const an = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(an), wi = Math.sin(an), h = len >> 1; for (let s = 0; s < m; s += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = s + k, q = p + h, tr = a[q] * cr - b[q] * ci, ti = a[q] * ci + b[q] * cr; a[q] = a[p] - tr; b[q] = b[p] - ti; a[p] += tr; b[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } };
+  for (let y = 0; y < n; y++) { for (let x = 0; x < n; x++) { r[x] = re[y * n + x]; i2[x] = im[y * n + x]; } f1(r, i2); for (let x = 0; x < n; x++) { re[y * n + x] = r[x]; im[y * n + x] = i2[x]; } }
+  for (let x = 0; x < n; x++) { for (let y = 0; y < n; y++) { r[y] = re[y * n + x]; i2[y] = im[y * n + x]; } f1(r, i2); for (let y = 0; y < n; y++) { re[y * n + x] = r[y]; im[y * n + x] = i2[y]; } }
+  if (inv) { const N2 = n * n; for (let k = 0; k < N2; k++) { re[k] /= N2; im[k] /= N2; } }
+}
+const gray = (img, n) => { const g = new Float64Array(n * n); for (let i = 0; i < n * n; i++) g[i] = img[i * 3] * 0.3 + img[i * 3 + 1] * 0.59 + img[i * 3 + 2] * 0.11; return g; };
+// sub-pixel shift (dx,dy) that moves b onto a, plus peak sharpness
+function smooth121(a, n, times) { let x = Float64Array.from(a); for (let t = 0; t < times; t++) { const y = new Float64Array(n * n);
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { const L = x[r * n + Math.max(0, c - 1)], R = x[r * n + Math.min(n - 1, c + 1)]; y[r * n + c] = (L + 2 * x[r * n + c] + R) / 4; }
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) { const U = y[Math.max(0, r - 1) * n + c], D = y[Math.min(n - 1, r + 1) * n + c]; x[r * n + c] = (U + 2 * y[r * n + c] + D) / 4; } } return x; }
+function phaseShift(a, b, n) {
+  a = smooth121(a, n, 2); b = smooth121(b, n, 2);
+  const ar = new Float64Array(n * n), ai = new Float64Array(n * n), br = new Float64Array(n * n), bi = new Float64Array(n * n);
+  let ma = 0, mb = 0; for (let i = 0; i < n * n; i++) { ma += a[i]; mb += b[i]; } ma /= n * n; mb /= n * n;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const w = Math.sin(Math.PI * (x + 0.5) / n) * Math.sin(Math.PI * (y + 0.5) / n), i = y * n + x; ar[i] = (a[i] - ma) * w; br[i] = (b[i] - mb) * w; }
+  fft2(ar, ai, n, false); fft2(br, bi, n, false);
+  for (let i = 0; i < n * n; i++) { const re = ar[i] * br[i] + ai[i] * bi[i], im = ai[i] * br[i] - ar[i] * bi[i], m = Math.hypot(re, im) + 1e-9; const f = Math.min(Math.hypot(i % n, Math.floor(i / n)), Math.hypot(n - i % n, Math.floor(i / n)), Math.hypot(i % n, n - Math.floor(i / n)), Math.hypot(n - i % n, n - Math.floor(i / n))), lp = f < n * 0.3 ? 1 : 0; ar[i] = lp * re / m; ai[i] = lp * im / m; }
+  fft2(ar, ai, n, true);
+  let bk = 0; for (let i = 1; i < n * n; i++) if (ar[i] > ar[bk]) bk = i;
+  let py = Math.floor(bk / n), px = bk % n; const v = (x, y) => ar[((y + n) % n) * n + ((x + n) % n)];
+  const sub = (m, c, p) => { const d = m - 2 * c + p; return d < 0 ? 0.5 * (m - p) / d : 0; };
+  let dx = px + sub(v(px - 1, py), v(px, py), v(px + 1, py)), dy = py + sub(v(px, py - 1), v(px, py), v(px, py + 1));
+  if (dx > n / 2) dx -= n; if (dy > n / 2) dy -= n;
+  return { dx, dy, peak: ar[bk] };
+}
+// frames: [{src:{w,h,data}, x, y, s}] -> super-resolved crop (n*n*3) on a 2x grid via align + average
+function stackSR(frames, n) {
+  if (frames.length === 1) return { img: cropSq(frames[0].src, frames[0].x, frames[0].y, frames[0].s, n), used: 1 };
+  const first = frames.map(f => cropSq(f.src, f.x, f.y, f.s, n)), g = first.map(c => gray(c, n));
+  // reference = sharpest (highest gradient energy)
+  const sharp = g.map(a => { let e = 0; for (let y = 1; y < n; y++) for (let x = 1; x < n; x++) { const i = y * n + x; e += (a[i] - a[i - 1]) ** 2 + (a[i] - a[i - n]) ** 2; } return e; });
+  const ref = sharp.indexOf(Math.max(...sharp)), acc = new Float64Array(n * n * 3); let used = 0;
+  frames.forEach((f, k) => {
+    const sh = k === ref ? { dx: 0, dy: 0, peak: 1 } : phaseShift(g[ref], g[k], n); if (sh.peak < 0.05) return;
+    const pp = f.s / n, c = cropSq(f.src, f.x - sh.dx * pp, f.y - sh.dy * pp, f.s, n);
+    for (let i = 0; i < c.length; i++) acc[i] += c[i]; used++;
+  });
+  for (let i = 0; i < acc.length; i++) acc[i] /= used || 1;
+  return { img: Float32Array.from(acc), used };
+}
+// cornea as a convex spherical mirror seen from the camera -> perspective view of what the eye faces
+function corneaView(img, n, out, yaw, pitch, fov, maxRho) {
+  const o = new Float32Array(out * out * 3), t = Math.tan(fov * Math.PI / 360), cy = Math.cos(yaw * Math.PI / 180), sy = Math.sin(yaw * Math.PI / 180), cp = Math.cos(pitch * Math.PI / 180), sp = Math.sin(pitch * Math.PI / 180), c = (n - 1) / 2;
+  const mask = new Uint8Array(out * out);
+  for (let j = 0; j < out; j++) for (let i = 0; i < out; i++) {
+    let dx = ((i + 0.5) / out * 2 - 1) * t, dy = -((j + 0.5) / out * 2 - 1) * t, dz = 1;
+    let y2 = dy * cp + dz * sp, z2 = -dy * sp + dz * cp; dy = y2; dz = z2;          // pitch
+    let x2 = dx * cy + dz * sy; z2 = -dx * sy + dz * cy; dx = x2; dz = z2;          // yaw
+    const L = Math.hypot(dx, dy, dz); dx /= L; dy /= L; dz /= L;
+    let nx = dx, ny = dy, nz = dz + 1; const M = Math.hypot(nx, ny, nz); if (M < 1e-6) continue; nx /= M; ny /= M; nz /= M; // normal bisects view & camera
+    const rho = Math.hypot(nx, ny); if (rho > maxRho) continue;
+    const sx = c + nx / maxRho * c, sy2 = c - ny / maxRho * c, X = Math.floor(sx), Y = Math.floor(sy2), ax = sx - X, ay = sy2 - Y;
+    if (X < 0 || Y < 0 || X >= n - 1 || Y >= n - 1) continue;
+    for (let k = 0; k < 3; k++) { const P = (u, v) => img[(v * n + u) * 3 + k]; o[(j * out + i) * 3 + k] = (P(X, Y) * (1 - ax) + P(X + 1, Y) * ax) * (1 - ay) + (P(X, Y + 1) * (1 - ax) + P(X + 1, Y + 1) * ax) * ay; }
+    mask[j * out + i] = 1;
+  }
+  return { img: o, mask };
+}
+// remove slowly varying dark iris/lens background (white top-hat with a large kernel) + gray-world colour balance
+function removeBase(img, n, mask, rad) {
+  const o = new Float32Array(img.length), r = Math.max(2, Math.round(rad));
+  for (let k = 0; k < 3; k++) {
+    const ch = new Float32Array(n * n); for (let i = 0; i < n * n; i++) ch[i] = img[i * 3 + k];
+    const filt = (a, fn) => { const t = new Float32Array(n * n), u = new Float32Array(n * n);
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { let m = fn === 'min' ? 1e9 : -1e9; for (let d = -r; d <= r; d++) { const X = x + d; if (X < 0 || X >= n || (mask && !mask[y * n + X])) continue; const v = a[y * n + X]; m = fn === 'min' ? Math.min(m, v) : Math.max(m, v); } t[y * n + x] = Math.abs(m) > 1e8 ? a[y * n + x] : m; }
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { let m = fn === 'min' ? 1e9 : -1e9; for (let d = -r; d <= r; d++) { const Y = y + d; if (Y < 0 || Y >= n || (mask && !mask[Y * n + x])) continue; const v = t[Y * n + x]; m = fn === 'min' ? Math.min(m, v) : Math.max(m, v); } u[y * n + x] = Math.abs(m) > 1e8 ? t[y * n + x] : m; } return u; };
+    const open = filt(filt(ch, 'min'), 'max');
+    for (let i = 0; i < n * n; i++) o[i * 3 + k] = Math.max(0, ch[i] - open[i] * 0.85);
+  }
+  const m = [0, 0, 0]; let c = 0; for (let i = 0; i < n * n; i++) if (!mask || mask[i]) { for (let k = 0; k < 3; k++) m[k] += o[i * 3 + k]; c++; }
+  const avg = (m[0] + m[1] + m[2]) / 3; for (let i = 0; i < n * n; i++) for (let k = 0; k < 3; k++) o[i * 3 + k] *= m[k] ? avg / m[k] : 1;
+  return o;
+}
+
 </script>
 <script type="module">
 {
 const $ = id => document.getElementById(id);
 const wait = ms => new Promise(r => setTimeout(r, ms));
-let src = 'cam', mode = 'eye', facing = 'user', stream = null, V = null, files = null, lmV = null, lmI = null, mirror = true, boost = true, last = null, manPt = null, picData = null;
+let src = 'cam', mode = 'eye', facing = 'environment', stream = null, V = null, lmV = null, lmI = null, mirror = true, iris = true, picData = null, manPt = null;
+let sets = null, aiUrls = {};   // sets: [{label, frames:[{src,x,y,s,r}]}]
 const video = $('vid'), pic = $('pic'), pg = pic.getContext('2d', { willReadFrequently: true });
 const seg = (ids, on) => ids.forEach(i => $(i).setAttribute('aria-pressed', i === on ? 'true' : 'false'));
 const say = (t, bad) => { $('msg').innerHTML = bad ? `<span class="bad">${t}</span>` : t; };
-$('s-cam').onclick = () => { src = 'cam'; seg(['s-cam', 's-up'], 's-cam'); $('camBox').hidden = false; $('upBox').hidden = true; $('picBox').hidden = mode !== 'man' || !picData; };
-$('s-up').onclick = () => { src = 'up'; seg(['s-cam', 's-up'], 's-up'); $('camBox').hidden = true; $('upBox').hidden = false; $('picBox').hidden = !picData; };
-const setMode = m => { mode = m; seg(['m-eye', 'm-gl', 'm-man'], { eye: 'm-eye', gl: 'm-gl', man: 'm-man' }[m]); $('manBox').hidden = m !== 'man'; if (picData) $('picBox').hidden = false; process(); };
+for (const [k, u] of [['Z', '%'], ['Y', '°'], ['P', '°'], ['F', '°']]) { const f = () => $('v' + k).textContent = $(k).value + u; $(k).addEventListener('input', () => { f(); if (k === 'Z') process(); else { aiUrls = {}; render(); } }); f(); }
+$('s-cam').onclick = () => { src = 'cam'; seg(['s-cam', 's-up'], 's-cam'); $('camBox').hidden = false; $('upBox').hidden = true; };
+$('s-up').onclick = () => { src = 'up'; seg(['s-cam', 's-up'], 's-up'); $('camBox').hidden = true; $('upBox').hidden = false; };
+const setMode = m => { mode = m; seg(['m-eye', 'm-gl', 'm-man'], { eye: 'm-eye', gl: 'm-gl', man: 'm-man' }[m]); $('manBox').hidden = m !== 'man'; $('viewCtl').hidden = m !== 'eye'; if (picData) $('picBox').hidden = false; aiUrls = {}; if (srcFrames.length) process(); };
 $('m-eye').onclick = () => setMode('eye'); $('m-gl').onclick = () => setMode('gl'); $('m-man').onclick = () => setMode('man');
-$('Z').oninput = () => { $('vZ').textContent = $('Z').value + '%'; if (mode === 'man') process(); }; $('vZ').textContent = $('Z').value + '%';
-$('b-mir').onclick = () => { mirror = !mirror; render(); };
-$('b-boost').onclick = () => { boost = !boost; $('b-boost').textContent = 'وضّح التفاصيل: ' + (boost ? 'شغال' : 'مقفول'); render(); };
+$('b-mir').onclick = () => { mirror = !mirror; $('b-mir').textContent = 'اقلب زي المراية: ' + (mirror ? 'شغال' : 'مقفول'); aiUrls = {}; render(); };
+$('b-iris').onclick = () => { iris = !iris; $('b-iris').textContent = 'شيل نقشة القزحية: ' + (iris ? 'شغال' : 'مقفول'); aiUrls = {}; render(); };
+$('viewCtl').hidden = false;
 
 async function models() {
-  if (lmV) return;
+  if (lmI) return;
   say('بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…');
   V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
-  files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
+  const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const o = (d, rm) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: rm, numFaces: 1 });
   const mk = async rm => { try { return await V.FaceLandmarker.createFromOptions(files, o('GPU', rm)); } catch (e) { return await V.FaceLandmarker.createFromOptions(files, o('CPU', rm)); } };
-  lmV = await mk('VIDEO'); lmI = await mk('IMAGE'); say('');
+  lmI = await mk('IMAGE'); lmV = await mk('VIDEO'); say('');
 }
 async function openCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
@@ -163,83 +250,132 @@ $('b-cam').onclick = async () => {
 };
 $('b-flip').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; try { await openCam(); say(`الكاميرا شغالة بدقة ${video.videoWidth}×${video.videoHeight}.`); } catch (e) { say('مقدرتش أفتح الكاميرا التانية.', true); } };
 
-// regions from landmarks, in pixels
+// regions in pixels
 function regions(pts, W, H) {
   const P = i => ({ x: pts[i].x * W, y: pts[i].y * H }), d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), out = [];
-  if (mode === 'eye') for (const [c, rim] of [[468, [469, 470, 471, 472]], [473, [474, 475, 476, 477]]]) {
-    if (pts.length <= c) continue; const C = P(c), r = rim.reduce((s, i) => s + d(C, P(i)), 0) / 4; out.push({ x: C.x, y: C.y, s: 2 * r * 1.02, r });
+  if (mode === 'eye') for (const [c, rim, lab] of [[468, [469, 470, 471, 472], 'العين اللي على شمال الصورة'], [473, [474, 475, 476, 477], 'العين اللي على يمين الصورة']]) {
+    if (pts.length <= c) continue; const C = P(c), r = rim.reduce((s, i) => s + d(C, P(i)), 0) / 4; out.push({ x: C.x, y: C.y, s: 2 * r * 1.02, r, lab });
   }
-  if (mode === 'gl') for (const [a, b] of [[33, 133], [362, 263]]) { const A = P(a), B = P(b), ew = d(A, B); out.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 - 0.1 * ew, s: 2.1 * ew }); }
+  if (mode === 'gl') for (const [a, b, lab] of [[33, 133, 'العدسة اللي على شمال الصورة'], [362, 263, 'العدسة اللي على يمين الصورة']]) { const A = P(a), B = P(b), ew = d(A, B); out.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 - 0.1 * ew, s: 2.1 * ew, lab }); }
   return out;
 }
-const N = 192;
-function extract(img, regs) { return regs.map(g => cropSq(img, g.x, g.y, g.s, N)); }
+// keep only a patch around each region (memory) -> frame {src(patch), x, y, s}
+function patch(full, g) {
+  const m = Math.ceil(g.s * 0.9), x0 = Math.max(0, Math.floor(g.x - m)), y0 = Math.max(0, Math.floor(g.y - m)), x1 = Math.min(full.w, Math.ceil(g.x + m)), y1 = Math.min(full.h, Math.ceil(g.y + m)), w = x1 - x0, h = y1 - y0;
+  const data = new Uint8ClampedArray(w * h * 4); for (let y = 0; y < h; y++) data.set(full.data.subarray(((y + y0) * full.w + x0) * 4, ((y + y0) * full.w + x1) * 4), y * w * 4);
+  return { src: { w, h, data }, x: g.x - x0, y: g.y - y0, s: g.s, r: g.r };
+}
+let srcFrames = []; // full-res sources kept only as canvases to re-run detection when mode changes (max 30, downscaled to 2048)
+function addFrame(canvasOrVideo, W, H, det) {
+  const c = document.createElement('canvas'), sc = Math.min(1, 2048 / Math.max(W, H)); c.width = Math.round(W * sc); c.height = Math.round(H * sc);
+  c.getContext('2d').drawImage(canvasOrVideo, 0, 0, c.width, c.height); srcFrames.push(c);
+}
+function process() {
+  if (!srcFrames.length) return;
+  const per = {};
+  srcFrames.forEach((c, k) => {
+    const g = c.getContext('2d', { willReadFrequently: true }), full = { w: c.width, h: c.height, data: g.getImageData(0, 0, c.width, c.height).data };
+    if (k === srcFrames.length - 1) { picData = full; }
+    let regs = [];
+    if (mode === 'man') { if (manPt) regs = [{ x: manPt.x * c.width, y: manPt.y * c.height, s: c.width * $('Z').value / 100, lab: 'المنطقة اللي اخترتها' }]; }
+    else if (lmI) { const res = lmI.detect(c), pts = res.faceLandmarks && res.faceLandmarks[0]; if (pts) regs = regions(pts, c.width, c.height); }
+    regs.forEach((g, i) => { (per[i] = per[i] || { lab: g.lab, frames: [] }).frames.push(patch(full, g)); });
+  });
+  drawPic();
+  sets = Object.values(per);
+  if (!sets.length) { $('res').innerHTML = ''; say(mode === 'man' ? 'دوس على مكان الانعكاس في الصورة.' : 'ما لقيتش وش في الصورة. جرّب «أي مكان (يدوي)».', mode !== 'man'); $('b-ai').disabled = true; return; }
+  // super-resolve each region once
+  for (const st of sets) {
+    const s = Math.max(...st.frames.map(f => f.s)), n = s * 2 >= 200 ? 256 : s * 2 >= 100 ? 128 : 64;
+    const sr = stackSR(st.frames, n); st.img = sr.img; st.n = n; st.used = sr.used; st.px = Math.round(st.frames[0].r ? 2 * st.frames[0].r : st.frames[0].s);
+  }
+  aiUrls = {}; say(''); $('b-ai').disabled = false; render();
+}
+function drawPic() {
+  if (!picData) return; $('picBox').hidden = false; pic.width = picData.w; pic.height = picData.h; pg.putImageData(new ImageData(new Uint8ClampedArray(picData.data), picData.w, picData.h), 0, 0);
+  if (mode === 'man' && manPt) { const s = picData.w * $('Z').value / 100; pg.strokeStyle = '#e8251a'; pg.lineWidth = Math.max(2, picData.w / 300); pg.strokeRect(manPt.x * picData.w - s / 2, manPt.y * picData.h - s / 2, s, s); }
+}
+pic.addEventListener('click', e => { if (mode !== 'man' || !picData) return; const r = pic.getBoundingClientRect(); manPt = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height }; process(); });
+
+function toUrl(img, n, mask) {
+  const px = enhance(img, n, mask, true), c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'); const id = g.createImageData(n, n); id.data.set(px); g.putImageData(id, 0, 0);
+  if (!mirror) return c.toDataURL('image/png'); const m = document.createElement('canvas'); m.width = m.height = n; const mg = m.getContext('2d'); mg.translate(n, 0); mg.scale(-1, 1); mg.drawImage(c, 0, 0); return m.toDataURL('image/png');
+}
+function baseOf(st) { if (!iris) return st.img; if (!st.base) st.base = mode === 'eye' ? removeBase(st.img, st.n, circleMask(st.n, 0.97), st.n * 0.12) : removeBase(st.img, st.n, null, st.n * 0.15); return st.base; }
+function viewOf(st) {
+  if (mode === 'eye') {
+    const base = baseOf(st);
+    const v = corneaView(base, st.n, st.n, +$('Y').value, +$('P').value, +$('F').value, 0.95); return { img: v.img, n: st.n, mask: v.mask };
+  }
+  return { img: baseOf(st), n: st.n, mask: null };
+}
+function render() {
+  if (!sets) return; let html = '';
+  const views = sets.map(viewOf);
+  // both eyes see almost the same scene: align and average them for one cleaner picture
+  let both = null;
+  if (views.length === 2) {
+    const n = views[0].n === views[1].n ? views[0].n : 0;
+    if (n) { const sh = phaseShift(gray(views[0].img, n), gray(views[1].img, n), n);
+      if (sh.peak > 0.08 && Math.hypot(sh.dx, sh.dy) < n / 6) { const a = new Float32Array(views[0].img.length), mk = new Uint8Array(n * n);
+        for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const X = Math.round(x - sh.dx), Y = Math.round(y - sh.dy), i = y * n + x; if (X < 0 || Y < 0 || X >= n || Y >= n) continue; const j = Y * n + X;
+          const m0 = !views[0].mask || views[0].mask[i], m1 = !views[1].mask || views[1].mask[j]; for (let k = 0; k < 3; k++) a[i * 3 + k] = m0 && m1 ? (views[0].img[i * 3 + k] + views[1].img[j * 3 + k]) / 2 : m0 ? views[0].img[i * 3 + k] : views[1].img[j * 3 + k]; mk[i] = m0 || m1 ? 1 : 0; }
+        both = { img: a, n, mask: views[0].mask ? mk : null }; } }
+  }
+  const fig = (url, cap, cls, key) => `<figure class="${cls || ''}"><img alt="" src="${url}" ${key ? `data-k="${key}"` : ''}><figcaption>${cap}</figcaption></figure>`;
+  if (both) {
+    const u = toUrl(both.img, both.n, both.mask);
+    html += `<h3>المنظر من العينين مع بعض</h3><div class="outs">${fig(u, 'صورة حقيقية: العينين متظبطين على بعض ومتجمّعين')}${aiUrls.both ? fig(aiUrls.both, 'تخمين AI ×٤: التفاصيل الصغيرة ممكن تكون متألّفة', 'ai') : ''}</div>`;
+    both.url = u;
+  }
+  sets.forEach((st, i) => {
+    const raw = toUrl(st.img, st.n, mode === 'eye' ? circleMask(st.n, 0.98) : null), v = toUrl(views[i].img, views[i].n, views[i].mask); views[i].url = v;
+    html += `<h3>${st.lab}</h3><div class="outs">${fig(raw, `الانعكاس متجمّع من ${st.used} صورة`)}${fig(v, mode === 'eye' ? 'صورة عادية: التقوّس متفرد' : 'صورة عادية: متعدّل اللون والاتجاه')}${aiUrls[i] ? fig(aiUrls[i], 'تخمين AI ×٤: التفاصيل الصغيرة ممكن تكون متألّفة', 'ai') : ''}</div>`;
+  });
+  $('res').innerHTML = html; render.views = views; render.both = both;
+  const px = sets.map(s => s.px), total = sets.reduce((a, s) => Math.max(a, s.used), 0);
+  $('note').textContent = (mode === 'eye' ? `قطر القزحية حوالي ${px.join(' و')} بكسل.` : `المنطقة حوالي ${px.join(' و')} بكسل.`) + ` اتجمّع لحد ${total} صورة.` + (total === 1 ? ' صورة واحدة بس، فمفيش تجميع. ارفع كذا صورة أو فيديو عشان دقة أعلى.' : '') + (mode === 'eye' && Math.min(...px) < 60 ? ' العين صغيرة في الصورة، فالتفاصيل محدودة مهما اتحسنت.' : '') + ' اضغط مطوّل على أي صورة عشان تحفظها.';
+}
 
 $('b-shot').onclick = async () => {
-  if (mode === 'man') { snapshot(); return; }
-  $('b-shot').disabled = true; say('اثبت… بيجمّع.');
-  const W = video.videoWidth, H = video.videoHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true });
-  let acc = null, cnt = 0, rr = [];
-  for (let k = 0; k < 20; k++) {
-    await new Promise(r => requestAnimationFrame(r));
-    const res = lmV.detectForVideo(video, performance.now()), pts = res.faceLandmarks && res.faceLandmarks[0]; if (!pts) continue;
-    const regs = regions(pts, W, H); if (!regs.length) continue;
-    g.drawImage(video, 0, 0, W, H); const im = { w: W, h: H, data: g.getImageData(0, 0, W, H).data }, cr = extract(im, regs);
-    if (!acc) acc = cr.map(a => new Float32Array(a.length)); if (acc.length !== cr.length) continue;
-    cr.forEach((a, i) => { for (let j = 0; j < a.length; j++) acc[i][j] += a[j]; }); cnt++; rr = regs; picData = im;
-  }
-  $('b-shot').disabled = false;
-  if (!cnt) { say('ما لقيتش وش في الصورة. قرّب وخلي الوش كله باين.', true); return; }
-  last = { crops: acc.map(a => a.map(v => v / cnt)), regs: rr, n: cnt }; drawPic(rr); $('picBox').hidden = false; say(`اتجمعت ${cnt} صورة.`); render();
+  if (mode === 'man') { srcFrames = []; addFrame(video, video.videoWidth, video.videoHeight); process(); return; }
+  $('b-shot').disabled = true; say('اثبت… بيجمّع ٢٠ صورة.'); srcFrames = [];
+  for (let k = 0; k < 20; k++) { await new Promise(r => requestAnimationFrame(r)); await wait(40); addFrame(video, video.videoWidth, video.videoHeight); }
+  say('بيظبط الصور على بعض…'); await wait(30); process(); $('b-shot').disabled = false;
 };
-function snapshot() {
-  const W = video.videoWidth, H = video.videoHeight, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true });
-  g.drawImage(video, 0, 0, W, H); picData = { w: W, h: H, data: g.getImageData(0, 0, W, H).data }; drawPic(); $('picBox').hidden = false; say('دوس على مكان الانعكاس في الصورة.');
-}
 $('file').onchange = async e => {
-  const f = e.target.files[0]; if (!f) return;
+  const fl = Array.from(e.target.files); if (!fl.length) return;
   try {
-    await models(); const bmp = await createImageBitmap(f), sc = Math.min(1, 4096 / Math.max(bmp.width, bmp.height)), W = Math.round(bmp.width * sc), H = Math.round(bmp.height * sc);
-    const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(bmp, 0, 0, W, H);
-    picData = { w: W, h: H, data: g.getImageData(0, 0, W, H).data, canvas: c }; drawPic(); $('picBox').hidden = false; process();
-  } catch (err) { say('مقدرتش أفتح الصورة.', true); }
+    if (mode !== 'man') await models(); srcFrames = []; aiUrls = {};
+    for (const f of fl) {
+      if (f.type.startsWith('video/')) {
+        say('بيقرا الفيديو…'); const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(f);
+        await new Promise((r, j) => { v.onloadeddata = r; v.onerror = j; v.load(); });
+        const dur = Math.min(v.duration || 2, 4), N = 30;
+        for (let k = 0; k < N && srcFrames.length < 30; k++) { v.currentTime = dur * (k + 0.5) / N; await new Promise(r => { v.onseeked = r; }); addFrame(v, v.videoWidth, v.videoHeight); }
+        URL.revokeObjectURL(v.src);
+      } else if (srcFrames.length < 30) { const b = await createImageBitmap(f); addFrame(b, b.width, b.height); }
+    }
+    say(`بيظبط ${srcFrames.length} صورة على بعض…`); await wait(30); process();
+  } catch (err) { say('مقدرتش أقرا الملف.', true); }
 };
-function drawPic(box) {
-  if (!picData) return; pic.width = picData.w; pic.height = picData.h;
-  pg.putImageData(new ImageData(new Uint8ClampedArray(picData.data), picData.w, picData.h), 0, 0);
-  if (box) { pg.strokeStyle = '#e8251a'; pg.lineWidth = Math.max(2, picData.w / 300); for (const b of box) pg.strokeRect(b.x - b.s / 2, b.y - b.s / 2, b.s, b.s); }
-}
-pic.addEventListener('click', e => {
-  if (mode !== 'man' || !picData) return; const r = pic.getBoundingClientRect();
-  manPt = { x: (e.clientX - r.left) / r.width * picData.w, y: (e.clientY - r.top) / r.height * picData.h }; process();
-});
-function process() {
-  if (!picData) return;
-  let regs = [];
-  if (mode === 'man') { if (!manPt) { drawPic(); return; } regs = [{ x: manPt.x, y: manPt.y, s: picData.w * $('Z').value / 100 }]; }
-  else {
-    const c = picData.canvas || (() => { const t = document.createElement('canvas'); t.width = picData.w; t.height = picData.h; t.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(picData.data), picData.w, picData.h), 0, 0); return t; })();
-    const res = lmI.detect(c), pts = res.faceLandmarks && res.faceLandmarks[0];
-    if (!pts) { drawPic(); $('outs').innerHTML = ''; say('ما لقيتش وش في الصورة. جرّب «أي مكان (يدوي)» وحدد الانعكاس بنفسك.', true); return; }
-    regs = regions(pts, picData.w, picData.h); say('');
-  }
-  drawPic(regs); last = { crops: extract(picData, regs), regs, n: 1 }; render();
-}
-function toUrl(px, n) { const c = document.createElement('canvas'); c.width = c.height = n; const g = c.getContext('2d'); const id = g.createImageData(n, n); id.data.set(px); g.putImageData(id, 0, 0);
-  if (mirror) { const m = document.createElement('canvas'); m.width = m.height = n; const mg = m.getContext('2d'); mg.translate(n, 0); mg.scale(-1, 1); mg.drawImage(c, 0, 0); return m.toDataURL('image/png'); } return c.toDataURL('image/png'); }
-function render() {
-  if (!last) return; const cards = [];
-  last.crops.forEach((cr, i) => {
-    const side = last.regs.length > 1 ? (i === 0 ? 'العين/العدسة اللي على يمين الصورة' : 'العين/العدسة اللي على شمال الصورة') : 'المنطقة اللي اخترتها';
-    if (mode === 'eye') {
-      cards.push(`<figure><img alt="" src="${toUrl(enhance(cr, N, circleMask(N, 0.98), boost), N)}"><figcaption>${side}: الانعكاس متكبّر</figcaption></figure>`);
-      cards.push(`<figure><img alt="" src="${toUrl(enhance(unwarpSphere(cr, N, 0.95), N, circleMask(N, 1), boost), N)}"><figcaption>بعد فرد التقوّس: المكان قدامه</figcaption></figure>`);
-    } else cards.push(`<figure><img alt="" src="${toUrl(enhance(cr, N, null, boost), N)}"><figcaption>${side}</figcaption></figure>`);
-  });
-  $('outs').innerHTML = cards.join('');
-  const px = last.regs.map(g => Math.round(g.r ? 2 * g.r : g.s));
-  $('note').textContent = (mode === 'eye' ? `قطر القزحية في الصورة حوالي ${px.join(' و')} بكسل، وده أقصى تفاصيل ممكن تطلع من الانعكاس.` + (Math.min(...px) < 40 ? ' العين صغيرة في الصورة، فقرّب أو استخدم صورة أوضح.' : '') : `المنطقة حوالي ${px.join(' و')} بكسل.`) + (last.n > 1 ? ` متوسط ${last.n} صورة.` : '') + ' اضغط مطوّل على أي صورة عشان تحفظها.';
-}
+
+// optional AI x4 (ESRGAN, runs on the phone)
+let up = null;
+const loadJs = u => new Promise((r, j) => { const s = document.createElement('script'); s.src = u; s.onload = r; s.onerror = j; document.head.appendChild(s); });
+$('b-ai').onclick = async () => {
+  if (!render.views) return; $('b-ai').disabled = true;
+  try {
+    if (!up) { say('بيحمّل موديل التحسين (حوالي ٤ ميجا)…');
+      await loadJs('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js'); await loadJs('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0/dist/umd/index.min.js');
+      await loadJs('https://cdn.jsdelivr.net/npm/upscaler@1.0.0/dist/browser/umd/upscaler.min.js'); await loadJs('https://cdn.jsdelivr.net/npm/@upscalerjs/esrgan-medium@1.0.0/dist/umd/models/esrgan-medium/src/x4/index.min.js');
+      up = new window.Upscaler({ model: window.ESRGANMedium4x }); }
+    const jobs = render.both ? [['both', render.both.url]] : []; render.views.forEach((v, i) => jobs.push([i, v.url]));
+    for (const [k, url] of jobs) { say(`الـ AI شغال… (${jobs.indexOf(jobs.find(j => j[0] === k)) + 1} من ${jobs.length})`); const img = new Image(); img.src = url; await img.decode(); aiUrls[k] = await up.upscale(img, { patchSize: 64, padding: 4 }); }
+    say('خلص. قارن نسخة الـ AI بالنسخة الحقيقية جنبها.'); render();
+  } catch (e) { say('موديل التحسين ما اشتغلش على الجهاز ده.', true); }
+  $('b-ai').disabled = false;
+};
 }
 </script>
 </body>

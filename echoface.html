@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>وشك بالصوت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.fig.tall{height:260px}
+.step{font-size:20px;font-weight:600;margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>وشك بالصوت</h1>
+<p class="sub">التليفون بيطلّع تكّات صغيرة ويسمع صداها وهو راجع من وشك. من غير كاميرا ولا نور، بيعرف وشك متكوّن من كام طبقة وكل طبقة على بعد قد إيه، وبيقدر يتعلم يفرّق بين وش ووش.</p>
+
+<div class="card">
+  <div class="step" id="step">١. بصمة المكان من غير وشك</div>
+  <p class="lbl" id="hint">امسك التليفون قدامك على بعد حوالي ٣٠ سم، والشاشة ناحيتك زي ما بتصوّر سيلفي. بعدين ميّل راسك بعيد خالص عن قدام التليفون، من غير ما تحرك إيدك، ودوس «سجّل».</p>
+  <div class="row"><button id="b-go">سجّل</button><button class="ghost" id="b-reset">من الأول</button></div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<h2>الطبقات اللي الصوت شافها</h2>
+<div class="fig tall"><canvas id="cvL"></canvas></div>
+<div class="fig"><canvas id="cvP"></canvas></div>
+<p class="lbl" id="layers"></p>
+
+<h2>مين ده؟</h2>
+<div class="card">
+  <div class="big" id="who" style="font-size:40px">—</div>
+  <div class="lbl" id="whoNote">سجّل وشّين على الأقل، كل واحد ٣ مرات، وبعدين أي قياس جديد هيتقارن بيهم.</div>
+  <input type="text" id="name" placeholder="اسم صاحب الوش اللي اتقاس دلوقتي" maxlength="20" style="margin-top:10px">
+  <div class="row"><button class="ghost" id="b-save" disabled>احفظ القياس ده باسمه</button></div>
+  <ul class="list" id="ppl"></ul>
+</div>
+
+<label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.5"></label>
+
+<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<ul>
+<li>التكّة صفارة بتعلى بسرعة من ٢ لـ ٢٠ كيلوهرتز. الصفحة بتسمع الصدى، وبتحسب كل صدى جه من على بعد قد إيه.</li>
+<li>عشان الصفحة تفصل وشك عن الحيطان والسقف، بتسجّل المكان مرة من غير وشك وتطرحه من القياس اللي فيه وشك.</li>
+<li>دقة المسافة حوالي ٢ سم. يعني بتفرّق بين طرف مناخيرك وخدودك وودانك، بس مش بتشوف تفاصيل أصغر من كده.</li>
+<li>السماعة والمايك بيسمعوا من كل الاتجاهات، فالصفحة بتعرف كل طبقة <b>على بعد قد إيه</b>، بس مش بتعرف هي فوق ولا تحت ولا يمين ولا شمال. عشان كده الرسمة طبقات، مش صورة وش.</li>
+<li>التعرّف على الوش هنا تجربة، مش قفل أمان. الوشوش المتشابهة في الحجم ممكن تتلخبط.</li>
+<li>التكّات مسموعة بس واطية، وكل قياس حوالي ثانيتين.</li>
+</ul></details>
+</div>
+<script>
+
+function fft(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let b = n >> 1;
+    for (; j & b; b >>= 1) j ^= b;
+    j ^= b;
+    if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < h; k++) {
+        const p = i + k, q = p + h;
+        const tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr;
+        re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+
+// Linear chirp with Tukey taper
+function makeChirp(sr, f0, f1, dur) {
+  const n = Math.round(sr * dur), s = new Float32Array(n), k = (f1 - f0) / dur, tap = Math.round(n * 0.1);
+  for (let i = 0; i < n; i++) {
+    const t = i / sr;
+    let w = 1;
+    if (i < tap) w = 0.5 - 0.5 * Math.cos(Math.PI * i / tap);
+    else if (i > n - tap) w = 0.5 - 0.5 * Math.cos(Math.PI * (n - i) / tap);
+    s[i] = w * Math.sin(2 * Math.PI * (f0 * t + 0.5 * k * t * t));
+  }
+  return s;
+}
+
+// Envelope of matched-filter output (analytic cross-correlation)
+function matchedEnvelope(x, s) {
+  let N = 1; while (N < x.length + s.length) N <<= 1;
+  const xr = new Float64Array(N), xi = new Float64Array(N), sr_ = new Float64Array(N), si = new Float64Array(N);
+  xr.set(x); sr_.set(s);
+  fft(xr, xi, false); fft(sr_, si, false);
+  for (let k = 0; k < N; k++) {
+    const r = xr[k] * sr_[k] + xi[k] * si[k], i = xi[k] * sr_[k] - xr[k] * si[k];
+    const g = k === 0 || k === N / 2 ? 1 : k < N / 2 ? 2 : 0;
+    xr[k] = r * g; xi[k] = i * g;
+  }
+  fft(xr, xi, true);
+  const env = new Float32Array(x.length);
+  for (let n = 0; n < x.length; n++) env[n] = Math.hypot(xr[n], xi[n]);
+  return env;
+}
+
+// Main analysis. Returns averaged profile (linear, normalised to direct path) and echo peaks.
+function bandPart(chirp, sr, f0, f1, dur, lo, hi) {
+  const k = (f1 - f0) / dur, a = Math.max(0, Math.round((lo - f0) / k * sr)), b = Math.min(chirp.length, Math.round((hi - f0) / k * sr));
+  const s = new Float32Array(chirp.length), tap = Math.max(1, Math.round((b - a) * 0.15));
+  for (let i = a; i < b; i++) { const w = Math.min(1, (i - a) / tap, (b - i) / tap); s[i] = chirp[i] * (0.5 - 0.5 * Math.cos(Math.PI * w)); }
+  return s;
+}
+
+function analyse(rec, chirp, o) {
+  const { sr, period, count, c, maxRange, minRange, relDb } = o;
+  const env = matchedEnvelope(rec, chirp);
+  const envL = o.band ? matchedEnvelope(rec, bandPart(chirp, sr, o.band.f0, o.band.f1, o.band.dur, 2000, 5000)) : null;
+  const envH = o.band ? matchedEnvelope(rec, bandPart(chirp, sr, o.band.f0, o.band.f1, o.band.dur, 8000, 12000)) : null;
+  let a = 0; for (let i = 1; i < env.length; i++) if (env[i] > env[a]) a = i;
+  const P = Math.round(period * sr), srch = Math.round(0.002 * sr), W = Math.round(2 * maxRange / c * sr);
+  const directs = [];
+  for (let k = -count; k <= count; k++) {
+    const g = a + k * P; if (g - srch < 0 || g + srch + W >= env.length) continue;
+    let b = g - srch; for (let i = b; i <= g + srch; i++) if (env[i] > env[b]) b = i;
+    if (env[b] > 0.25 * env[a]) directs.push(b);
+  }
+  if (!directs.length) return null;
+  const prof = new Float32Array(W), profL = envL && new Float32Array(W), profH = envH && new Float32Array(W);
+  const localMax = (e, i, r) => { let m = 0; for (let j = Math.max(0, i - r); j <= i + r && j < e.length; j++) m = Math.max(m, e[j]); return m; };
+  const r3 = Math.round(0.0003 * sr);
+  for (const d of directs) {
+    const ref = env[d]; for (let i = 0; i < W; i++) prof[i] += env[d + i] / ref;
+    if (envL) { const rl = localMax(envL, d, r3), rh = localMax(envH, d, r3); for (let i = 0; i < W; i++) { profL[i] += envL[d + i] / rl; profH[i] += envH[d + i] / rh; } }
+  }
+  for (let i = 0; i < W; i++) { prof[i] /= directs.length; if (profL) { profL[i] /= directs.length; profH[i] /= directs.length; } }
+  const sorted = Array.from(prof.subarray(Math.floor(W * 0.6))).sort((p, q) => p - q);
+  const noise = sorted[Math.floor(sorted.length / 2)] || 1e-6;
+  let dsum = 0; for (const d of directs) dsum += env[d];
+  const all = Array.from(env).sort((p, q) => p - q), floor = all[Math.floor(all.length / 2)] || 1e-9;
+  const dsnr = 20 * Math.log10(dsum / directs.length / floor);
+  const r = { prof, profL, profH, noise, used: directs.length, dsnr };
+  Object.assign(r, findPeaks(prof, noise, sr, c, minRange, relDb, profL, profH));
+  return r;
+}
+
+function findPeaks(prof, noise, sr, c, minRange, relDb, profL, profH) {
+  const W = prof.length, thr = Math.max(noise * 3, Math.pow(10, relDb / 20));
+  const i0 = Math.round(2 * minRange / c * sr), win = Math.round(0.00025 * sr);
+  const peaks = [];
+  for (let i = Math.max(i0, win); i < W - win; i++) {
+    const v = prof[i]; if (v < thr) continue;
+    let ok = true; for (let j = i - win; j <= i + win; j++) if (prof[j] > v) { ok = false; break; }
+    if (ok) {
+      const p = { d: (i / sr) * c / 2, db: 20 * Math.log10(v), snr: 20 * Math.log10(v / noise) };
+      if (profL) { let l = 0, h = 0; for (let j = i - win; j <= i + win; j++) { l = Math.max(l, profL[j]); h = Math.max(h, profH[j]); } p.tilt = 20 * Math.log10((h + 1e-9) / (l + 1e-9)); }
+      peaks.push(p); i += win;
+    }
+  }
+  peaks.sort((p, q) => q.db - p.db);
+  return { thr, peaks: peaks.slice(0, 8).sort((p, q) => p.d - q.d) };
+}
+
+{
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const C = 343, PERIOD = 0.05, COUNT = 30, MAXR = 1.0;
+let ctx, stream, base = null, face = null, sr = 48000;
+let people = {}; try { people = JSON.parse(localStorage.getItem('echoFaces') || '{}'); } catch (e) {}
+const keep = () => { try { localStorage.setItem('echoFaces', JSON.stringify(people)); } catch (e) {} };
+$('V').addEventListener('input', () => $('vV').textContent = $('V').value); $('vV').textContent = $('V').value;
+
+async function capture() {
+  if (!ctx) {
+    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  await ctx.resume(); sr = ctx.sampleRate;
+  const chirp = makeChirp(sr, 2000, Math.min(20000, sr / 2 - 1000), 0.005), total = 0.25 + COUNT * PERIOD + 0.25;
+  const buf = ctx.createBuffer(1, Math.round(total * sr), sr), chn = buf.getChannelData(0), g = +$('V').value;
+  for (let k = 0; k < COUNT; k++) { const o = Math.round((0.25 + k * PERIOD) * sr); for (let i = 0; i < chirp.length; i++) chn[o + i] = g * chirp[i]; }
+  const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
+  const chunks = []; let rec = true; proc.onaudioprocess = e => { if (rec) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination); await wait(200);
+  const p = ctx.createBufferSource(); p.buffer = buf; p.connect(ctx.destination); p.start();
+  await wait((total + 0.4) * 1000); rec = false; src.disconnect(); proc.disconnect();
+  const n = chunks.reduce((a, b) => a + b.length, 0), x = new Float32Array(n); let o = 0; for (const b of chunks) { x.set(b, o); o += b.length; }
+  const r = analyse(x, chirp, { sr, period: PERIOD, count: COUNT, c: C, maxRange: MAXR, minRange: 0.05, relDb: -60 });
+  if (!r || r.dsnr < 15) throw new Error('المايك مش سامع التكّات كويس. علّي الصوت وشيل الآيفون من الصامت.');
+  return r.prof;
+}
+const dist = i => i / sr * C / 2, idx = d => Math.round(d * 2 / C * sr);
+function diffProf() {
+  const n = Math.min(base.length, face.length), d = new Float32Array(n);
+  for (let i = 0; i < n; i++) d[i] = Math.max(0, face[i] - base[i]);
+  for (let i = 0; i < idx(0.06); i++) d[i] = 0;
+  return d;
+}
+function layersOf(d) {
+  const mx = Math.max(...d.subarray(0, idx(0.9))), w = idx(0.01), out = [];
+  if (mx <= 0) return out;
+  for (let i = w; i < idx(0.9); i++) { const v = d[i]; if (v < mx * 0.25) continue; let ok = true; for (let j = i - w; j <= i + w; j++) if (d[j] > v) { ok = false; break; } if (ok) { out.push({ d: dist(i), s: v / mx }); i += w; } }
+  return out;
+}
+function sig(d) {
+  const L = layersOf(d); if (!L.length) return null;
+  const a = idx(L[0].d - 0.02), b = idx(L[0].d + 0.15), v = [];
+  for (let k = 0; k < 64; k++) { const i = Math.round(a + (b - a) * k / 63); v.push(d[i] || 0); }
+  const nrm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1; return v.map(x => x / nrm);
+}
+const cos = (a, b) => a.reduce((s, x, k) => s + x * b[k], 0);
+function fit(c) { const d = devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight; c.width = W * d; c.height = H * d; const g = c.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, W, H]; }
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function draw(d) {
+  // layers picture: phone on the right, depth layers as vertical arcs
+  let [g, W, H] = fit($('cvL')); g.clearRect(0, 0, W, H);
+  const L = d ? layersOf(d) : [], dmin = L.length ? Math.max(0.05, L[0].d - 0.08) : 0.15, dmax = L.length ? Math.min(0.9, L[L.length - 1].d + 0.08) : 0.6;
+  const X = x => W - 40 - (W - 80) * (x - dmin) / (dmax - dmin);
+  g.fillStyle = css('--mute'); g.font = '12px system-ui'; g.textAlign = 'center';
+  g.fillStyle = css('--ink'); g.fillRect(W - 30, H / 2 - 30, 12, 60); g.fillStyle = css('--mute'); g.fillText('التليفون', W - 24, H / 2 + 46);
+  if (!L.length) { g.fillText(d ? 'ما ظهرش صدى واضح من وشك' : 'سجّل الخطوتين عشان تظهر الطبقات', W / 2, H / 2); }
+  L.forEach((l, k) => {
+    const x = X(l.d), r = 40 + 60 * l.s; g.strokeStyle = css('--red'); g.globalAlpha = 0.35 + 0.65 * l.s; g.lineWidth = 2 + 6 * l.s;
+    g.beginPath(); g.arc(x + r * 1.6, H / 2, r * 1.6, Math.PI * 0.82, Math.PI * 1.18); g.stroke(); g.globalAlpha = 1;
+    g.fillStyle = css('--ink'); g.fillText(`${(l.d * 100).toFixed(1)} سم`, x, H / 2 + r + 22 - (k % 2) * 14);
+  });
+  [g, W, H] = fit($('cvP')); g.clearRect(0, 0, W, H);
+  if (!d) return;
+  const a = idx(0.05), b = idx(0.9), seg = Array.from(d.subarray(a, b)), mx = Math.max(...seg) || 1;
+  g.strokeStyle = css('--ink'); g.lineWidth = 1.5; g.beginPath();
+  seg.forEach((v, i) => { const x = W - 10 - (W - 20) * i / seg.length, y = H - 22 - (H - 34) * v / mx; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
+  g.fillStyle = css('--mute'); for (const cm of [10, 30, 50, 70, 90]) g.fillText(cm + ' سم', W - 10 - (W - 20) * (idx(cm / 100) - a) / seg.length, H - 6);
+}
+function recog() {
+  const names = Object.keys(people).filter(n => people[n].length);
+  $('ppl').innerHTML = names.length ? names.map(n => `<li><span>${esc(n)} · ${people[n].length} قياس</span><button class="ghost" data-del="${esc(n)}">امسح</button></li>`).join('') : '';
+  if (!face || !base) return;
+  const s = sig(diffProf()); if (!s || names.length < 2) { $('who').textContent = '—'; return; }
+  const sc = names.map(n => ({ n, v: Math.max(...people[n].map(p => cos(p, s))) })).sort((a, b) => b.v - a.v);
+  if (sc[0].v < 0.8) { $('who').textContent = 'وش مش معروف'; $('whoNote').textContent = `أقرب واحد ${sc[0].n} بتشابه ${Math.round(sc[0].v * 100)}% بس.`; }
+  else if (sc[0].v - sc[1].v < 0.04) { $('who').textContent = 'مش متأكد'; $('whoNote').textContent = `بين ${sc[0].n} (${Math.round(sc[0].v * 100)}%) و${sc[1].n} (${Math.round(sc[1].v * 100)}%).`; }
+  else { $('who').textContent = sc[0].n; $('whoNote').textContent = sc.map(x => `${x.n} ${Math.round(x.v * 100)}%`).join(' · '); }
+}
+$('ppl').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (!b) return; delete people[b.dataset.del]; keep(); recog(); });
+function stepUi() {
+  if (!base) { $('step').textContent = '١. بصمة المكان من غير وشك'; $('hint').textContent = 'امسك التليفون قدامك على بعد حوالي ٣٠ سم، والشاشة ناحيتك زي ما بتصوّر سيلفي. بعدين ميّل راسك بعيد خالص عن قدام التليفون، من غير ما تحرك إيدك، ودوس «سجّل».'; }
+  else { $('step').textContent = '٢. وشك'; $('hint').textContent = 'رجّع وشك قدام التليفون في نفس المكان، والتليفون ما يتحركش، ودوس «سجّل». تقدر تعيد الخطوة دي كذا مرة لنفس بصمة المكان.'; }
+}
+$('b-go').addEventListener('click', async () => {
+  $('b-go').disabled = true; $('msg').textContent = 'بيقيس… اثبت.';
+  try {
+    const p = await capture();
+    if (!base) { base = p; $('msg').textContent = 'اتسجلت بصمة المكان.'; }
+    else {
+      face = p; const d = diffProf(), L = layersOf(d); draw(d);
+      $('layers').textContent = L.length ? `أقرب طبقة في وشك على بعد ${(L[0].d * 100).toFixed(1)} سم (غالباً طرف مناخيرك)، وظهر ${L.length} طبقات لحد ${(L[L.length - 1].d * 100).toFixed(1)} سم.` : 'ما ظهرش فرق واضح بين القياسين. اتأكد إن التليفون ما اتحركش، وإن وشك كان بعيد في الخطوة الأولى وقريب في التانية.';
+      $('b-save').disabled = !L.length; $('msg').textContent = 'خلص.'; recog();
+    }
+    stepUi();
+  } catch (e) { $('msg').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : (e.message || e))}</span>`; }
+  $('b-go').disabled = false;
+});
+$('b-reset').addEventListener('click', () => { base = face = null; draw(null); $('layers').textContent = ''; $('b-save').disabled = true; stepUi(); $('msg').textContent = ''; });
+$('b-save').addEventListener('click', () => {
+  const n = $('name').value.trim(); if (!n) { $('msg').textContent = 'اكتب الاسم الأول.'; return; }
+  const s = sig(diffProf()); if (!s) return;
+  (people[n] = people[n] || []).push(s); keep(); recog(); $('msg').textContent = `اتحفظ قياس لـ ${n} (${people[n].length}).`;
+});
+draw(null); recog();
+}
+</script>
+</body>
+</html>

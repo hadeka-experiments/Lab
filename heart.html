@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>قلبك من غير سماعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>قلبك من غير سماعة</h1>
+<p class="sub">نام على ضهرك، وحط التليفون على صدرك. مع كل نبضة قلبك بيهز ضلوعك هزة صغيرة جداً، وحساسات الحركة في التليفون بتحس بيها. ونَفَسك بيميّل التليفون لفوق وتحت. مفيش مايك ولا كاميرا.</p>
+
+<div class="grid2">
+  <div class="card"><div class="lbl">النبض</div><div class="big" id="hr">—<small> نبضة/د</small></div><div class="lbl" id="hrq">—</div></div>
+  <div class="card"><div class="lbl">النَّفَس</div><div class="big" id="br">—<small> نَفَس/د</small></div><div class="lbl" id="brq">—</div></div>
+</div>
+<div class="fig"><canvas id="cvH"></canvas></div>
+<div class="fig"><canvas id="cvB"></canvas></div>
+<div class="msg" id="msg">دوس «ابدأ»، وبعدين نام وحط التليفون على صدرك ناحية الشمال شوية. أول قراية بتظهر بعد حوالي ١٠ ثواني.</div>
+<div class="row"><button id="go">ابدأ</button></div>
+
+<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<ul>
+<li>القلب وهو بيضخ بيعمل اهتزاز في الصدر، وده اسمه Seismocardiography. التليفون بيقيس الاهتزاز ده بالـ accelerometer والـ gyroscope حوالي ٦٠ مرة في الثانية، والصفحة بتدوّر على الإيقاع اللي بيتكرر بين ٤٥ و١٥٠ مرة في الدقيقة.</li>
+<li>النَّفَس بيتقاس من ميل التليفون وصدرك بيطلع وينزل.</li>
+<li>لازم تكون ثابت تماماً ومن غير كلام. أي حركة بتغطي على النبض، والصفحة هتقولك لما ده يحصل.</li>
+<li>جنب كل رقم فيه «وضوح الإشارة»، ولو ضعيف الرقم ما يتاخدش بجد.</li>
+<li>دي تجربة، مش جهاز طبي.</li>
+</ul></details>
+</div>
+<script>
+
+function fftB(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+function bandB(x, fs, lo, hi) {
+  let N = 1; while (N < x.length) N <<= 1;
+  const re = new Float64Array(N), im = new Float64Array(N); let m = 0; for (const v of x) m += v / x.length;
+  for (let i = 0; i < x.length; i++) re[i] = x[i] - m;
+  fftB(re, im, false);
+  for (let k = 0; k < N; k++) { const f = (k <= N / 2 ? k : N - k) * fs / N; if (f < lo || f > hi) { re[k] = 0; im[k] = 0; } }
+  fftB(re, im, true); return Array.from(re.subarray(0, x.length));
+}
+// dominant rate in [lo,hi] Hz; q = share of band power near the peak (and its harmonic)
+function rateB(x, fs, lo, hi) {
+  let N = 1; while (N < x.length * 4) N <<= 1;
+  const re = new Float64Array(N), im = new Float64Array(N); let m = 0; for (const v of x) m += v / x.length;
+  for (let i = 0; i < x.length; i++) re[i] = (x[i] - m) * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (x.length - 1)));
+  fftB(re, im, false);
+  const P = k => re[k] ** 2 + im[k] ** 2; let bk = 0, bp = 0, tot = 0;
+  for (let k = 1; k < N / 2; k++) { const f = k * fs / N; if (f < lo || f > hi) continue; tot += P(k); if (P(k) > bp) { bp = P(k); bk = k; } }
+  const w = Math.max(1, Math.round(0.08 * N / fs)); let near = 0;
+  for (let k = bk - w; k <= bk + w; k++) near += P(k);
+  return { f: bk * fs / N, q: near / (tot + 1e-12) };
+}
+// irregular samples -> uniform
+function uniform(s, keys, fs) {
+  const t0 = s[0].t, n = Math.floor((s[s.length - 1].t - t0) * fs), out = keys.map(() => new Float64Array(n)); let j = 0;
+  for (let i = 0; i < n; i++) { const t = t0 + i / fs; while (j < s.length - 2 && s[j + 1].t < t) j++; const a = s[j], b = s[j + 1], w = Math.min(1, Math.max(0, (t - a.t) / ((b.t - a.t) || 1))); keys.forEach((k, c) => out[c][i] = a[k] + w * (b[k] - a[k])); }
+  return out;
+}
+// seismocardiography: s = [{t, az, ra, rb, rg, gx, gy, gz}]
+function scg(s) {
+  const fs = 60; if (s.length < fs * 8) return null;
+  const [az, ra, rb, rg, gx, gy, gz] = uniform(s, ['az', 'ra', 'rb', 'rg', 'gx', 'gy', 'gz'], fs);
+  const hp = x => bandB(x, fs, 4, 29);
+  const ch = [hp(az), hp(ra), hp(rb), hp(rg)].map(x => { let sd = 0; for (const v of x) sd += v * v; sd = Math.sqrt(sd / x.length) || 1; return x.map(v => v / sd); });
+  const e = ch[0].map((_, i) => ch.reduce((s2, x) => s2 + x[i] * x[i], 0));
+  const L = Math.round(0.12 * fs), env = e.map((_, i) => { let s2 = 0, c = 0; for (let j = i - L; j <= i + L; j++) if (j >= 0 && j < e.length) { s2 += e[j]; c++; } return s2 / c; });
+  const hb = rateB(env, fs, 0.75, 2.5);
+  const tilt = Array.from(gz).map((v, i) => Math.atan2(gy[i], v));
+  const br = rateB(tilt, fs, 0.1, 0.7);
+  let mv = 0; for (let i = 1; i < gx.length; i++) mv += Math.abs(gx[i] - gx[i - 1]) + Math.abs(gy[i] - gy[i - 1]) + Math.abs(gz[i] - gz[i - 1]);
+  return { fs, env, tilt: bandB(tilt, fs, 0.1, 0.7), hr: hb.f * 60, hq: hb.q, br: br.f * 60, bq: br.q, moving: mv / gx.length > 0.08 };
+}
+// ultrasonic CW Doppler breathing: iq = [{t, i, q}] at ~100 Hz baseband
+function doppler(iq, fs) {
+  if (iq.length < fs * 10) return null;
+  const I = iq.map(x => x.i), Q = iq.map(x => x.q);
+  const hpI = bandB(I, fs, 0.08, 3), hpQ = bandB(Q, fs, 0.08, 3);
+  // principal axis of the moving part
+  let sii = 0, sqq = 0, siq = 0; for (let k = 0; k < hpI.length; k++) { sii += hpI[k] ** 2; sqq += hpQ[k] ** 2; siq += hpI[k] * hpQ[k]; }
+  const th = 0.5 * Math.atan2(2 * siq, sii - sqq), c = Math.cos(th), s = Math.sin(th);
+  const sig = hpI.map((v, k) => v * c + hpQ[k] * s);
+  const br = bandB(sig, fs, 0.1, 0.7), r = rateB(sig, fs, 0.1, 0.7);
+  const fast = bandB(sig, fs, 1, 3); let ef = 0, eb = 0; for (let k = 0; k < sig.length; k++) { ef += fast[k] ** 2; eb += br[k] ** 2; }
+  return { wave: br, bpm: r.f * 60, q: r.q, motion: ef > eb * 0.8 };
+}
+
+function drawWave(cv, arr, label) {
+  const d = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight; cv.width = W * d; cv.height = H * d;
+  const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H);
+  const cs = getComputedStyle(document.documentElement);
+  g.fillStyle = cs.getPropertyValue('--mute'); g.font = '12px system-ui'; g.textAlign = 'right'; g.fillText(label || '', W - 10, 16);
+  if (!arr || arr.length < 2) return;
+  let mn = Infinity, mx = -Infinity; for (const v of arr) { if (v < mn) mn = v; if (v > mx) mx = v; }
+  const r = (mx - mn) || 1; g.strokeStyle = cs.getPropertyValue('--red'); g.lineWidth = 2; g.beginPath();
+  arr.forEach((v, i) => { const x = W - 8 - (W - 16) * (1 - i / (arr.length - 1)), y = 26 + (H - 36) * (1 - (v - mn) / r); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+  g.stroke();
+}
+
+{
+const $ = id => document.getElementById(id);
+const now = () => performance.now() / 1000;
+let buf = [], on = false, timer = null;
+function onMotion(e) {
+  const g = e.accelerationIncludingGravity, a = e.acceleration, r = e.rotationRate; if (!g || g.x == null) return;
+  buf.push({ t: now(), az: a && a.z != null ? a.z : 0, ra: r && r.alpha || 0, rb: r && r.beta || 0, rg: r && r.gamma || 0, gx: g.x, gy: g.y, gz: g.z });
+  if (buf.length > 60 * 40) buf.splice(0, buf.length - 60 * 40);
+}
+const qTxt = q => q > 0.45 ? '<span class="ok">وضوح الإشارة عالي</span>' : q > 0.25 ? 'وضوح الإشارة متوسط' : '<span class="bad">الإشارة ضعيفة</span>';
+function tick() {
+  const t = now(), s = buf.filter(x => x.t > t - 20);
+  if (!s.length || s[s.length - 1].t - s[0].t < 9) { $('msg').textContent = 'بيجمّع… اثبت.'; return; }
+  const r = scg(s); if (!r) return;
+  if (r.moving) { $('msg').innerHTML = '<span class="bad">اتحركت. اثبت تماماً وما تتكلمش.</span>'; }
+  else $('msg').textContent = 'بيقيس. كل ما تثبت أكتر، الرقم بيبقى أدق.';
+  $('hr').innerHTML = (r.hq > 0.25 && !r.moving ? Math.round(r.hr) : '—') + '<small> نبضة/د</small>'; $('hrq').innerHTML = qTxt(r.hq);
+  $('br').innerHTML = (r.bq > 0.3 ? Math.round(r.br) : '—') + '<small> نَفَس/د</small>'; $('brq').innerHTML = qTxt(r.bq);
+  drawWave($('cvH'), r.env.slice(-r.fs * 8), 'اهتزاز القلب (آخر ٨ ثواني)');
+  drawWave($('cvB'), r.tilt, 'النَّفَس (آخر ٢٠ ثانية)');
+}
+$('go').addEventListener('click', async () => {
+  if (on) { on = false; clearInterval(timer); removeEventListener('devicemotion', onMotion); $('go').textContent = 'ابدأ'; return; }
+  try {
+    if (window.DeviceMotionEvent && DeviceMotionEvent.requestPermission && await DeviceMotionEvent.requestPermission() !== 'granted') throw new Error('محتاج إذن الحركة: الإعدادات ← Chrome ← الحركة واللياقة.');
+    buf = []; addEventListener('devicemotion', onMotion); on = true; $('go').textContent = 'وقّف';
+    timer = setInterval(tick, 1000);
+    try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
+  } catch (e) { $('msg').innerHTML = `<span class="bad">${e.message}</span>`; }
+});
+drawWave($('cvH'), null, 'اهتزاز القلب'); drawWave($('cvB'), null, 'النَّفَس');
+}
+</script>
+</body>
+</html>

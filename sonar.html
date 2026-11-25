@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سونار الأوضة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: أداة قياس هادية ودقيقة
+   IDEA: شاشة سونار في غرفة تحكم
+   PICTURE: منحنى الصدى بالمسافة + خريطة قطبية للقياسات
+   COLOUR and TYPE: معدن فاتح/ليلي، أسود، أحمر إنذار؛ IBM Plex Sans Arabic
+   LAYOUT: قراءة كبيرة لأقرب سطح، المنحنى تحتها، ثم الإعدادات والخريطة */
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:900px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}
+p.sub{color:var(--mute);margin:0 0 14px}
+.read{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.big{font-size:clamp(44px,13vw,72px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+.lbl{color:var(--mute);font-size:14px}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 20px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.fig{position:relative;height:260px;margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.polar{height:min(92vw,420px)}
+.msg{min-height:1.5em;margin:10px 0;color:var(--mute)}
+.msg.err{color:var(--red)}
+ul.ech{list-style:none;padding:0;margin:10px 0;display:grid;gap:6px}
+ul.ech li{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px 18px;margin-top:8px}
+label{display:block;font-size:14px;color:var(--mute)}
+label b{color:var(--ink);font-weight:600;float:left;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+h2{font-size:20px;margin:28px 0 6px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chk{display:flex;gap:10px;align-items:center;min-height:48px;color:var(--ink)}.chk input{width:22px;height:22px;accent-color:var(--red)}
+.ring{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:6px 0}.ring i{height:10px;border-radius:3px;background:var(--line)}.ring i.on{background:var(--red)}
+#sum ul{padding-inline-start:20px;margin:8px 0}#sum p{margin:8px 0}
+details{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>سونار الأوضة</h1>
+<p class="sub">التليفون بيطلع صوت صفير قصير من السماعة ويسمع الصدى بالمايك، ويحسب المسافة لكل سطح بيرجّع الصوت.</p>
+
+<div class="read">
+  <div>
+    <div class="lbl">أقوى صدى (أغلب الوقت الحيطة اللي قدامك)</div>
+    <div class="big" id="near">—<small> متر</small></div>
+    <div class="lbl" id="meta">لسه مفيش قياس</div>
+  </div>
+  <button id="go">قيس</button>
+</div>
+<div class="msg" id="msg"></div>
+<div class="fig"><canvas id="cv"></canvas></div>
+<ul class="ech" id="list"></ul>
+
+<h2>الإعدادات</h2>
+<p class="sub">الأرقام الأصلية مناسبة لأغلب الأوض. التغيير في الحساسية وأقل مسافة بيتطبق على القياسات اللي اتعملت قبل كده، من غير ما تعيد المسح.</p>
+<div class="row"><button class="ghost" id="rst">رجّع الإعدادات الأصلية</button></div>
+<div class="grid">
+  <label>الحرارة في المكان <b id="vT"></b><input type="range" id="T" min="0" max="45" step="1" value="24"></label>
+  <label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.6"></label>
+  <label>عدد الصفارات (كل ما يزيد، النتيجة أنضف) <b id="vN"></b><input type="range" id="N" min="4" max="40" step="1" value="16"></label>
+  <label>أقصى مسافة <b id="vR"></b><input type="range" id="R" min="2" max="10" step="0.5" value="6"></label>
+  <label>تجاهل أي حاجة أقرب من <b id="vM"></b><input type="range" id="M" min="0.1" max="0.6" step="0.05" value="0.25"></label>
+  <label>السماعة اللي بتطلّع الصفارة
+  <select id="spk" style="width:100%;min-height:44px;font:inherit;font-size:16px;margin-top:6px;border-radius:10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:0 10px">
+    <option value="B">الاتنين (فوق وتحت)</option><option value="L">القناة الشمال بس</option><option value="R">القناة اليمين بس</option></select></label>
+  <label>الحساسية (كل ما تزيد، بيلقط أصداء أضعف) <b id="vS"></b><input type="range" id="S" min="15" max="60" step="1" value="40"></label>
+</div>
+
+<h2>رسم الأوضة</h2>
+<p class="sub">اقف في نص الأوضة، وامسك التليفون قدام صدرك وطرفه اللي تحت لقدام. دوس «ابدأ المسح» ولف حوالين نفسك ببطء، تقف كل شوية لحد ما الحلقة تكمل ١٢ اتجاه. جسمك بيحجب جزء من الصدى اللي جاي من وراك، ومن الفرق ده الصفحة بتعرف كل سطح في أنهي اتجاه.</p>
+<div class="row"><button id="scan">ابدأ المسح</button><button class="ghost" id="clr">امسح القياسات</button><button class="ghost" id="cp">انسخ القياسات CSV</button></div>
+<div class="grid">
+  <label>ارتفاع التليفون عن الأرض <b id="vH"></b><input type="range" id="H" min="0" max="2" step="0.05" value="1.2"></label>
+  <label class="chk"><input type="checkbox" id="rect" checked> افترض إن الأوضة مستطيلة (الحيطان متعامدة)</label>
+</div>
+<div class="msg" id="hd"></div>
+<div class="ring" id="ring"></div>
+<div class="fig polar"><canvas id="rc"></canvas></div>
+<p class="lbl"><span style="color:var(--red)">●</span> صلب (حيطة، خشب، إزاز) · <span style="color:#1D9E75">●</span> طري (كنبة، ستارة، سرير) · <span style="color:var(--mute)">●</span> مش واضح. مكان الحاجات اتجاهه تقريبي.</p>
+<div id="sum"></div>
+<h2>البيانات الخام</h2>
+<p class="sub">كل نقطة هي صدى، مترسومة في الاتجاه اللي كنت باصص له وقت القياس.</p>
+<div class="fig polar"><canvas id="pc"></canvas></div>
+<details><summary>إزاي تاخد قياس كويس</summary>
+<ul>
+<li>افتح الصفحة من لينك https، لأن الآيفون مش بيدي المايك لملف مفتوح من تطبيق Files.</li>
+<li>شيل الآيفون من الوضع الصامت، وإلا الصفارة مش هتطلع.</li>
+<li>المكان يكون هادي، والتليفون يبقى في إيدك بعيد عن جسمك، وطرفه اللي تحت (السماعة والمايك) ناحية السطح اللي عايز تقيسه.</li>
+<li>لو مفيش ولا صدى ظهر، زوّد الحساسية. ولو ظهرت نقط كتير مالهاش معنى، قللها.</li>
+<li>السماعة والمايك بتوع التليفون بيسمعوا من كل الاتجاهات. يعني الصدى ممكن ييجي من الأرض أو السقف أو الحيطة اللي وراك. جسمك بيحجب اللي وراك جزئياً بس.</li>
+<li>«صلب» و«طري» جايين من مقارنة الصدى في الترددات العالية (٨–١٢ كيلوهرتز) والواطية (٢–٥ كيلوهرتز). الحاجات الطرية بتمتص العالي أكتر. ده بيفرّق بين صلب وطري بس، ومش بيعرف نوع المادة. والحاجة الصلبة الصغيرة ممكن تبان «مش واضح».</li>
+</ul></details>
+</div>
+
+<script>
+
+function fft(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let b = n >> 1;
+    for (; j & b; b >>= 1) j ^= b;
+    j ^= b;
+    if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < h; k++) {
+        const p = i + k, q = p + h;
+        const tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr;
+        re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+
+// Linear chirp with Tukey taper
+function makeChirp(sr, f0, f1, dur) {
+  const n = Math.round(sr * dur), s = new Float32Array(n), k = (f1 - f0) / dur, tap = Math.round(n * 0.1);
+  for (let i = 0; i < n; i++) {
+    const t = i / sr;
+    let w = 1;
+    if (i < tap) w = 0.5 - 0.5 * Math.cos(Math.PI * i / tap);
+    else if (i > n - tap) w = 0.5 - 0.5 * Math.cos(Math.PI * (n - i) / tap);
+    s[i] = w * Math.sin(2 * Math.PI * (f0 * t + 0.5 * k * t * t));
+  }
+  return s;
+}
+
+// Envelope of matched-filter output (analytic cross-correlation)
+function matchedEnvelope(x, s) {
+  let N = 1; while (N < x.length + s.length) N <<= 1;
+  const xr = new Float64Array(N), xi = new Float64Array(N), sr_ = new Float64Array(N), si = new Float64Array(N);
+  xr.set(x); sr_.set(s);
+  fft(xr, xi, false); fft(sr_, si, false);
+  for (let k = 0; k < N; k++) {
+    const r = xr[k] * sr_[k] + xi[k] * si[k], i = xi[k] * sr_[k] - xr[k] * si[k];
+    const g = k === 0 || k === N / 2 ? 1 : k < N / 2 ? 2 : 0;
+    xr[k] = r * g; xi[k] = i * g;
+  }
+  fft(xr, xi, true);
+  const env = new Float32Array(x.length);
+  for (let n = 0; n < x.length; n++) env[n] = Math.hypot(xr[n], xi[n]);
+  return env;
+}
+
+// Main analysis. Returns averaged profile (linear, normalised to direct path) and echo peaks.
+function bandPart(chirp, sr, f0, f1, dur, lo, hi) {
+  const k = (f1 - f0) / dur, a = Math.max(0, Math.round((lo - f0) / k * sr)), b = Math.min(chirp.length, Math.round((hi - f0) / k * sr));
+  const s = new Float32Array(chirp.length), tap = Math.max(1, Math.round((b - a) * 0.15));
+  for (let i = a; i < b; i++) { const w = Math.min(1, (i - a) / tap, (b - i) / tap); s[i] = chirp[i] * (0.5 - 0.5 * Math.cos(Math.PI * w)); }
+  return s;
+}
+
+function analyse(rec, chirp, o) {
+  const { sr, period, count, c, maxRange, minRange, relDb } = o;
+  const env = matchedEnvelope(rec, chirp);
+  const envL = o.band ? matchedEnvelope(rec, bandPart(chirp, sr, o.band.f0, o.band.f1, o.band.dur, 2000, 5000)) : null;
+  const envH = o.band ? matchedEnvelope(rec, bandPart(chirp, sr, o.band.f0, o.band.f1, o.band.dur, 8000, 12000)) : null;
+  let a = 0; for (let i = 1; i < env.length; i++) if (env[i] > env[a]) a = i;
+  const P = Math.round(period * sr), srch = Math.round(0.002 * sr), W = Math.round(2 * maxRange / c * sr);
+  const directs = [];
+  for (let k = -count; k <= count; k++) {
+    const g = a + k * P; if (g - srch < 0 || g + srch + W >= env.length) continue;
+    let b = g - srch; for (let i = b; i <= g + srch; i++) if (env[i] > env[b]) b = i;
+    if (env[b] > 0.25 * env[a]) directs.push(b);
+  }
+  if (!directs.length) return null;
+  const prof = new Float32Array(W), profL = envL && new Float32Array(W), profH = envH && new Float32Array(W);
+  const localMax = (e, i, r) => { let m = 0; for (let j = Math.max(0, i - r); j <= i + r && j < e.length; j++) m = Math.max(m, e[j]); return m; };
+  const r3 = Math.round(0.0003 * sr);
+  for (const d of directs) {
+    const ref = env[d]; for (let i = 0; i < W; i++) prof[i] += env[d + i] / ref;
+    if (envL) { const rl = localMax(envL, d, r3), rh = localMax(envH, d, r3); for (let i = 0; i < W; i++) { profL[i] += envL[d + i] / rl; profH[i] += envH[d + i] / rh; } }
+  }
+  for (let i = 0; i < W; i++) { prof[i] /= directs.length; if (profL) { profL[i] /= directs.length; profH[i] /= directs.length; } }
+  const sorted = Array.from(prof.subarray(Math.floor(W * 0.6))).sort((p, q) => p - q);
+  const noise = sorted[Math.floor(sorted.length / 2)] || 1e-6;
+  let dsum = 0; for (const d of directs) dsum += env[d];
+  const all = Array.from(env).sort((p, q) => p - q), floor = all[Math.floor(all.length / 2)] || 1e-9;
+  const dsnr = 20 * Math.log10(dsum / directs.length / floor);
+  const r = { prof, profL, profH, noise, used: directs.length, dsnr };
+  Object.assign(r, findPeaks(prof, noise, sr, c, minRange, relDb, profL, profH));
+  return r;
+}
+
+function findPeaks(prof, noise, sr, c, minRange, relDb, profL, profH) {
+  const W = prof.length, thr = Math.max(noise * 3, Math.pow(10, relDb / 20));
+  const i0 = Math.round(2 * minRange / c * sr), win = Math.round(0.00025 * sr);
+  const peaks = [];
+  for (let i = Math.max(i0, win); i < W - win; i++) {
+    const v = prof[i]; if (v < thr) continue;
+    let ok = true; for (let j = i - win; j <= i + win; j++) if (prof[j] > v) { ok = false; break; }
+    if (ok) {
+      const p = { d: (i / sr) * c / 2, db: 20 * Math.log10(v), snr: 20 * Math.log10(v / noise) };
+      if (profL) { let l = 0, h = 0; for (let j = i - win; j <= i + win; j++) { l = Math.max(l, profL[j]); h = Math.max(h, profH[j]); } p.tilt = 20 * Math.log10((h + 1e-9) / (l + 1e-9)); }
+      peaks.push(p); i += win;
+    }
+  }
+  peaks.sort((p, q) => q.db - p.db);
+  return { thr, peaks: peaks.slice(0, 8).sort((p, q) => p.d - q.d) };
+}
+
+
+// marks: [{h: heading deg, peaks:[{d, db}]}]; o: {phoneH, rect, tol}
+function reconstruct(marks, o) {
+  const B = 12, bw = 360 / B, tolF = o.tol || 0.04;
+  const ms = marks.filter(m => m.h != null);
+  const bins = Array.from({ length: B }, () => []);
+  for (const m of ms) bins[Math.round(m.h / bw) % B].push(m);
+  const measured = bins.map(b => b.length > 0), nMeas = measured.filter(Boolean).length;
+  const res = { nMeas, walls: [], objects: [], horiz: [], rejected: [], floor: null, ceiling: null, poly: null, rect: null };
+  if (nMeas < 8) { res.why = 'need'; return res; }
+  // pool peaks and cluster by distance
+  const all = [];
+  bins.forEach((b, i) => b.forEach(m => m.peaks.forEach(p => all.push({ d: p.d, db: p.db, tilt: p.tilt, bin: i }))));
+  all.sort((a, b) => a.d - b.d);
+  const cl = [];
+  for (const p of all) {
+    const c = cl[cl.length - 1];
+    if (c && p.d - c.last <= Math.max(0.03, tolF * p.d)) { c.pts.push(p); c.last = p.d; } else cl.push({ pts: [p], last: p.d });
+  }
+  const minDb = Math.min(...all.map(p => p.db)) - 3;
+  const C = cl.map(c => {
+    let sw = 0, sd = 0, st = 0, swt = 0; for (const p of c.pts) { const w = Math.pow(10, p.db / 20); sw += w; sd += w * p.d; if (p.tilt != null && isFinite(p.tilt)) { st += w * p.tilt; swt += w; } }
+    const amp = new Array(B).fill(null);
+    for (let i = 0; i < B; i++) if (measured[i]) {
+      // mean over marks in the bin, best peak per mark (missing = floor)
+      const per = bins[i].map(m => { const ps = c.pts.filter(p => p.bin === i && m.peaks.some(q => q.d === p.d && q.db === p.db)); return ps.length ? Math.max(...ps.map(p => p.db)) : minDb; });
+      amp[i] = per.reduce((a, b) => a + b, 0) / per.length;
+    }
+    const pres = bins.filter((b, i) => measured[i] && c.pts.some(p => p.bin === i)).length / nMeas;
+    // circular smoothing over measured bins
+    const sm = amp.map((v, i) => { if (v == null) return null; let s = 0, w = 0; for (const [k, g] of [[-1, .25], [0, .5], [1, .25]]) { const u = amp[(i + k + B) % B]; if (u != null) { s += g * u; w += g; } } return s / w; });
+    const vals = sm.filter(v => v != null), lo = Math.min(...vals), hi = Math.max(...vals);
+    const det = amp.filter((v, i) => v != null && v > minDb + 0.01);
+    const spread = det.length ? Math.max(...det) - Math.min(...det) : 0;
+    return { d: sd / sw, tilt: swt ? st / swt : null, pres, sm, contrast: hi - lo, lo, hi, spread, n: c.pts.length };
+  }).filter(c => c.pres >= 0.2 || c.n >= 2);
+  // classify
+  const cand = [];
+  for (const c of C) {
+    if ((c.pres >= 0.75 && c.contrast < 6) || (c.pres >= 0.5 && c.spread < 5)) { res.horiz.push({ d: c.d, tilt: c.tilt, pres: c.pres, contrast: c.contrast }); continue; }
+    const dirs = [];
+    for (let i = 0; i < B; i++) {
+      const v = c.sm[i]; if (v == null || v - c.lo < 6) continue;
+      const L = c.sm[(i - 1 + B) % B], R = c.sm[(i + 1) % B];
+      if ((L != null && L > v) || (R != null && R > v)) continue;
+      let off = 0; if (L != null && R != null) { const den = L - 2 * v + R; if (den < 0) off = 0.5 * (L - R) / den; }
+      dirs.push({ a: ((i + Math.max(-.5, Math.min(.5, off))) * bw + 360) % 360, c: v - c.lo });
+    }
+    dirs.sort((a, b) => b.c - a.c);
+    const kept = [];
+    for (const x of dirs) if (!kept.some(k => angDiff(k.a, x.a) < 75)) kept.push(x);
+    for (const k of kept) cand.push({ d: c.d, a: k.a, contrast: k.c, pres: c.pres, tilt: c.tilt });
+    if (!kept.length) res.rejected.push({ d: c.d, tilt: c.tilt, why: 'weak' });
+  }
+  // floor / ceiling
+  const H = res.horiz.slice().sort((a, b) => a.d - b.d);
+  if (o.phoneH) {
+    let best = null; for (const h of H) { const e = Math.abs(h.d - o.phoneH) / o.phoneH; if (e < 0.2 && (!best || e < best.e)) best = { h, e }; }
+    if (best) { res.floor = best.h.d; best.h.kind = 'floor'; }
+  }
+  for (const h of H) if (!h.kind && (res.floor == null || !near(h.d, 2 * res.floor))) { h.kind = 'ceiling'; res.ceiling = h.d; break; }
+  for (const h of H) if (!h.kind) h.kind = 'multi';
+  const horizD = [res.floor, res.ceiling].filter(v => v != null);
+  // walls, nearest first, rejecting multiples / corners / wall-floor edges
+  cand.sort((a, b) => a.d - b.d);
+  // 1) echoes that bounced twice off a closer surface in the same direction
+  const S = [];
+  for (const w of cand) {
+    let why = null;
+    for (const v of S) if (!why && near(w.d, 2 * v.d) && angDiff(w.a, v.a) < 35) why = 'double';
+    for (const v of S) for (const h of horizD) if (!why && angDiff(w.a, v.a) < 35 && near(w.d, Math.hypot(v.d, h))) why = 'edge';
+    if (why) res.rejected.push({ d: w.d, a: w.a, tilt: w.tilt, why }); else S.push(w);
+  }
+  // 2) in each direction the farthest surface is the wall; closer ones are things inside the room
+  res.objects = S.filter(w => S.some(v => v !== w && v.d > w.d + 0.15 && angDiff(v.a, w.a) < 35));
+  const W0 = S.filter(w => !res.objects.includes(w));
+  // 3) corner reflections between two walls
+  for (const w of W0) {
+    let why = null;
+    for (let i = 0; i < res.walls.length && !why; i++) for (let j = i + 1; j < res.walls.length && !why; j++) {
+      const p = res.walls[i], q = res.walls[j], dq = angDiff(p.a, q.a);
+      if (dq > 60 && dq < 120 && near(w.d, Math.hypot(p.d, q.d)) && between(w.a, p.a, q.a)) why = 'corner';
+    }
+    if (why) res.rejected.push({ d: w.d, a: w.a, tilt: w.tilt, why }); else res.walls.push(w);
+  }
+  res.walls.sort((a, b) => a.a - b.a);
+  // rectangle fit
+  if (o.rect && res.walls.length >= 2) {
+    let bestPhi = 0, bestE = 1e9;
+    for (let phi = 0; phi < 90; phi += 1) { let e = 0, wsum = 0; for (const w of res.walls) { const r = ((w.a - phi) % 90 + 90) % 90, dv = Math.min(r, 90 - r); e += w.contrast * dv * dv; wsum += w.contrast; } if (e / wsum < bestE) { bestE = e / wsum; bestPhi = phi; } }
+    const side = [null, null, null, null];
+    for (const w of res.walls) { const k = Math.round(((w.a - bestPhi + 360) % 360) / 90) % 4; if (!side[k] || w.contrast > side[k].contrast) side[k] = w; }
+    res.rect = { phi: bestPhi, side: side.map(s => s && s.d), rms: Math.sqrt(bestE) };
+  }
+  // general polygon from consecutive walls
+  if (res.walls.length >= 3) {
+    const W = res.walls, pts = [];
+    for (let i = 0; i < W.length; i++) { const p = W[i], q = W[(i + 1) % W.length]; const v = intersect(p, q); pts.push(v); }
+    res.poly = pts;
+  }
+  return res;
+}
+function angDiff(a, b) { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; }
+function near(a, b) { return Math.abs(a - b) <= Math.max(0.04, 0.05 * b); }
+function between(x, a, b) { return angDiff(x, a) + angDiff(x, b) <= angDiff(a, b) + 20; }
+function nvec(a) { const r = a * Math.PI / 180; return [Math.sin(r), -Math.cos(r)]; } // x east, y south(screen)
+function intersect(p, q) {
+  const [a1, b1] = nvec(p.a), [a2, b2] = nvec(q.a), det = a1 * b2 - a2 * b1;
+  if (Math.abs(det) < 0.5) return null;
+  return [(p.d * b2 - q.d * b1) / det, (a1 * q.d - a2 * p.d) / det];
+}
+
+{
+const $ = id => document.getElementById(id);
+const P = {T:'°',V:'',N:'',R:' م',M:' م',S:' dB',H:' م'};
+const DEF = {};for (const k in P) DEF[k] = document.getElementById(k).value;
+const val = k => +$(k).value;
+for (const k in P) { const f = () => $('v'+k).textContent = k === 'H' && +$(k).value === 0 ? 'على الأرض' : $(k).value + P[k]; $(k).addEventListener('input', f); f(); }
+try { const s = JSON.parse(localStorage.getItem('sonar2') || '{}'); for (const k in s) if ($(k)) { $(k).value = s[k]; $(k).dispatchEvent(new Event('input')); } } catch (e) {}
+const save = () => { try { const s = { spk: $('spk').value }; for (const k in P) s[k] = $(k).value; localStorage.setItem('sonar2', JSON.stringify(s)); } catch (e) {} };
+
+let ctx, stream, heading = null, last = null, scanning = false, busy = false;
+let marks = [];
+try { marks = JSON.parse(localStorage.getItem('sonarMarks2') || '[]'); } catch (e) {}
+const keep = () => { try { localStorage.setItem('sonarMarks2', JSON.stringify(marks, (k, v) => k[0] === '_' ? undefined : v)); } catch (e) {} };
+const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
+const fmt = d => d.toFixed(2);
+const toDb = a => Array.from(a, v => Math.round(20 * Math.log10(v + 1e-9) * 10) / 10), fromDb = a => Float32Array.from(a, v => Math.pow(10, v / 20));
+const toMark = (r, h) => ({ h, t: new Date().toISOString(), sr: r.sr, c: r.c, noise: r.noise, p: toDb(r.prof), pl: toDb(r.profL), ph: toDb(r.profH) });
+const MAT = t => t == null || !isFinite(t) ? null : t >= -4 ? 'hard' : t <= -8 ? 'soft' : 'mid';
+const MATN = { hard: 'صلب', soft: 'طري', mid: 'مش واضح' };
+const matCol = m => m === 'soft' ? '#1D9E75' : m === 'mid' ? css('--mute') : css('--red');
+const markPeaks = m => { if (!m._prof) { m._prof = fromDb(m.p); m._l = m.pl && fromDb(m.pl); m._h = m.ph && fromDb(m.ph); } return findPeaks(m._prof, m.noise, m.sr, m.c, val('M'), -val('S'), m._l, m._h).peaks; };
+const peaked = () => marks.map(m => ({ h: m.h, t: m.t, peaks: markPeaks(m) }));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const DIRS = ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'];
+const dirName = a => DIRS[Math.round(a / 45) % 8];
+
+async function setup() {
+  if (ctx) return;
+  if (!window.isSecureContext) throw new Error('الصفحة مفتوحة من ملف مش من لينك https، فالمتصفح مش هيدي إذن المايك. ارفعها على استضافة https وافتحها من اللينك.');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('المتصفح ده مش بيدي الصفحة إذن المايك. افتحها في Safari من لينك https.');
+  stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+async function capture() {
+  await setup(); await ctx.resume();
+  const sr = ctx.sampleRate, period = 0.12, count = val('N'), c = 331.3 + 0.606 * val('T');
+  const chirp = makeChirp(sr, 2000, Math.min(12000, sr / 2 - 2000), 0.01);
+  const total = 0.3 + count * period + 0.3;
+  const buf = ctx.createBuffer(2, Math.round(total * sr), sr), g = val('V'), spk = $('spk').value;
+  for (const [ci, on] of [[0, spk !== 'R'], [1, spk !== 'L']]) { if (!on) continue; const ch = buf.getChannelData(ci);
+    for (let k = 0; k < count; k++) { const o = Math.round((0.3 + k * period) * sr); for (let i = 0; i < chirp.length; i++) ch[o + i] = g * chirp[i]; } }
+  const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain();
+  mute.gain.value = 0; const chunks = []; let rec = true;
+  proc.onaudioprocess = e => { if (rec) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+  await wait(250);
+  const h0 = heading;
+  const play = ctx.createBufferSource(); play.buffer = buf; play.channelCountMode = 'explicit'; play.connect(ctx.destination); play.start();
+  await wait((total + 0.5) * 1000);
+  rec = false; src.disconnect(); proc.disconnect();
+  const h1 = heading;
+  const n = chunks.reduce((a, b) => a + b.length, 0), x = new Float32Array(n);
+  let o = 0, peak = 0; for (const b of chunks) { x.set(b, o); o += b.length; }
+  for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
+  if (peak < 0.003) throw new Error('المايك مش سامع حاجة تقريباً. شيل الآيفون من الوضع الصامت وعلّي الصوت.');
+  const r = analyse(x, chirp, { sr, period, count, c, maxRange: val('R'), minRange: val('M'), relDb: -val('S'), band: { f0: 2000, f1: Math.min(12000, sr / 2 - 2000), dur: 0.01 } });
+  if (!r) throw new Error('مقدرتش ألاقي صوت الصفارة في التسجيل. جرّب صوت أعلى.');
+  r.sr = sr; r.c = c; r.clip = peak > 0.98;
+  if (r.dsnr < 15) throw new Error(`المايك مش سامع الصفارة نفسها (${r.dsnr.toFixed(0)} dB بس فوق الضوضاء). اتأكد إن الآيفون مش على الصامت (زرار الجنب)، وإن صوت الميديا عالي من زراير الصوت.`);
+  let h = null, moved = false;
+  if (h0 != null && h1 != null) { moved = angDiff(h0, h1) > 15; const a = h0 * Math.PI / 180, b = h1 * Math.PI / 180; h = (Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)) * 180 / Math.PI + 360) % 360; }
+  return { r, h, moved };
+}
+
+function show(r) {
+  last = r;
+  const strong = r.peaks.slice().sort((a, b) => b.db - a.db)[0];
+  $('near').innerHTML = (strong ? fmt(strong.d) : '—') + '<small> متر</small>';
+  $('meta').textContent = `${r.used} صفارة اتسمعت · الصفارة فوق الضوضاء بـ ${r.dsnr.toFixed(0)} dB` + (r.clip ? ' · الصوت مشبّع، وطّيه شوية' : '');
+  $('list').innerHTML = r.peaks.length ? r.peaks.map(p => `<li><span>${fmt(p.d)} م · ${MATN[MAT(p.tilt)] || ''}</span><span>${p.db.toFixed(1)} dB · فرق الترددات ${p.tilt == null ? '—' : p.tilt.toFixed(0) + ' dB'}</span></li>`).join('') : '<li>مفيش صدى واضح فوق الحساسية دي</li>';
+  draw();
+}
+
+function errMsg(e) { return e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك. اسمح بيه من إعدادات Safari للموقع ده وجرّب تاني.' : (e && e.message) || String(e); }
+
+async function measure() {
+  if (busy) return; busy = true; const btn = $('go'); btn.disabled = true; btn.classList.add('pulse'); save();
+  try {
+    say('بيقيس… خلّي التليفون ثابت.');
+    const { r, h, moved } = await capture(); show(r);
+    if (h != null && !moved) { marks.push(toMark(r, h)); keep(); }
+    say(moved ? 'التليفون اتحرك أثناء القياس، فالقياس ما اتضافش للخريطة.' : h == null ? 'تم. القياس ما اتضافش للخريطة لأن البوصلة مش شغالة.' : `تم. القياس اتسجل على اتجاه ${Math.round(h)}°.`);
+    room(); drawPolar();
+  } catch (e) { say(errMsg(e), true); }
+  finally { busy = false; btn.disabled = false; btn.classList.remove('pulse'); }
+}
+
+async function compass() {
+  if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) { if (await DeviceOrientationEvent.requestPermission() !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه عشان البوصلة.'); }
+  addEventListener('deviceorientationabsolute', onOri); addEventListener('deviceorientation', onOri);
+  for (let i = 0; i < 20 && heading == null; i++) await wait(100);
+  if (heading == null) throw new Error('البوصلة مش بتدي قراءة على الجهاز ده.');
+}
+function onOri(e) {
+  const h = e.webkitCompassHeading != null ? e.webkitCompassHeading : (e.absolute || e.type === 'deviceorientationabsolute') && e.alpha != null ? (360 - e.alpha) % 360 : null;
+  if (h != null) heading = h;
+}
+
+const binsDone = () => { const b = new Array(12).fill(0); for (const m of marks) b[Math.round(m.h / 30) % 12]++; return b; };
+function ring() {
+  const b = binsDone(), cur = heading == null ? -1 : Math.round(heading / 30) % 12;
+  $('ring').innerHTML = b.map((n, i) => `<i class="${n ? 'on' : ''}" style="${i === cur ? 'outline:2px solid var(--ink)' : ''}"></i>`).join('');
+}
+
+async function scan() {
+  if (scanning) { scanning = false; return; }
+  const btn = $('scan');
+  try {
+    if (heading == null) await compass();
+    scanning = true; btn.textContent = 'وقّف المسح'; save();
+    while (scanning) {
+      const b = binsDone(), cur = Math.round(heading / 30) % 12;
+      if (b.every(n => n > 0)) { $('hd').textContent = 'المسح خلص. الرسم تحت.'; break; }
+      if (b[cur] > 0) { $('hd').textContent = `الاتجاه ده اتقاس. لف لحد ما توصل لمربع فاضي (${b.filter(n => !n).length} فاضيين).`; ring(); await wait(300); continue; }
+      $('hd').textContent = 'اثبت… بيقيس.';
+      busy = true;
+      try {
+        const { r, h, moved } = await capture(); show(r);
+        if (!moved) { marks.push(toMark(r, h)); keep(); }
+        else { $('hd').textContent = 'اتحركت أثناء القياس. اثبت شوية.'; await wait(800); }
+      } finally { busy = false; }
+      ring(); room(); drawPolar();
+      await wait(400);
+    }
+  } catch (e) { $('hd').textContent = errMsg(e); }
+  scanning = false; btn.textContent = 'ابدأ المسح'; ring();
+}
+
+function fit(cv) { const d = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight; cv.width = W * d; cv.height = H * d; const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, W, H]; }
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function draw() {
+  const [g, W, H] = fit($('cv')), ink = css('--ink'), mute = css('--mute'), line = css('--line');
+  g.clearRect(0, 0, W, H); g.font = '12px system-ui'; g.fillStyle = mute;
+  const pl = 34, pr = 10, pt = 12, pb = 24, maxR = last ? last.prof.length / last.sr * last.c / 2 : val('R');
+  const X = d => W - pr - (d / maxR) * (W - pl - pr), lo = -70, Y = db => pt + (0 - db) / (0 - lo) * (H - pt - pb);
+  g.strokeStyle = line; g.lineWidth = 1;
+  const step = maxR > 8 ? 2 : 1;
+  for (let d = 0; d <= maxR + 1e-9; d += step) { g.beginPath(); g.moveTo(X(d), pt); g.lineTo(X(d), H - pb); g.stroke(); g.textAlign = 'center'; g.fillText(d + ' م', X(d), H - 6); }
+  for (let db = 0; db >= lo; db -= 20) { g.beginPath(); g.moveTo(pl, Y(db)); g.lineTo(W - pr, Y(db)); g.stroke(); if (W > 360) { g.textAlign = 'left'; g.fillText(db, 2, Y(db) + 4); } }
+  if (!last) { g.textAlign = 'center'; g.fillText('اضغط «قيس» عشان يظهر منحنى الصدى', W / 2, H / 2); return; }
+  const { prof, sr, c } = last;
+  g.strokeStyle = ink; g.lineWidth = 1.4; g.beginPath();
+  for (let i = 0; i < prof.length; i += 2) { const d = i / sr * c / 2, v = Math.max(lo, 20 * Math.log10(prof[i] + 1e-9)); i ? g.lineTo(X(d), Y(v)) : g.moveTo(X(d), Y(v)); }
+  g.stroke();
+  { const ty = Y(Math.max(lo, 20 * Math.log10(last.thr))); g.setLineDash([4, 4]); g.strokeStyle = mute; g.beginPath(); g.moveTo(pl, ty); g.lineTo(W - pr, ty); g.stroke(); g.setLineDash([]); }
+  g.fillStyle = 'rgba(128,128,128,.15)'; g.fillRect(X(val('M')), pt, X(0) - X(val('M')), H - pt - pb);
+  for (const p of last.peaks) { g.fillStyle = matCol(MAT(p.tilt)); g.beginPath(); g.arc(X(p.d), Y(p.db), 4.5, 0, 7); g.fill(); }
+}
+
+function polarBase(g, W, H, maxR) {
+  const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 22, s = R / maxR;
+  g.strokeStyle = css('--line'); g.fillStyle = css('--mute'); g.font = '12px system-ui'; g.textAlign = 'center'; g.lineWidth = 1;
+  for (let d = 1; d <= maxR; d++) { g.beginPath(); g.arc(cx, cy, d * s, 0, 7); g.stroke(); if (d % (maxR > 8 ? 2 : 1) === 0) g.fillText(d + ' م', cx + 4, cy - d * s - 3); }
+  [['ش', 0], ['ق', 90], ['ج', 180], ['غ', 270]].forEach(([t, a]) => { const r = (a - 90) * Math.PI / 180; g.fillText(t, cx + (R + 12) * Math.cos(r), cy + (R + 12) * Math.sin(r) + 4); });
+  return { cx, cy, R, s };
+}
+
+function drawPolar() {
+  const [g, W, H] = fit($('pc')), red = css('--red'), maxR = val('R');
+  g.clearRect(0, 0, W, H);
+  const { cx, cy, R, s } = polarBase(g, W, H, maxR);
+  if (!marks.length) { g.fillText('مفيش قياسات بالاتجاه لسه', cx, cy + 4); return; }
+  for (const m of peaked()) {
+    const r = (m.h - 90) * Math.PI / 180;
+    g.strokeStyle = css('--line'); g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + R * Math.cos(r), cy + R * Math.sin(r)); g.stroke();
+    for (const p of m.peaks) { if (p.d > maxR) continue; g.globalAlpha = Math.min(1, Math.max(.25, (p.db + 50) / 35)); g.fillStyle = matCol(MAT(p.tilt)); g.beginPath(); g.arc(cx + p.d * s * Math.cos(r), cy + p.d * s * Math.sin(r), 4, 0, 7); g.fill(); }
+    g.globalAlpha = 1;
+  }
+  g.fillStyle = css('--ink'); g.beginPath(); g.arc(cx, cy, 4, 0, 7); g.fill();
+}
+
+const conf = c => c >= 12 ? 'ثقة عالية' : c >= 8 ? 'ثقة متوسطة' : 'ثقة ضعيفة';
+const WHY = { double: 'صدى مكرر (الصوت رايح جاي مرتين على نفس الحيطة)', corner: 'ركنة بين حيطتين، مش حيطة لوحدها', edge: 'الخط اللي بين حيطة والأرض أو السقف', weak: 'مش باين له اتجاه واضح' };
+
+function room() {
+  ring();
+  const res = reconstruct(peaked(), { phoneH: val('H'), rect: $('rect').checked });
+  const [g, W, H] = fit($('rc')), ink = css('--ink'), red = css('--red'), mute = css('--mute');
+  g.clearRect(0, 0, W, H);
+  let ext = 2; for (const w of res.walls) ext = Math.max(ext, w.d * 1.25);
+  const { cx, cy, s } = polarBase(g, W, H, Math.ceil(ext));
+  const P = (x, y) => [cx + x * s, cy + y * s];
+  let html = '';
+  if (res.nMeas < 8) {
+    g.fillStyle = mute; g.fillText(`محتاج ٨ اتجاهات على الأقل (عندك ${res.nMeas})`, cx, cy + 24);
+    html = `<p>لسه بدري على الرسم. الصفحة محتاجة قياسات من ٨ اتجاهات على الأقل من الـ١٢ عشان تقارن الصدى بين الاتجاهات.</p>`;
+  } else {
+    g.lineWidth = 3; g.strokeStyle = ink;
+    if (res.rect) {
+      const { phi, side } = res.rect, u = nvec(phi), v = nvec(phi + 90);
+      const big = Math.ceil(ext);
+      const e = side.map(d => d == null ? big : d);
+      const corner = (a, b) => [a * u[0] + b * v[0], a * u[1] + b * v[1]];
+      const cs = [corner(e[0], e[1]), corner(-e[2], e[1]), corner(-e[2], -e[3]), corner(e[0], -e[3])];
+      // side k lies between corners: k0: cs[3]->cs[0], k1: cs[0]->cs[1], k2: cs[1]->cs[2], k3: cs[2]->cs[3]
+      const seg = [[3, 0], [0, 1], [1, 2], [2, 3]];
+      seg.forEach(([a, b], k) => {
+        g.setLineDash(side[k] == null ? [6, 6] : []); g.strokeStyle = side[k] == null ? mute : ink; g.lineWidth = side[k] == null ? 1.5 : 3;
+        g.beginPath(); g.moveTo(...P(...cs[a])); g.lineTo(...P(...cs[b])); g.stroke();
+      });
+      g.setLineDash([]);
+      const dimA = side[0] != null && side[2] != null ? side[0] + side[2] : null, dimB = side[1] != null && side[3] != null ? side[1] + side[3] : null;
+      html += `<p><b>الأوضة تقريباً: ${dimA ? fmt(dimA) : '؟'} × ${dimB ? fmt(dimB) : '؟'} متر</b>` + (res.ceiling != null && (res.floor != null || val('H') === 0) ? `، والسقف على ارتفاع ${fmt((res.floor || val('H')) + res.ceiling)} متر تقريباً` : '') + '.</p>';
+      if (side.some(d => d == null)) html += '<p>الخط المتقطع معناه إن فيه حيطة ما ظهرلهاش صدى واضح، غالباً عشان عليها عفش أو ستارة أو فيها باب مفتوح.</p>';
+      if (res.rect.rms > 15) html += '<p>زوايا الحيطان المقاسة بعيدة عن إنها تكون متعامدة. ممكن الأوضة مش مستطيلة. جرّب تلغي افتراض المستطيل.</p>';
+    } else {
+      const Wl = res.walls;
+      Wl.forEach((w, i) => {
+        const n = nvec(w.a), foot = [n[0] * w.d, n[1] * w.d], t = [-n[1], n[0]];
+        const prev = res.poly && res.poly[(i - 1 + Wl.length) % Wl.length], next = res.poly && res.poly[i];
+        let A = prev, B2 = next, dashed = false;
+        if (!A || !B2) { A = [foot[0] - t[0] * 0.8, foot[1] - t[1] * 0.8]; B2 = [foot[0] + t[0] * 0.8, foot[1] + t[1] * 0.8]; dashed = true; }
+        g.setLineDash(dashed ? [6, 6] : []); g.beginPath(); g.moveTo(...P(...A)); g.lineTo(...P(...B2)); g.stroke();
+      });
+      g.setLineDash([]);
+      if (res.ceiling != null && (res.floor != null || val('H') === 0)) html += `<p>السقف على ارتفاع ${fmt((res.floor || val('H')) + res.ceiling)} متر تقريباً.</p>`;
+    }
+    for (const w of res.walls) { const n = nvec(w.a), [x, y] = P(n[0] * w.d, n[1] * w.d); g.fillStyle = matCol(MAT(w.tilt)); g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }
+    for (const o of res.objects) { const n = nvec(o.a), [x, y] = P(n[0] * o.d, n[1] * o.d); g.fillStyle = matCol(MAT(o.tilt)); g.globalAlpha = .85; g.beginPath(); g.arc(x, y, 11, 0, 7); g.fill(); g.globalAlpha = 1; g.fillStyle = css('--ink'); g.fillText(MATN[MAT(o.tilt)] || '؟', x, y - 15); }
+    g.fillStyle = ink; g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.fill(); g.fillStyle = mute; g.fillText('إنت', cx, cy + 20);
+    const mt = x => MATN[MAT(x.tilt)] ? ` · ${MATN[MAT(x.tilt)]}` : '';
+    if (res.objects.length) html += '<p>حاجات جوه الأوضة (الدواير الكبيرة):</p><ul>' + res.objects.map(o => `<li>حاجة ناحية ${dirName(o.a)} (${Math.round(o.a)}°) على بعد ${fmt(o.d)} م${mt(o)} · ${conf(o.contrast)}</li>`).join('') + '</ul>';
+    html += res.walls.length ? '<p>الحيطان اللي اتعرفت:</p><ul>' + res.walls.map(w => `<li>حيطة ناحية ${dirName(w.a)} (${Math.round(w.a)}°) على بعد ${fmt(w.d)} م${mt(w)} · ${conf(w.contrast)}</li>`).join('') + '</ul>' : '<p>ما ظهرش ولا صدى ليه اتجاه واضح. اتأكد إن جسمك ورا التليفون وإن الصوت عالي كفاية.</p>';
+    const hz = [];
+    if (res.floor != null) hz.push(`الأرض: ${fmt(res.floor)} م تحت التليفون`);
+    if (res.ceiling != null) hz.push(`السقف: ${fmt(res.ceiling)} م فوق التليفون`);
+    if (val('H') === 0) html += '<p class="lbl">التليفون على الأرض: مفيش جسم وراه يحجب الصدى، فاتجاهات الحيطان بتطلع أضعف بكتير من وانت ماسكه. المسافات نفسها بتفضل مظبوطة.</p>';
+    if (hz.length) html += '<p>أسطح أفقية (صداها شبه ثابت في كل الاتجاهات):</p><ul>' + hz.map(t => `<li>${t}</li>`).join('') + '</ul>';
+    if (res.rejected.length) html += '<p>أصداء استبعدتها من الرسم:</p><ul>' + res.rejected.map(x => `<li>${fmt(x.d)} م${x.why === 'weak' && MAT(x.tilt) ? ` (${MATN[MAT(x.tilt)]})` : ''}: ${WHY[x.why]}</li>`).join('') + '</ul>';
+  }
+  $('sum').innerHTML = html;
+}
+
+$('go').addEventListener('click', measure);
+$('scan').addEventListener('click', scan);
+$('clr').addEventListener('click', () => { marks = []; keep(); room(); drawPolar(); $('hd').textContent = ''; });
+$('rect').addEventListener('change', room);
+$('H').addEventListener('input', room);
+$('cp').addEventListener('click', async () => {
+  const rows = ['time,heading_deg,distance_m,level_db,snr_db,hi_minus_lo_db'];
+  for (const m of peaked()) for (const p of m.peaks) rows.push([m.t, m.h.toFixed(0), p.d.toFixed(3), p.db.toFixed(1), (p.snr || 0).toFixed(1), p.tilt == null ? '' : p.tilt.toFixed(1)].join(','));
+  try { await navigator.clipboard.writeText(rows.join('\n')); $('hd').textContent = `اتنسخ ${rows.length - 1} صف.`; } catch (e) { $('hd').textContent = 'النسخ اترفض من المتصفح.'; }
+});
+const refresh = () => { if (last) Object.assign(last, findPeaks(last.prof, last.noise, last.sr, last.c, val('M'), -val('S'), last.profL, last.profH)), show(last); else draw(); drawPolar(); room(); save(); };
+for (const k of ['R', 'M', 'S']) $(k).addEventListener('input', refresh);
+$('rst').addEventListener('click', () => { for (const k in DEF) { $(k).value = DEF[k]; $(k).dispatchEvent(new Event('input')); } refresh(); });
+setInterval(() => { if (!scanning && heading != null) ring(); }, 500);
+const ro = new ResizeObserver(() => { draw(); drawPolar(); room(); }); ro.observe($('cv')); ro.observe($('pc')); ro.observe($('rc'));
+}
+</script>
+</body>
+</html>

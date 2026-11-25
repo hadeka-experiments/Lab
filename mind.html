@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>قارئ الأرقام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: معمل هادي ودقيق
+   IDEA: اختبار المعلومة المخفية؛ الشاشة البيضا هي مصدر النور
+   PICTURE: الرقم الكبير في النص، وبعدين أعمدة ردود الفعل لكل رقم
+   COLOUR and TYPE: أبيض ناصع عشان ينوّر الوش، حبر أسود، أحمر للحكم؛ IBM Plex Sans Arabic
+   LAYOUT: عمود واحد، الأزرار تحت في متناول الإبهام */
+:root{--bg:#fff;--ink:#0d0f11;--mute:#5a6470;--line:#d9dee3;--red:#d6201a;--soft:#f3f5f7}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:560px;margin:auto;padding:18px 18px 40px;min-height:100dvh;display:flex;flex-direction:column}
+h1{font-size:32px;line-height:1.1;margin:8px 0}
+h2{font-size:22px;margin:18px 0 6px}
+p{margin:8px 0}.mute{color:var(--mute)}
+button{font:inherit;font-weight:600;min-height:52px;padding:0 22px;border-radius:14px;border:0;background:var(--ink);color:#fff;cursor:pointer;touch-action:manipulation}
+button.ghost{background:var(--soft);color:var(--ink)}
+button:disabled{opacity:.4}
+button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.scr{display:none;flex:1;flex-direction:column}.scr.on{display:flex}
+.cam{position:relative;width:132px;height:99px;border-radius:12px;overflow:hidden;background:#000;margin:8px 0}
+.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.stat{display:grid;gap:6px;margin:10px 0;padding:0;list-style:none}
+.stat li{display:flex;justify-content:space-between;gap:10px;background:var(--soft);border-radius:10px;padding:8px 12px}
+.ok{color:#137a52;font-weight:600}.bad{color:var(--red);font-weight:600}
+.big{font-size:clamp(120px,40vw,200px);font-weight:700;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:45dvh}
+.fix{font-size:40px;color:var(--mute)}
+.grid{position:relative;flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:10px;min-height:62dvh}
+.grid div{display:grid;place-items:center;font-size:clamp(48px,15vw,84px);font-weight:700;background:var(--soft);border-radius:16px}
+.grid div.dot::after{content:"";width:26px;height:26px;border-radius:50%;background:var(--red)}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:auto;padding-bottom:10px}
+.ans button{min-height:96px;font-size:28px}
+.ans .no{background:var(--ink)}.ans .yes{background:#e8ecef;color:var(--ink)}
+.nums{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.nums span{width:52px;height:52px;display:grid;place-items:center;background:var(--soft);border-radius:12px}
+.pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.pick button{font-size:24px;background:var(--soft);color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.prog{height:6px;background:var(--soft);border-radius:4px;overflow:hidden;margin:6px 0}.prog i{display:block;height:100%;background:var(--ink);width:0}
+.verdict{text-align:center;margin:10px 0 4px}
+.verdict .big{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:15px;margin-top:8px}
+th,td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right}
+th{font-weight:600;color:var(--mute);font-size:13px}
+td.n{font-weight:700;font-size:18px}
+.bar{height:10px;background:var(--soft);border-radius:5px;overflow:hidden;min-width:50px}.bar i{display:block;height:100%;background:var(--ink)}
+tr.top td{background:#fff1f0}tr.top .bar i{background:var(--red)}
+.fb{min-height:1.6em;text-align:center;font-weight:600}
+details{margin-top:16px;background:var(--soft);border-radius:12px;padding:10px 14px}summary{font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section class="scr on" id="s-intro">
+  <h1>قارئ الأرقام</h1>
+  <p>اختار رقم من ١ لـ ٩ في سرك. الكاميرا هتراقب وشك وعينك ونبضك والشاشة بتعرض الأرقام، وفي الآخر التليفون يخمّن رقمك. مفيش أي زرار هتدوسه أثناء الاختبار.</p>
+  <p class="mute">الأوضة ممكن تكون ضلمة، لأن الشاشة البيضا هي اللي هتنوّر وشك. علّي السطوع على الآخر، واقفل دوران الشاشة على الطولي، وثبّت التليفون قدام وشك على بعد حوالي ٣٠ سم. الأحسن تسنده على حاجة، لأن أي حركة بتبوّظ قراءة العين والنبض.</p>
+  <div class="cam"><video id="vid" playsinline muted autoplay></video></div>
+  <ul class="stat">
+    <li><span>الكاميرا</span><span id="st-cam">لسه</span></li>
+    <li><span>وشك متشاف</span><span id="st-face">—</span></li>
+    <li><span>النور على وشك</span><span id="st-light">—</span></li>
+    <li><span>نبضك من وشك</span><span id="st-hr">—</span></li>
+  </ul>
+  <p class="mute" id="st-msg"></p>
+  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button id="b-go" disabled>اخترت رقم في سري، ابدأ</button></div>
+  <details><summary>بيعرف إزاي؟</summary>
+  <p>الاختبار ٣ مراحل، حوالي دقيقتين ونص:</p>
+  <ul>
+  <li><b>معايرة العين (١٢ ثانية):</b> نقطة حمرا بتتنقل على ٩ أماكن، وانت بتتابعها بعينك. كده الصفحة بتتعلم شكل عينك وهي باصّة على كل مكان.</li>
+  <li><b>نظرة حرة (١٥ ثانية):</b> الأرقام كلها بتظهر، وانت بتفكر في رقمك وتبص براحتك. الناس غالباً بتبص على الحاجة اللي في دماغها أكتر من غيرها من غير ما تقصد، والصفحة بتحسب عينك كانت فين كل لحظة.</li>
+  <li><b>الأرقام واحد واحد (حوالي دقيقتين):</b> كل رقم بيظهر ٤ مرات. لما رقمك يظهر، نبضك بيبطأ لحظة، وعضلات وشك بتتحرك حركات صغيرة. الكاميرا بتقيس الاتنين.</li>
+  </ul>
+  <p>الحكم هو متوسط الإشارات الواضحة بس. لو إشارة ضعيفة، زي إن المعايرة طلعت مش دقيقة، بتتشال من الحكم. ولو مفيش رقم باين بفرق كافي، الصفحة هتقولك إنها مش قادرة تحدد.</p></details>
+</section>
+
+<section class="scr" id="s-run">
+  <div class="prog"><i id="prog"></i></div>
+  <p class="mute" id="run-lbl"></p>
+  <div class="grid" id="grid"></div>
+  <div class="stage" id="flash" style="display:none"><div id="stim" class="big"></div></div>
+</section>
+
+<section class="scr" id="s-res">
+  <div class="verdict" id="verdict"></div>
+  <table id="tbl"></table>
+  <p class="mute" id="res-note"></p>
+  <h2>كان رقمك كام؟</h2>
+  <p class="mute">اختياري. لو قلتلي، الصفحة هتحسب هي بتصيب قد إيه فعلاً.</p>
+  <div class="pick" id="truth"></div>
+  <p id="hist"></p>
+  <div class="row"><button id="b-again">جرّب تاني</button></div>
+</section>
+
+</div>
+<script>
+
+function fftc(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) {
+    const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } }
+  }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+const mean = a => a.reduce((s, v) => s + v, 0) / (a.length || 1);
+const sd = a => { const m = mean(a); return Math.sqrt(mean(a.map(v => (v - m) ** 2))) || 1e-9; };
+
+// samples: [{t (s), r, g, b}] irregular -> uniform at fs
+function resample(samples, fs) {
+  if (samples.length < 2) return null;
+  const t0 = samples[0].t, t1 = samples[samples.length - 1].t, n = Math.floor((t1 - t0) * fs);
+  const R = new Float64Array(n), G = new Float64Array(n), B = new Float64Array(n);
+  let j = 0;
+  for (let i = 0; i < n; i++) {
+    const t = t0 + i / fs; while (j < samples.length - 2 && samples[j + 1].t < t) j++;
+    const a = samples[j], b = samples[j + 1], w = Math.min(1, Math.max(0, (t - a.t) / (b.t - a.t || 1)));
+    R[i] = a.r + w * (b.r - a.r); G[i] = a.g + w * (b.g - a.g); B[i] = a.b + w * (b.b - a.b);
+  }
+  return { t0, fs, R, G, B, n };
+}
+
+// POS rPPG (Wang et al. 2017)
+function pos(u) {
+  const { R, G, B, n, fs } = u, L = Math.round(1.6 * fs), H = new Float64Array(n);
+  for (let s = 0; s + L <= n; s++) {
+    let mr = 0, mg = 0, mb = 0; for (let i = s; i < s + L; i++) { mr += R[i]; mg += G[i]; mb += B[i]; } mr /= L; mg /= L; mb /= L;
+    const s1 = [], s2 = [];
+    for (let i = s; i < s + L; i++) { const r = R[i] / mr, g = G[i] / mg, b = B[i] / mb; s1.push(g - b); s2.push(g + b - 2 * r); }
+    const al = sd(s1) / sd(s2), h = s1.map((v, k) => v + al * s2[k]), m = mean(h);
+    for (let k = 0; k < L; k++) H[s + k] += h[k] - m;
+  }
+  return H;
+}
+
+function bandpass(x, fs, lo, hi) {
+  let N = 1; while (N < x.length) N <<= 1;
+  const re = new Float64Array(N), im = new Float64Array(N), m = mean(Array.from(x));
+  for (let i = 0; i < x.length; i++) re[i] = x[i] - m;
+  fftc(re, im, false);
+  for (let k = 0; k < N; k++) { const f = (k <= N / 2 ? k : N - k) * fs / N; const w = f < lo || f > hi ? 0 : 1; re[k] *= w; im[k] *= w; }
+  fftc(re, im, true);
+  return re.subarray(0, x.length);
+}
+
+// dominant pulse rate + quality from a pulse signal
+function spectrumHR(h, fs) {
+  let N = 1; while (N < h.length * 4) N <<= 1;
+  const re = new Float64Array(N), im = new Float64Array(N); re.set(h); fftc(re, im, false);
+  let best = 0, bk = 0, tot = 0;
+  for (let k = 1; k < N / 2; k++) { const f = k * fs / N; if (f < 0.7 || f > 3) continue; const p = re[k] ** 2 + im[k] ** 2; tot += p; if (p > best) { best = p; bk = k; } }
+  const w = Math.round(0.15 * N / fs); let near = 0;
+  for (let k = bk - w; k <= bk + w; k++) near += re[k] ** 2 + im[k] ** 2;
+  const k2 = bk * 2; for (let k = k2 - w; k <= k2 + w && k < N / 2; k++) { const f = k * fs / N; if (f <= 3) near += re[k] ** 2 + im[k] ** 2; }
+  return { bpm: bk * fs / N * 60, q: near / (tot + 1e-12) };
+}
+
+// beat-to-beat heart rate on a uniform grid
+function hrSeries(h, fs, bpmGuess) {
+  const minGap = Math.round(fs * 60 / Math.min(180, bpmGuess * 1.5)), peaks = [];
+  for (let i = 1; i < h.length - 1; i++) {
+    if (h[i] > 0 && h[i] >= h[i - 1] && h[i] > h[i + 1]) {
+      if (peaks.length && i - peaks[peaks.length - 1] < minGap) { if (h[i] > h[peaks[peaks.length - 1]]) peaks[peaks.length - 1] = i; }
+      else peaks.push(i);
+    }
+  }
+  const pts = [];
+  for (let i = 1; i < peaks.length; i++) { const ibi = (peaks[i] - peaks[i - 1]) / fs, bpm = 60 / ibi; if (bpm > 40 && bpm < 180 && Math.abs(bpm - bpmGuess) < 35) pts.push({ t: (peaks[i] + peaks[i - 1]) / 2 / fs, bpm }); }
+  const out = new Float64Array(h.length).fill(NaN);
+  if (pts.length < 3) return out;
+  let j = 0;
+  for (let i = 0; i < h.length; i++) {
+    const t = i / fs; while (j < pts.length - 2 && pts[j + 1].t < t) j++;
+    const a = pts[j], b = pts[j + 1]; if (t < pts[0].t || t > pts[pts.length - 1].t) continue;
+    out[i] = a.bpm + (b.bpm - a.bpm) * Math.min(1, Math.max(0, (t - a.t) / (b.t - a.t)));
+  }
+  return out;
+}
+
+function pulseFrom(samples) {
+  const fs = 30, u = resample(samples, fs); if (!u || u.n < fs * 8) return null;
+  const h = bandpass(pos(u), fs, 0.7, 3.0), sp = spectrumHR(h, fs);
+  return { t0: u.t0, fs, h, bpm: sp.bpm, q: sp.q, hr: hrSeries(h, fs, sp.bpm) };
+}
+
+// trials: [{n, t (onset s), rt (ms|null), ans: 'yes'|'no'|null}]; blinks: [t]
+function analyseCIT(trials, items, target, pulse, blinks) {
+  const per = {};
+  for (const it of items) per[it] = { rts: [], dhr: [], bl: [], errors: 0 };
+  for (const tr of trials) {
+    const p = per[tr.n]; if (!p) continue;
+    const correct = tr.n === target ? tr.ans === 'yes' : tr.ans === 'no';
+    if (!correct) p.errors++;
+    else if (tr.rt != null && tr.rt > 150 && tr.rt < 1500) p.rts.push(tr.rt);
+    if (pulse && pulse.q > 0.25) {
+      const at = s => { const i = Math.round((s - pulse.t0) * pulse.fs); return i >= 0 && i < pulse.hr.length ? pulse.hr[i] : NaN; };
+      const win = (a, b) => { const v = []; for (let s = a; s <= b; s += 0.1) { const x = at(tr.t + s); if (!isNaN(x)) v.push(x); } return v.length > 3 ? mean(v) : NaN; };
+      const pre = win(-1, 0), post = win(1.5, 4);
+      if (!isNaN(pre) && !isNaN(post)) p.dhr.push(post - pre);
+    }
+    p.bl.push(blinks.filter(b => b > tr.t + 0.2 && b < tr.t + 1.5).length);
+  }
+  const cand = items.filter(n => n !== target);
+  const rt = cand.map(n => per[n].rts.length >= 2 ? mean(per[n].rts) : NaN);
+  const dh = cand.map(n => per[n].dhr.length >= 2 ? mean(per[n].dhr) : NaN);
+  const bl = cand.map(n => per[n].bl.length ? mean(per[n].bl) : NaN);
+  const z = arr => { const v = arr.filter(x => !isNaN(x)); if (v.length < cand.length - 1) return arr.map(() => 0); const m = mean(v), s = sd(v); return arr.map(x => isNaN(x) ? 0 : (x - m) / s); };
+  const zRT = z(rt), zHR = z(dh).map(v => -v), useHR = dh.filter(x => !isNaN(x)).length >= cand.length - 1;
+  const score = cand.map((n, i) => zRT[i] + (useHR ? 0.5 * zHR[i] : 0));
+  const order = cand.map((n, i) => i).sort((a, b) => score[b] - score[a]);
+  return {
+    cand, rt, dh, bl, zRT, zHR, score, useHR, per,
+    top: cand[order[0]], second: cand[order[1]], margin: score[order[0]] - score[order[1]], ranked: order.map(i => cand[i])
+  };
+}
+
+// ---- gaze: nearest-centroid on standardised features ----
+// cal: [{cell, f:[...]}]  (frames recorded while looking at each cell)
+function gazeModel(cal) {
+  const D = cal[0].f.length, mu = new Array(D).fill(0), sdv = new Array(D).fill(0);
+  for (const c of cal) c.f.forEach((v, k) => mu[k] += v / cal.length);
+  for (const c of cal) c.f.forEach((v, k) => sdv[k] += (v - mu[k]) ** 2 / cal.length);
+  for (let k = 0; k < D; k++) sdv[k] = Math.sqrt(sdv[k]) || 1;
+  const z = f => f.map((v, k) => (v - mu[k]) / sdv[k]);
+  const cells = [...new Set(cal.map(c => c.cell))];
+  const cent = (rows) => { const m = {}; for (const cl of cells) { const r = rows.filter(c => c.cell === cl); if (!r.length) continue; const a = new Array(D).fill(0); r.forEach(c => z(c.f).forEach((v, k) => a[k] += v / r.length)); m[cl] = a; } return m; };
+  const near = (C, f) => { const q = z(f); let best = null, bd = 1e9; for (const cl in C) { const d = C[cl].reduce((s, v, k) => s + (v - q[k]) ** 2, 0); if (d < bd) { bd = d; best = +cl; } } return best; };
+  // split-half accuracy: centroids from first half of each cell's frames, test on second half
+  const tr = [], te = [];
+  for (const cl of cells) { const r = cal.filter(c => c.cell === cl), h = Math.floor(r.length / 2); tr.push(...r.slice(0, h)); te.push(...r.slice(h)); }
+  const C1 = cent(tr); const acc = te.length ? te.filter(c => near(C1, c.f) === c.cell).length / te.length : 0;
+  const C = cent(cal);
+  return { acc, classify: f => near(C, f) };
+}
+
+// onsets: [{n, t}]; frames: [{t, bs:Float32Array|null}]; bsIdx: indices of blendshapes used for facial reaction
+function analysePassive(items, onsets, frames, bsIdx, pulse, blinks, dwell, gazeOk) {
+  const per = {}; for (const n of items) per[n] = { dhr: [], face: [], bl: [] };
+  const at = s => { const i = Math.round((s - pulse.t0) * pulse.fs); return i >= 0 && i < pulse.hr.length ? pulse.hr[i] : NaN; };
+  const avg = (a, b) => { const v = []; for (let s = a; s <= b; s += 0.1) { const x = at(s); if (!isNaN(x)) v.push(x); } return v.length > 3 ? mean(v) : NaN; };
+  const useHR0 = pulse && pulse.q > 0.3;
+  for (const o of onsets) {
+    const p = per[o.n];
+    if (useHR0) { const pre = avg(o.t - 1, o.t), post = avg(o.t + 1.5, o.t + 4.5); if (!isNaN(pre) && !isNaN(post)) p.dhr.push(post - pre); }
+    const base = frames.filter(f => f.bs && f.t > o.t - 0.5 && f.t <= o.t), resp = frames.filter(f => f.bs && f.t > o.t + 0.2 && f.t < o.t + 1.5);
+    if (base.length >= 3 && resp.length >= 5) {
+      const b = bsIdx.map(k => mean(base.map(f => f.bs[k])));
+      p.face.push(mean(resp.map(f => bsIdx.reduce((s, k, j) => s + Math.abs(f.bs[k] - b[j]), 0))));
+    }
+    p.bl.push(blinks.filter(x => x > o.t + 0.2 && x < o.t + 1.5).length);
+  }
+  const m = (n, key) => per[n][key].length >= 2 ? mean(per[n][key]) : NaN;
+  const dh = items.map(n => m(n, 'dhr')), face = items.map(n => m(n, 'face')), bl = items.map(n => per[n].bl.length ? mean(per[n].bl) : NaN);
+  const z = arr => { const v = arr.filter(x => !isNaN(x)); if (v.length < items.length - 1) return null; const mm = mean(v), s = sd(v); return arr.map(x => isNaN(x) ? 0 : (x - mm) / s); };
+  const zs = [];
+  const zG = gazeOk && dwell ? z(items.map(n => dwell[n] || 0)) : null; if (zG) zs.push(zG);
+  const zH = useHR0 ? z(dh) : null; if (zH) zs.push(zH.map(v => -v));
+  const zF = z(face); if (zF) zs.push(zF);
+  const score = items.map((n, i) => zs.length ? mean(zs.map(a => a[i])) : 0);
+  const order = items.map((n, i) => i).sort((a, b) => score[b] - score[a]);
+  return { dh, face, bl, score, used: { gaze: !!zG, hr: !!zH, face: !!zF }, nSig: zs.length,
+    top: items[order[0]], second: items[order[1]], margin: score[order[0]] - score[order[1]], ranked: order.map(i => items[i]) };
+}
+
+</script>
+<script type="module">
+{
+const $ = id => document.getElementById(id);
+const show = id => { document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); scrollTo(0, 0); };
+const now = () => performance.now() / 1000;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const ITEMS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+let lm = null, video = $('vid'), samples = [], frames = [], blinks = [], faceOk = false, lastFace = 0, blinkOn = false, lightOk = false, bsNames = null, bsIdx = null, lock = null;
+const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+
+async function loadModel() {
+  $('st-msg').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
+  const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
+  const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true, outputFacialTransformationMatrixes: true });
+  try { lm = await V.FaceLandmarker.createFromOptions(files, opts('GPU')); } catch (e) { lm = await V.FaceLandmarker.createFromOptions(files, opts('CPU')); }
+}
+
+function roiMean(pts, W, H) {
+  const P = i => [pts[i].x * W, pts[i].y * H];
+  const fw = Math.hypot(P(234)[0] - P(454)[0], P(234)[1] - P(454)[1]);
+  const rects = [[P(151), 0.22 * fw, 0.12 * fw], [P(50), 0.13 * fw, 0.13 * fw], [P(280), 0.13 * fw, 0.13 * fw]];
+  let r = 0, g = 0, b = 0, n = 0;
+  for (const [[x, y], w, h] of rects) {
+    const x0 = Math.max(0, Math.round(x - w / 2)), y0 = Math.max(0, Math.round(y - h / 2)), ww = Math.min(W - x0, Math.round(w)), hh = Math.min(H - y0, Math.round(h));
+    if (ww < 2 || hh < 2) continue;
+    const d = cx.getImageData(x0, y0, ww, hh).data;
+    for (let i = 0; i < d.length; i += 4) { const G = d[i + 1]; if (G < 12 || G > 250) continue; r += d[i]; g += G; b += d[i + 2]; n++; }
+  }
+  return n > 30 ? { r: r / n, g: g / n, b: b / n } : null;
+}
+
+function irisRatio(pts, iris, c1, c2, top, bot) {
+  const a = pts[c1], b = pts[c2], p = pts[iris], dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy || 1e-9;
+  return [((p.x - a.x) * dx + (p.y - a.y) * dy) / L2, (p.y - (pts[top].y + pts[bot].y) / 2) / Math.sqrt(L2)];
+}
+
+let lastVT = -1;
+function frame() {
+  if (video.readyState >= 2 && video.currentTime !== lastVT && lm) {
+    lastVT = video.currentTime;
+    const t = now(), res = lm.detectForVideo(video, performance.now());
+    const pts = res.faceLandmarks && res.faceLandmarks[0];
+    if (pts) {
+      const W = cv.width = 240, H = cv.height = Math.round(240 * video.videoHeight / video.videoWidth);
+      cx.drawImage(video, 0, 0, W, H);
+      const m = roiMean(pts, W, H);
+      if (m) { samples.push({ t, ...m }); lightOk = m.g > 40; }
+      lastFace = t;
+      const bs = res.faceBlendshapes && res.faceBlendshapes[0];
+      let arr = null, gz = null;
+      if (bs) {
+        if (!bsNames) { bsNames = bs.categories.map(c => c.categoryName); bsIdx = bsNames.map((n, i) => /eyeBlink|eyeLook|neutral/i.test(n) ? -1 : i).filter(i => i >= 0); }
+        arr = Float32Array.from(bs.categories.map(c => c.score));
+        const v = n => arr[bsNames.indexOf(n)] || 0;
+        const bl = (v('eyeBlinkLeft') + v('eyeBlinkRight')) / 2;
+        if (!blinkOn && bl > 0.35) { blinkOn = true; blinks.push(t); } else if (blinkOn && bl < 0.2) blinkOn = false;
+        const mx = res.facialTransformationMatrixes && res.facialTransformationMatrixes[0] && res.facialTransformationMatrixes[0].data;
+        if (pts.length > 477 && bl < 0.3) gz = [v('eyeLookInLeft'), v('eyeLookOutLeft'), v('eyeLookInRight'), v('eyeLookOutRight'), v('eyeLookUpLeft'), v('eyeLookUpRight'), v('eyeLookDownLeft'), v('eyeLookDownRight'),
+          ...irisRatio(pts, 468, 33, 133, 159, 145), ...irisRatio(pts, 473, 362, 263, 386, 374), ...(mx ? [mx[8], mx[9], mx[2], mx[6]] : [0, 0, 0, 0])];
+      }
+      frames.push({ t, bs: arr, gz });
+      if (frames.length > 30 * 300) frames.splice(0, frames.length - 30 * 300);
+      if (samples.length > 30 * 300) samples.splice(0, samples.length - 30 * 300);
+    }
+    faceOk = now() - lastFace < 0.5;
+  }
+  (video.requestVideoFrameCallback ? video.requestVideoFrameCallback.bind(video) : requestAnimationFrame)(frame);
+}
+
+function liveStatus() {
+  if (!$('s-intro').classList.contains('on')) return;
+  $('st-face').innerHTML = faceOk ? '<span class="ok">أيوه</span>' : '<span class="bad">لأ، قرّب وبص للشاشة</span>';
+  $('st-light').innerHTML = !faceOk ? '—' : lightOk ? '<span class="ok">كفاية</span>' : '<span class="bad">ضعيف، علّي السطوع</span>';
+  const t = now(), recent = samples.filter(s => s.t > t - 12);
+  const p = recent.length > 150 && recent[recent.length - 1].t - recent[0].t > 9 ? pulseFrom(recent) : null;
+  $('st-hr').innerHTML = p ? (p.q > 0.3 ? `<span class="ok">${Math.round(p.bpm)} نبضة/دقيقة</span>` : '<span class="bad">مش واضح، اثبت أكتر</span>') : 'استنى ١٠ ثواني ثابت';
+  $('b-go').disabled = !(faceOk && lightOk);
+}
+
+$('b-cam').addEventListener('click', async () => {
+  const b = $('b-cam'); b.disabled = true;
+  try {
+    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } }, audio: false });
+    video.srcObject = st; await video.play();
+    $('st-cam').innerHTML = '<span class="ok">شغالة</span>';
+    await loadModel();
+    $('st-msg').textContent = 'اثبت وبص للشاشة. لما «نبضك من وشك» يظهر، يبقى كله تمام.';
+    frame(); setInterval(liveStatus, 1000); b.style.display = 'none';
+  } catch (e) {
+    b.disabled = false;
+    $('st-msg').textContent = e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e);
+  }
+});
+
+async function keepAwake() { try { if (navigator.wakeLock) lock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (lock && document.visibilityState === 'visible') keepAwake(); });
+
+let pos = [];
+const cells = () => Array.from($('grid').children);
+function drawGrid(mode, dotCell) {
+  $('grid').innerHTML = pos.map((n, c) => `<div class="${mode === 'cal' && c === dotCell ? 'dot' : ''}">${mode === 'nums' ? n : ''}</div>`).join('');
+}
+
+let lastRes = null;
+$('b-go').addEventListener('click', async () => {
+  await keepAwake();
+  pos = shuffle(ITEMS);
+  show('s-run'); $('flash').style.display = 'none'; $('grid').style.display = '';
+  const total = 12 + 15 + 4 * 9 * 3;
+  let el = 0; const prog = s => { el += s; $('prog').style.width = (100 * el / total) + '%'; };
+  // 1) calibration
+  $('run-lbl').textContent = 'تابع النقطة الحمرا بعينك من غير ما تحرك راسك';
+  drawGrid('cal', -1); await wait(1500);
+  const calOrder = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]), calWin = [];
+  for (const c of calOrder) { drawGrid('cal', c); const t = now(); await wait(1300); calWin.push({ c, a: t + 0.45, b: now() }); prog(1.3); }
+  const cal = [];
+  for (const w of calWin) for (const f of frames) if (f.gz && f.t > w.a && f.t < w.b) cal.push({ cell: w.c, f: f.gz });
+  const gm = cal.length > 40 ? gazeModel(cal) : null;
+  // 2) free viewing
+  $('run-lbl').textContent = 'فكّر في رقمك، وبص على الأرقام براحتك';
+  drawGrid('nums'); const fv0 = now(); await wait(15000); const fv1 = now(); prog(15);
+  const dwell = {}; let nG = 0;
+  if (gm) for (const f of frames) if (f.gz && f.t > fv0 + 1.5 && f.t < fv1) { const c = gm.classify(f.gz); dwell[pos[c]] = (dwell[pos[c]] || 0) + 1; nG++; }
+  for (const n in dwell) dwell[n] /= nG || 1;
+  // 3) one by one
+  $('grid').style.display = 'none'; $('flash').style.display = '';
+  $('run-lbl').textContent = 'بص على كل رقم يظهر، وفكّر في رقمك';
+  const stim = $('stim'); stim.className = 'fix'; stim.textContent = '+'; await wait(2000);
+  let seq = []; for (let r = 0; r < 4; r++) { let o = shuffle(ITEMS); if (seq.length && o[0] === seq[seq.length - 1]) o.push(o.shift()); seq = seq.concat(o); }
+  const onsets = [], t0 = now();
+  for (const n of seq) {
+    stim.className = 'big'; stim.textContent = n;
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    onsets.push({ n, t: now() });
+    await wait(1500); stim.className = 'fix'; stim.textContent = '+';
+    await wait(1300 + Math.random() * 400); prog(3);
+  }
+  const t1 = now();
+  $('run-lbl').textContent = 'بيحلل…'; await wait(50);
+  const win = samples.filter(s => s.t > t0 - 3 && s.t < t1 + 1);
+  const pulse = win.length > 300 ? pulseFrom(win) : null;
+  const gazeOk = !!gm && gm.acc >= 0.45 && nG > 100;
+  const res = analysePassive(ITEMS, onsets, frames.filter(f => f.t > t0 - 2 && f.t < t1 + 2), bsIdx || [], pulse, blinks.filter(b => b > t0 && b < t1), dwell, gazeOk);
+  lastRes = { res, pulse, gm, gazeOk, dwell };
+  try { if (lock) { await lock.release(); lock = null; } } catch (e) {}
+  render(lastRes); show('s-res');
+});
+
+function render({ res, pulse, gm, gazeOk, dwell }) {
+  let v;
+  if (!res.nSig) v = `<h2>مش هقدر أحكم</h2><p>ولا إشارة طلعت واضحة كفاية. غالباً النور ضعيف أو التليفون كان بيتحرك.</p>`;
+  else if (res.margin >= 0.8) v = `<p class="mute">الرقم اللي في دماغك</p><div class="big">${res.top}</div><p>ثقة ${res.margin >= 1.3 ? 'عالية' : 'متوسطة'}</p>`;
+  else if (res.margin >= 0.5) v = `<p class="mute">أغلب ظني</p><div class="big">${res.top}</div><p>بس ثقتي ضعيفة. التاني في الترتيب: ${res.second}</p>`;
+  else v = `<h2>مش قادر أحدد</h2><p>مفيش رقم باين بفرق كافي. أقرب احتمالات: ${res.ranked.slice(0, 3).join(' أو ')}.</p>`;
+  $('verdict').innerHTML = v;
+  const f1 = x => isNaN(x) ? '—' : x.toFixed(1), called = res.nSig && res.margin >= 0.5;
+  $('tbl').innerHTML = '<tr><th>الرقم</th><th>نظرك</th><th>تغيّر النبض</th><th>رد فعل الوش</th><th>رمشات</th></tr>' +
+    res.ranked.map(n => { const i = ITEMS.indexOf(n);
+      return `<tr class="${called && n === res.top ? 'top' : ''}"><td class="n">${n}</td><td>${gazeOk ? Math.round(100 * (dwell[n] || 0)) + '%' : '—'}</td><td>${isNaN(res.dh[i]) ? '—' : (res.dh[i] > 0 ? '+' : '') + res.dh[i].toFixed(1)}</td><td>${isNaN(res.face[i]) ? '—' : (100 * res.face[i]).toFixed(0)}</td><td>${f1(res.bl[i])}</td></tr>`; }).join('');
+  const parts = [];
+  parts.push(gm ? `دقة معايرة العين ${Math.round(100 * gm.acc)}% (الصدفة ١١%)${gazeOk ? '' : '، ضعيفة فاتشالت من الحكم'}.` : 'معايرة العين ما نجحتش، فالنظر اتشال من الحكم.');
+  parts.push(pulse ? `نبضك حوالي ${Math.round(pulse.bpm)}${res.used.hr ? '' : '، بس الإشارة مش واضحة فاتشال من الحكم'}.` : 'النبض ما اتقاسش.');
+  parts.push(`الحكم مبني على: ${[res.used.gaze && 'النظر', res.used.hr && 'النبض', res.used.face && 'رد فعل الوش'].filter(Boolean).join(' + ') || 'مفيش'}. الرمشات معروضة بس.`);
+  $('res-note').textContent = parts.join(' ');
+  $('truth').innerHTML = ITEMS.map(n => `<button data-n="${n}">${n}</button>`).join('');
+  $('hist').textContent = histText();
+}
+
+function getHist() { try { return JSON.parse(localStorage.getItem('mindHist2') || '[]'); } catch (e) { return []; } }
+function histText() {
+  const h = getHist().filter(x => x.called); if (!h.length) return '';
+  return `الصفحة حكمت ${h.length} مرة، وصابت ${h.filter(x => x.hit).length} منهم. التخمين العشوائي بيصيب حوالي مرة من ٩.`;
+}
+$('truth').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !lastRes) return;
+  const n = +b.dataset.n, r = lastRes.res, called = !!r.nSig && r.margin >= 0.5;
+  const h = getHist(); h.push({ t: Date.now(), truth: n, guess: r.top, called, hit: called && n === r.top, margin: r.margin, used: r.used });
+  try { localStorage.setItem('mindHist2', JSON.stringify(h.slice(-200))); } catch (e) {}
+  $('truth').innerHTML = `<p>${called ? (n === r.top ? '<span class="ok">صابت.</span>' : '<span class="bad">غلطت.</span>') : 'الصفحة ما حكمتش المرة دي، فمش محسوبة.'} رقمك كان ${n}.</p>`;
+  $('hist').textContent = histText();
+});
+$('b-again').addEventListener('click', () => show('s-intro'));
+}
+</script>
+</body>
+</html>

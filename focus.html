@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>خريطة التركيز</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: محرر هادي بيقرا معاك
+   IDEA: نسخة بروفة عليها علامات قلم أحمر وأخضر في الهامش
+   PICTURE: النص أو الشرايح نفسها، وجنب كل جزء شريط لونه بيقول ركزت قد إيه
+   COLOUR and TYPE: ورق أبيض (عشان ينوّر الوش)، حبر أسود، أخضر للتركيز وأحمر للسرحان؛ Amiri للنص وIBM Plex للواجهة
+   LAYOUT: عمود قراءة واحد، النتيجة في نفس مكان النص */
+:root{--bg:#fff;--ink:#121416;--mute:#5d6670;--line:#e1e5e9;--soft:#f3f5f7;--hi:#1d8f5f;--lo:#d6201a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,16px) 60px}
+h1{font-size:30px;line-height:1.1;margin:6px 0}h2{font-size:20px;margin:22px 0 6px}
+.mute{color:var(--mute)}.lbl{color:var(--mute);font-size:14px}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--ink);color:#fff;cursor:pointer}
+button.ghost{background:var(--soft);color:var(--ink)}button:disabled{opacity:.4}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.tabs{display:flex;gap:8px;margin:12px 0}.tabs button{flex:1}.tabs button[aria-pressed=false]{background:var(--soft);color:var(--ink)}
+textarea{width:100%;min-height:180px;font:17px/1.7 Amiri,serif;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.cam{width:110px;height:82px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.stat{display:grid;gap:6px;margin:10px 0;padding:0;list-style:none}.stat li{display:flex;justify-content:space-between;background:var(--soft);border-radius:10px;padding:8px 12px}
+.ok{color:var(--hi);font-weight:600}.bad{color:var(--lo);font-weight:600}
+.scr{display:none}.scr.on{display:block}
+.bar{position:sticky;top:0;z-index:2;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;margin-bottom:10px}
+.bar .lbl{flex:1}
+article p{font:20px/1.9 Amiri,serif;margin:0 0 26px;padding-inline-start:14px;border-inline-start:5px solid transparent;transition:border-color .3s}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin:0 -4px}
+.slides figure{flex:0 0 100%;scroll-snap-align:center;margin:0;border-inline-start:6px solid transparent;padding:0 4px}
+.slides img{width:100%;height:auto;display:block;border-radius:8px}
+.nav{display:flex;justify-content:space-between;margin-top:10px}
+.unit-meta{font:13px/1.4 "IBM Plex Sans Arabic",sans-serif;color:var(--mute);margin-top:6px;font-variant-numeric:tabular-nums}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;margin:8px 0}.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-inline-end:4px}
+.summary{background:var(--soft);border-radius:12px;padding:12px 14px;margin:10px 0}
+.msg{min-height:1.4em}.msg.err{color:var(--lo)}
+details{margin-top:20px;background:var(--soft);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section class="scr on" id="s-setup">
+  <h1>خريطة التركيز</h1>
+  <p>اقرا نص أو قلّب شرايح كاروسيل، والكاميرا الأمامية بتراقب رمشك وحركة راسك وإمتى بصيت بعيد. في الآخر بتطلع لك خريطة: أنهي جزء ركزت فيه، وأنهي جزء سرحت فيه أو عدّيته بسرعة.</p>
+  <div class="tabs" role="group"><button id="t-text" aria-pressed="true">نص</button><button id="t-img" aria-pressed="false">شرايح كاروسيل</button></div>
+  <div id="m-text">
+    <textarea id="txt" aria-label="النص"></textarea>
+    <p class="lbl">النص الموجود نص تجريبي. حط مكانه أي نص، وكل سطر فاضي بيفصل فقرة عن التانية.</p>
+  </div>
+  <div id="m-img" hidden>
+    <input type="file" id="files" accept="image/*" multiple>
+    <p class="lbl">اختار صور الشرايح بالترتيب. الصور بتفضل على التليفون ومش بتترفع لأي مكان.</p>
+  </div>
+  <h2>الكاميرا</h2>
+  <p class="lbl">علّي سطوع الشاشة، وامسك التليفون زي ما بتقرا عادي.</p>
+  <div class="cam"><video id="vid" playsinline muted autoplay></video></div>
+  <ul class="stat"><li><span>وشك متشاف</span><span id="st-face">—</span></li><li><span>الرمش بيتسجل</span><span id="st-blink">—</span></li></ul>
+  <div class="msg" id="msg"></div>
+  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button id="b-start" disabled>ابدأ القراية</button></div>
+  <details><summary>بيقيس إيه؟ وإيه حدوده؟</summary>
+  <ul>
+  <li><b>الرمش:</b> لما الواحد بيركز في حاجة بيرمش أقل. ده معروف في أبحاث الانتباه، بس بيختلف من شخص لشخص، فالمقارنة بتبقى بين أجزاء نفس الجلسة بس.</li>
+  <li><b>البص بعيد:</b> اللحظات اللي وشك ما كانش فيها ناحية الشاشة.</li>
+  <li><b>حركة الراس:</b> الحركة الكتير غالباً معناها قلق أو ملل.</li>
+  <li><b>الوقت:</b> قعدت قد إيه على كل جزء، وفي النص سرعة قرايتك بالكلمة في الدقيقة.</li>
+  </ul>
+  <p>«التركيز» هنا متوسط نسبي للمؤشرات دي داخل الجلسة نفسها، مش قياس مطلق. يعني أخضر معناها "ركزت هنا أكتر من باقي الأجزاء". ولو الأجزاء أقل من ٣، مش هيطلع تقييم.</p></details>
+</section>
+
+<section class="scr" id="s-read">
+  <div class="bar"><span class="lbl" id="readLbl">اقرا براحتك</span><button id="b-done">خلصت</button></div>
+  <div id="content"></div>
+</section>
+
+<section class="scr" id="s-res">
+  <h1>خريطة تركيزك</h1>
+  <div class="legend"><span><i style="background:var(--hi)"></i>ركزت أكتر</span><span><i style="background:#c9cfd4"></i>متوسط</span><span><i style="background:var(--lo)"></i>سرحت أو عدّيت بسرعة</span></div>
+  <div class="summary" id="sum"></div>
+  <div id="resContent"></div>
+  <div class="row"><button id="b-again">جلسة جديدة</button></div>
+</section>
+</div>
+
+<script type="module">
+{
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const now = () => performance.now() / 1000;
+const show = id => { document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); scrollTo(0, 0); };
+const avg = a => a.reduce((s, v) => s + v, 0) / (a.length || 1);
+const sdv = a => { const m = avg(a); return Math.sqrt(avg(a.map(v => (v - m) ** 2))) || 1e-9; };
+
+$('txt').value = `في سنة ١٧٩٣، لاحظ عالم إيطالي اسمه لازارو سبالانزاني إن الخفافيش بتعرف تطير في أوضة ضلمة تماماً من غير ما تخبط في الخيوط اللي كان مادّدها في الهوا. ولما غطّى عينيها، فضلت تطير عادي. ولما سدّ ودانها، بقت تخبط في كل حاجة.
+
+فضل السؤال من غير إجابة أكتر من ١٤٠ سنة: إزاي الودن بتشوف؟ العلماء وقتها ما كانش عندهم أجهزة تسمع الأصوات اللي أعلى من سمع الإنسان، فافترضوا إن الخفاش عنده حاسة لمس خارقة في جناحه.
+
+في التلاتينات، دخل طالب أمريكي اسمه دونالد جريفين معمل فيه جهاز جديد بيلقط الموجات فوق الصوتية، وحط قدامه قفص خفافيش. الجهاز طلّع صوت طقطقة متواصل. الخفافيش كانت بتصرخ طول الوقت، بس بتردد إحنا ما نقدرش نسمعه.
+
+جريفين سمّى الظاهرة دي «تحديد المكان بالصدى». الخفاش بيطلّع صرخة قصيرة، ويسمع صداها وهو راجع من الحيطة أو من الحشرة، ومن الوقت اللي الصدى بياخده يعرف المسافة. ومن الفرق بين الودن اليمين والشمال يعرف الاتجاه.
+
+الأغرب إن الخفاش بيغيّر صرخته وهو بيقرّب من فريسته: بتبقى أسرع وأقصر، لحد ما توصل لحوالي ٢٠٠ صرخة في الثانية في آخر لحظة. العلماء سمّوا اللحظة دي «طنين الاقتراب».
+
+النهارده نفس الفكرة موجودة في السونار بتاع الغواصات، وفي حساسات الركن في العربيات، وفي أجهزة السونار الطبي اللي بتشوف الجنين في بطن أمه. كلها نسخ من حاجة الخفافيش بتعملها من ملايين السنين.`;
+
+let mode = 'text', imgs = [];
+const tab = m => { mode = m; $('t-text').setAttribute('aria-pressed', m === 'text'); $('t-img').setAttribute('aria-pressed', m === 'img'); $('m-text').hidden = m !== 'text'; $('m-img').hidden = m !== 'img'; };
+$('t-text').addEventListener('click', () => tab('text')); $('t-img').addEventListener('click', () => tab('img'));
+$('files').addEventListener('change', e => { imgs.forEach(u => URL.revokeObjectURL(u)); imgs = Array.from(e.target.files).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })).map(f => URL.createObjectURL(f)); });
+
+let lm = null, video = $('vid'), frames = [], blinks = [], blinkOn = false, lastFace = 0, timeline = [], cur = -1, recording = false;
+async function loadModel() {
+  $('msg').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
+  const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
+  const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true, outputFacialTransformationMatrixes: true });
+  try { lm = await V.FaceLandmarker.createFromOptions(files, opts('GPU')); } catch (e) { lm = await V.FaceLandmarker.createFromOptions(files, opts('CPU')); }
+}
+let lastVT = -1;
+function frame() {
+  if (video.readyState >= 2 && video.currentTime !== lastVT && lm) {
+    lastVT = video.currentTime;
+    const t = now(), res = lm.detectForVideo(video, performance.now());
+    const bs = res.faceBlendshapes && res.faceBlendshapes[0], mx = res.facialTransformationMatrixes && res.facialTransformationMatrixes[0] && res.facialTransformationMatrixes[0].data;
+    let rec = { t, face: false };
+    if (bs && mx) {
+      lastFace = t;
+      const v = n => (bs.categories.find(c => c.categoryName === n) || { score: 0 }).score;
+      const bl = (v('eyeBlinkLeft') + v('eyeBlinkRight')) / 2;
+      if (!blinkOn && bl > 0.35) { blinkOn = true; if (recording) blinks.push(t); } else if (blinkOn && bl < 0.2) blinkOn = false;
+      const yaw = Math.atan2(mx[8], mx[10]) * 180 / Math.PI, pitch = Math.asin(Math.max(-1, Math.min(1, -mx[9]))) * 180 / Math.PI;
+      rec = { t, face: true, yaw, pitch, x: mx[12], y: mx[13] };
+    }
+    if (recording) { frames.push(rec); timeline.push({ t, u: cur }); }
+  }
+  (video.requestVideoFrameCallback ? video.requestVideoFrameCallback.bind(video) : requestAnimationFrame)(frame);
+}
+let blinkSeen = false;
+setInterval(() => {
+  if (!$('s-setup').classList.contains('on') || !lm) return;
+  const ok = now() - lastFace < 0.6; if (blinkOn) blinkSeen = true;
+  $('st-face').innerHTML = ok ? '<span class="ok">أيوه</span>' : '<span class="bad">لأ</span>';
+  $('st-blink').innerHTML = blinkSeen ? '<span class="ok">أيوه</span>' : 'ارمش مرة عشان نتأكد';
+  $('b-start').disabled = !ok;
+}, 300);
+
+$('b-cam').addEventListener('click', async () => {
+  const b = $('b-cam'); b.disabled = true;
+  try {
+    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
+    video.srcObject = st; await video.play(); await loadModel(); frame();
+    $('msg').textContent = ''; b.style.display = 'none';
+  } catch (e) { b.disabled = false; $('msg').className = 'msg err'; $('msg').textContent = e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e); }
+});
+
+let units = [], io = null, lock = null;
+$('b-start').addEventListener('click', async () => {
+  if (mode === 'text') {
+    units = $('txt').value.split(/\n\s*\n/).map(s => s.trim()).filter(Boolean).map(s => ({ text: s, words: s.split(/\s+/).length }));
+    if (units.length < 2) { $('msg').className = 'msg err'; $('msg').textContent = 'محتاج فقرتين على الأقل، وبين كل فقرة والتانية سطر فاضي.'; return; }
+    $('content').innerHTML = '<article>' + units.map((u, i) => `<p data-u="${i}">${esc(u.text)}</p>`).join('') + '<p style="min-height:50vh"></p></article>';
+    $('readLbl').textContent = 'اقرا براحتك، ولما تخلص دوس «خلصت»';
+  } else {
+    if (imgs.length < 2) { $('msg').className = 'msg err'; $('msg').textContent = 'اختار صورتين على الأقل.'; return; }
+    units = imgs.map(src => ({ src }));
+    $('content').innerHTML = '<div class="slides" id="slides">' + units.map((u, i) => `<figure data-u="${i}"><img src="${u.src}" alt="شريحة ${i + 1}"></figure>`).join('') + '</div><div class="nav"><button class="ghost" id="prev">السابقة</button><span class="lbl" id="pos"></span><button class="ghost" id="next">التالية</button></div>';
+    $('readLbl').textContent = 'قلّب الشرايح زي ما بتعمل على إنستجرام';
+    const go = d => { const s = $('slides'), f = s.children[Math.max(0, Math.min(units.length - 1, cur + d))]; if (f) f.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); };
+    $('prev').addEventListener('click', () => go(-1)); $('next').addEventListener('click', () => go(1));
+  }
+  frames = []; blinks = []; timeline = []; cur = mode === 'text' ? -1 : 0;
+  if (io) io.disconnect();
+  io = mode === 'text'
+    ? new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) cur = +e.target.dataset.u; }, { rootMargin: '-38% 0px -60% 0px' })
+    : new IntersectionObserver(es => { for (const e of es) if (e.intersectionRatio > 0.6) { cur = +e.target.dataset.u; const p = $('pos'); if (p) p.textContent = `${cur + 1} من ${units.length}`; } }, { root: $('slides'), threshold: [0.6] });
+  document.querySelectorAll('[data-u]').forEach(el => io.observe(el));
+  try { if (navigator.wakeLock) lock = await navigator.wakeLock.request('screen'); } catch (e) {}
+  recording = true; show('s-read');
+  if (mode === 'img') { const p = $('pos'); if (p) p.textContent = `1 من ${units.length}`; }
+});
+
+$('b-done').addEventListener('click', async () => {
+  recording = false; if (io) io.disconnect();
+  try { if (lock) { await lock.release(); lock = null; } } catch (e) {}
+  analyse(); show('s-res');
+});
+
+function analyse() {
+  const U = units.map(() => ({ time: 0, fr: 0, away: 0, bl: 0, mv: [] }));
+  for (let i = 1; i < timeline.length; i++) {
+    const u = timeline[i - 1].u, dt = Math.min(0.5, timeline[i].t - timeline[i - 1].t); if (u < 0 || !U[u]) continue;
+    const f = frames[i - 1]; U[u].time += dt; U[u].fr++;
+    if (!f.face || Math.abs(f.yaw) > 25 || Math.abs(f.pitch) > 25) U[u].away += dt;
+    if (f.face && frames[i].face) U[u].mv.push(Math.hypot(frames[i].x - f.x, frames[i].y - f.y) / dt);
+  }
+  for (const b of blinks) { let k = timeline.findIndex(x => x.t >= b); if (k > 0 && timeline[k - 1].u >= 0 && U[timeline[k - 1].u]) U[timeline[k - 1].u].bl++; }
+  const M = U.map((x, i) => {
+    const on = Math.max(0.1, x.time - x.away);
+    return { i, time: x.time, awayP: x.time ? x.away / x.time : NaN, bpm: x.time > 3 ? 60 * x.bl / on : NaN, mv: x.mv.length > 10 ? avg(x.mv) : NaN, wpm: mode === 'text' && x.time > 1 ? units[i].words / (x.time / 60) : NaN };
+  });
+  const valid = M.filter(m => m.time > 3);
+  const z = (key, sign) => { const v = valid.map(m => m[key]).filter(x => !isNaN(x)); if (v.length < 3) return null; const mu = avg(v), s = sdv(v); return m => isNaN(m[key]) ? 0 : sign * (m[key] - mu) / s; };
+  const zs = [z('bpm', -1), z('awayP', -1), z('mv', -1)].filter(Boolean);
+  if (mode === 'text') { const ws = valid.map(m => m.wpm).filter(x => !isNaN(x)), med = ws.sort((a, b) => a - b)[Math.floor(ws.length / 2)] || 0; M.forEach(m => m.skim = m.wpm > med * 1.8 && m.wpm > 400); }
+  M.forEach(m => { m.score = m.time > 3 && zs.length ? avg(zs.map(f => f(m))) : NaN; if (m.skim) m.score = Math.min(isNaN(m.score) ? -1 : m.score, -1); });
+  const colOf = m => isNaN(m.score) ? 'transparent' : m.score > 0.5 ? 'var(--hi)' : m.score < -0.5 ? 'var(--lo)' : '#c9cfd4';
+  const meta = m => [m.time ? `${Math.round(m.time)} ث` : 'ما اتقريش', !isNaN(m.wpm) ? `${Math.round(m.wpm)} كلمة/د` : '', !isNaN(m.bpm) ? `${Math.round(m.bpm)} رمشة/د` : '', !isNaN(m.awayP) ? `بصيت بعيد ${Math.round(100 * m.awayP)}%` : '', m.skim ? 'عدّيتها بسرعة' : ''].filter(Boolean).join(' · ');
+  const name = i => mode === 'text' ? `الفقرة ${i + 1}` : `الشريحة ${i + 1}`;
+  $('resContent').innerHTML = mode === 'text'
+    ? '<article>' + units.map((u, i) => `<p style="border-inline-start-color:${colOf(M[i])}">${esc(u.text)}<span class="unit-meta" style="display:block">${meta(M[i])}</span></p>`).join('') + '</article>'
+    : units.map((u, i) => `<figure style="margin:0 0 18px;border-inline-start:6px solid ${colOf(M[i])};padding-inline-start:8px"><img src="${u.src}" alt="شريحة ${i + 1}" style="width:100%;border-radius:8px"><figcaption class="unit-meta">${name(i)} · ${meta(M[i])}</figcaption></figure>`).join('');
+  const rated = M.filter(m => !isNaN(m.score)).sort((a, b) => b.score - a.score);
+  let s = '';
+  if (rated.length < 3 || !zs.length) s = 'البيانات مش كفاية عشان أقارن بين الأجزاء. يمكن القراية كانت سريعة، أو الكاميرا ما شافتش وشك أغلب الوقت. الأوقات والأرقام اللي اتقاست معروضة تحت.';
+  else s = `ركزت أكتر في <b>${name(rated[0].i)}</b>، وسرحت أكتر في <b>${name(rated[rated.length - 1].i)}</b>. التقييم مبني على: ${['الرمش', 'البص بعيد', 'حركة الراس'].filter((_, k) => [z('bpm', -1), z('awayP', -1), z('mv', -1)][k]).join(' + ')}${mode === 'text' ? '، والفقرات اللي اتقرت بسرعة زيادة عن اللزوم بتتعلّم إنك عدّيتها' : ''}.`;
+  const total = M.reduce((a, m) => a + m.time, 0);
+  $('sum').innerHTML = s + `<br><span class="lbl">وقت الجلسة ${Math.round(total)} ثانية · ${blinks.length} رمشة.</span>`;
+}
+$('b-again').addEventListener('click', () => show('s-setup'));
+}
+</script>
+</body>
+</html>

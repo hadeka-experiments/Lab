@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>رسايل مش مسموعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+textarea{width:100%;min-height:90px;font:inherit;font-size:17px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+ul.list li{display:block}ul.list li .m{font-size:19px;font-weight:600;overflow-wrap:anywhere}
+.meter{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;width:0;background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>رسايل مش مسموعة</h1>
+<p class="sub">تليفون بيبعت رسالة لتليفون تاني على شكل صفير فوق سمعي، والتاني يسمعه ويفكّه ويكتبه. مفيش إنترنت ولا بلوتوث ولا واي فاي، والكبار اللي حواليك مش سامعين حاجة. افتح الصفحة دي على التليفونين.</p>
+
+<div class="card">
+  <h2 style="margin-top:0">الاستقبال</h2>
+  <div class="row"><button id="b-rx">شغّل الاستقبال</button></div>
+  <div class="lbl" id="rxSt">مقفول</div>
+  <div class="meter"><i id="lvl"></i></div>
+  <ul class="list" id="inbox"></ul>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <h2 style="margin-top:0">الإرسال</h2>
+  <textarea id="txt" maxlength="60" placeholder="اكتب رسالة قصيرة"></textarea>
+  <div class="lbl" id="cnt"></div>
+  <label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.2" max="1" step="0.05" value="0.9"></label>
+  <div class="row"><button id="b-tx">ابعت</button></div>
+  <div class="msg" id="txSt"></div>
+</div>
+
+<label>نطاق الترددات (لازم يبقى نفسه على التليفونين)
+<select id="band"><option value="17500">عالي: ١٧–٢٠ كيلوهرتز (مش مسموع للكبار)</option><option value="15500">أوطى: ١٥–١٨ كيلوهرتز (أضمن، بس ممكن يتسمع خفيف)</option></select></label>
+
+<details><summary>بيشتغل إزاي؟ وإيه حدوده؟</summary>
+<ul>
+<li>كل حرف بيتحول لأرقام، وكل رقم بيتبعت كنغمة من ١٦ نغمة بين ١٧.٥ و١٩ كيلوهرتز. يعني كل نغمة بتشيل ٤ بت، وكل حرف عربي بياخد حوالي ربع ثانية.</li>
+<li>قبل الرسالة فيه «صفارة نداء» صاعدة، التليفون التاني بيدوّر عليها عشان يعرف إن فيه رسالة بدأت.</li>
+<li>في آخر الرسالة رقم تأكيد. لو الرسالة اتلخبطت في السكة، المستقبل بيعرف ويقول إنها اتلخبطت بدل ما يكتب كلام غلط.</li>
+<li>جرّب لوحدك بتليفون واحد: شغّل الاستقبال وابعت، والتليفون هيسمع نفسه.</li>
+<li>المدى من نص متر لكام متر في أوضة هادية. لو مش بيوصل، علّي الصوت، أو قرّب التليفونين، أو جرّب النطاق الأوطى.</li>
+<li>الأطفال والحيوانات بيسمعوا الترددات دي.</li>
+</ul></details>
+</div>
+<script>
+
+const MD = { base: 17500, step: 100, ns: 16, sym: 0.05, guard: 0.015, c0: 17000, c1: 19700, cd: 0.08, gap: 0.02 };
+function crc8(b) { let c = 0; for (const x of b) { c ^= x; for (let i = 0; i < 8; i++) c = c & 0x80 ? ((c << 1) ^ 0x07) & 0xff : (c << 1) & 0xff; } return c; }
+function mdChirp(sr) {
+  const n = Math.round(MD.cd * sr), s = new Float32Array(n), k = (MD.c1 - MD.c0) / MD.cd, tap = Math.round(n * 0.1);
+  for (let i = 0; i < n; i++) { const t = i / sr, w = i < tap ? 0.5 - 0.5 * Math.cos(Math.PI * i / tap) : i > n - tap ? 0.5 - 0.5 * Math.cos(Math.PI * (n - i) / tap) : 1; s[i] = w * Math.sin(2 * Math.PI * (MD.c0 * t + 0.5 * k * t * t)); }
+  return s;
+}
+function encodeMsg(bytes, sr, f0) {
+  const base = f0 || MD.base, data = [bytes.length, ...bytes, crc8(bytes)], syms = [];
+  for (const b of data) syms.push(b >> 4, b & 15);
+  const ch = mdChirp(sr), S = Math.round(MD.sym * sr), G = Math.round(MD.guard * sr), lead = Math.round(0.05 * sr), gap = Math.round(MD.gap * sr);
+  const out = new Float32Array(lead + ch.length + gap + syms.length * (S + G) + lead);
+  out.set(ch, lead); let p = lead + ch.length + gap;
+  for (const s of syms) { const f = base + s * MD.step; for (let i = 0; i < S; i++) { const w = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (S - 1)); out[p + i] = w * Math.sin(2 * Math.PI * f * i / sr); } p += S + G; }
+  return out;
+}
+function fftM(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = (inv ? 2 : -2) * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1;
+    for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+// find preamble: returns {idx, score} (idx = chirp start inside x)
+function findPreamble(x, sr) {
+  const s = mdChirp(sr); let N = 1; while (N < x.length + s.length) N <<= 1;
+  const xr = new Float64Array(N), xi = new Float64Array(N), sr2 = new Float64Array(N), si = new Float64Array(N);
+  xr.set(x); sr2.set(s); fftM(xr, xi, false); fftM(sr2, si, false);
+  for (let k = 0; k < N; k++) { const r = xr[k] * sr2[k] + xi[k] * si[k], i = xi[k] * sr2[k] - xr[k] * si[k], g = k === 0 || k === N / 2 ? 1 : k < N / 2 ? 2 : 0; xr[k] = r * g; xi[k] = i * g; }
+  fftM(xr, xi, true);
+  const L = x.length - s.length; if (L <= 0) return null;
+  const env = new Float64Array(L); let best = 0;
+  for (let n = 0; n < L; n++) { env[n] = Math.hypot(xr[n], xi[n]); if (env[n] > env[best]) best = n; }
+  const sorted = Array.from(env).sort((a, b) => a - b), med = sorted[Math.floor(L / 2)] || 1e-12;
+  return { idx: best, score: env[best] / med };
+}
+function goertzel(x, a, n, f, sr) { const w = 2 * Math.PI * f / sr, c = 2 * Math.cos(w); let s1 = 0, s2 = 0; for (let i = 0; i < n; i++) { const s0 = x[a + i] + c * s1 - s2; s2 = s1; s1 = s0; } return s1 * s1 + s2 * s2 - c * s1 * s2; }
+// read k symbols starting from chirp index; returns null if not enough samples
+function readSyms(x, idx, sr, from, k, f0) {
+  const base = f0 || MD.base, S = Math.round(MD.sym * sr), G = Math.round(MD.guard * sr), start = idx + Math.round(MD.cd * sr) + Math.round(MD.gap * sr), skip = Math.round(0.006 * sr), n = S - 2 * skip;
+  const out = [], conf = [];
+  for (let j = from; j < from + k; j++) {
+    const a = start + j * (S + G) + skip; if (a + n > x.length) return null;
+    const p = []; for (let s = 0; s < MD.ns; s++) p.push(goertzel(x, a, n, base + s * MD.step, sr));
+    let b = 0; for (let s = 1; s < MD.ns; s++) if (p[s] > p[b]) b = s;
+    const sorted = p.slice().sort((u, v) => v - u); out.push(b); conf.push(sorted[0] / (sorted[1] + 1e-12));
+  }
+  return { syms: out, conf };
+}
+function msgLenSamples(nBytes, sr) { return Math.round(MD.cd * sr) + Math.round(MD.gap * sr) + (nBytes + 2) * 2 * (Math.round(MD.sym * sr) + Math.round(MD.guard * sr)); }
+function decodeAt(x, idx, sr, f0) {
+  const h = readSyms(x, idx, sr, 0, 2, f0); if (!h) return { need: true };
+  const len = h.syms[0] * 16 + h.syms[1]; if (len < 1 || len > 120) return { bad: 'len' };
+  const r = readSyms(x, idx, sr, 2, (len + 1) * 2, f0); if (!r) return { need: true, len };
+  const by = []; for (let i = 0; i < r.syms.length; i += 2) by.push(r.syms[i] * 16 + r.syms[i + 1]);
+  const payload = by.slice(0, len), ok = crc8(payload) === by[len];
+  return { ok, bytes: payload, len, conf: Math.min(...h.conf.concat(r.conf)) };
+}
+
+{
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+let ctx = null, stream, src, proc, mute, rx = false, chunks = [], absStart = 0, total = 0, pending = null, lastDone = 0, timer, lastSent = null;
+const enc = new TextEncoder(), dec = new TextDecoder('utf-8', { fatal: false });
+const setBand = () => { const b = +$('band').value; MD.base = b; MD.c0 = b - 500; MD.c1 = b + 2200; };
+$('band').addEventListener('change', setBand); setBand();
+$('V').addEventListener('input', () => $('vV').textContent = $('V').value); $('vV').textContent = $('V').value;
+const count = () => { const n = enc.encode($('txt').value).length; $('cnt').textContent = `${n} من ٦٠ بايت · حوالي ${(0.2 + (n + 2) * 0.13).toFixed(1)} ثانية`; };
+$('txt').addEventListener('input', count); count();
+async function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); await ctx.resume(); return ctx; }
+
+function windowFrom(a, b) {
+  a = Math.max(a, absStart); b = Math.min(b, total); if (b <= a) return null;
+  const out = new Float32Array(b - a); let pos = absStart;
+  for (const c of chunks) { const s = pos, e = pos + c.length; if (e > a && s < b) { const from = Math.max(a, s), to = Math.min(b, e); out.set(c.subarray(from - s, to - s), from - a); } pos = e; }
+  return out;
+}
+function tick() {
+  const sr = ctx.sampleRate;
+  if (pending) {
+    const x = windowFrom(pending, total), r = x && decodeAt(x, 0, sr);
+    if (!r || r.need) { if (total - pending > sr * 15) pending = null; return; }
+    if (r.bad) { pending = null; lastDone = total - sr * 0.5; return; }
+    const text = r.ok ? dec.decode(new Uint8Array(r.bytes)) : null, mine = r.ok && lastSent && text === lastSent.text && Date.now() - lastSent.t < 20000;
+    const t = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    $('inbox').insertAdjacentHTML('afterbegin', r.ok ? `<li><div class="m">${esc(text)}</div><div class="lbl">${t}${mine ? ' · رسالتك، التليفون سمع نفسه' : ''} · وضوح ${Math.min(99, Math.round(r.conf))}</div></li>` : `<li><div class="m bad">اتلقطت رسالة بس اتلخبطت في السكة</div><div class="lbl">${t} · قرّب التليفونين أو علّي الصوت</div></li>`);
+    lastDone = pending + msgLenSamples(r.len, sr); pending = null; $('rxSt').textContent = 'بيسمع…';
+    return;
+  }
+  const a = Math.max(lastDone, total - Math.round(sr * 1.2)), x = windowFrom(a, total); if (!x || x.length < sr * 0.3) return;
+  const p = findPreamble(x, sr);
+  if (p && p.score > 15) { pending = a + p.idx; $('rxSt').textContent = 'فيه رسالة جاية…'; }
+}
+$('b-rx').addEventListener('click', async () => {
+  if (rx) { rx = false; clearInterval(timer); try { src.disconnect(); proc.disconnect(); } catch (e) {} stream.getTracks().forEach(t => t.stop()); $('b-rx').textContent = 'شغّل الاستقبال'; $('rxSt').textContent = 'مقفول'; return; }
+  try {
+    if (!window.isSecureContext) throw new Error('https');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+    await getCtx(); chunks = []; total = 0; absStart = 0; pending = null; lastDone = 0;
+    src = ctx.createMediaStreamSource(stream); proc = ctx.createScriptProcessor(4096, 1, 1); mute = ctx.createGain(); mute.gain.value = 0;
+    proc.onaudioprocess = e => {
+      const c = new Float32Array(e.inputBuffer.getChannelData(0)); chunks.push(c); total += c.length;
+      while (total - absStart > ctx.sampleRate * 20) { absStart += chunks[0].length; chunks.shift(); }
+      let m = 0; for (let i = 0; i < c.length; i += 8) m = Math.max(m, Math.abs(c[i])); $('lvl').style.width = Math.min(100, m * 300) + '%';
+    };
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    rx = true; $('b-rx').textContent = 'اقفل الاستقبال'; $('rxSt').textContent = 'بيسمع…'; timer = setInterval(tick, 200);
+  } catch (e) { $('rxSt').innerHTML = `<span class="bad">${e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : 'الصفحة لازم تتفتح من لينك https.'}</span>`; }
+});
+$('b-tx').addEventListener('click', async () => {
+  const text = $('txt').value.trim(); if (!text) { $('txSt').textContent = 'اكتب رسالة الأول.'; return; }
+  const bytes = [...enc.encode(text)]; if (bytes.length > 60) { $('txSt').textContent = 'الرسالة طويلة. قصّرها.'; return; }
+  const c = await getCtx(), sig = encodeMsg(bytes, c.sampleRate), b = c.createBuffer(1, sig.length, c.sampleRate), g = +$('V').value;
+  b.getChannelData(0).set(sig.map(v => v * g));
+  const s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start();
+  lastSent = { text, t: Date.now() }; $('b-tx').disabled = true; $('txSt').textContent = `بيبعت… (${(sig.length / c.sampleRate).toFixed(1)} ثانية)`;
+  s.onended = () => { $('b-tx').disabled = false; $('txSt').textContent = 'اتبعتت.'; };
+});
+}
+</script>
+</body>
+</html>

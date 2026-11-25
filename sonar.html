@@ -355,17 +355,18 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 const DIRS = ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'];
 const dirName = a => DIRS[Math.round(a / 45) % 8];
 
+function ensureCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); try { ctx.resume(); } catch (e) {} }
 async function setup() {
-  if (ctx) return;
+  ensureCtx();
+  if (stream) return;
   if (!window.isSecureContext) throw new Error('الصفحة مفتوحة من ملف مش من لينك https، فالمتصفح مش هيدي إذن المايك. ارفعها على استضافة https وافتحها من اللينك.');
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('المتصفح ده مش بيدي الصفحة إذن المايك. افتحها في Safari من لينك https.');
   stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
-async function capture() {
+async function capture(maxCount) {
   await setup(); await ctx.resume();
-  const sr = ctx.sampleRate, period = 0.12, count = val('N'), c = 331.3 + 0.606 * val('T');
+  const sr = ctx.sampleRate, period = 0.12, count = Math.min(val('N'), maxCount || 99), c = 331.3 + 0.606 * val('T');
   const chirp = makeChirp(sr, 2000, Math.min(12000, sr / 2 - 2000), 0.01);
   const total = 0.3 + count * period + 0.3;
   const buf = ctx.createBuffer(2, Math.round(total * sr), sr), g = val('V'), spk = $('spk').value;
@@ -390,7 +391,7 @@ async function capture() {
   r.sr = sr; r.c = c; r.clip = peak > 0.98;
   if (r.dsnr < 15) throw new Error(`المايك مش سامع الصفارة نفسها (${r.dsnr.toFixed(0)} dB بس فوق الضوضاء). اتأكد إن الآيفون مش على الصامت (زرار الجنب)، وإن صوت الميديا عالي من زراير الصوت.`);
   let h = null, moved = false;
-  if (h0 != null && h1 != null) { moved = angDiff(h0, h1) > 15; const a = h0 * Math.PI / 180, b = h1 * Math.PI / 180; h = (Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)) * 180 / Math.PI + 360) % 360; }
+  if (h0 != null && h1 != null) { moved = angDiff(h0, h1) > 20; const a = h0 * Math.PI / 180, b = h1 * Math.PI / 180; h = (Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)) * 180 / Math.PI + 360) % 360; }
   return { r, h, moved };
 }
 
@@ -406,7 +407,7 @@ function show(r) {
 function errMsg(e) { return e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك. اسمح بيه من إعدادات Safari للموقع ده وجرّب تاني.' : (e && e.message) || String(e); }
 
 async function measure() {
-  if (busy) return; busy = true; const btn = $('go'); btn.disabled = true; btn.classList.add('pulse'); save();
+  if (busy) return; ensureCtx(); busy = true; const btn = $('go'); btn.disabled = true; btn.classList.add('pulse'); save();
   try {
     say('بيقيس… خلّي التليفون ثابت.');
     const { r, h, moved } = await capture(); show(r);
@@ -438,23 +439,27 @@ async function scan() {
   if (scanning) { scanning = false; return; }
   const btn = $('scan');
   try {
-    if (heading == null) await compass();
+    ensureCtx();                       // must happen inside the tap, before any waiting
+    if (heading == null) await compass(); // needs the tap too, so it comes before the mic prompt
+    await setup();
     scanning = true; btn.textContent = 'وقّف المسح'; save();
+    let lastBin = -1;
     while (scanning) {
       const b = binsDone(), cur = Math.round(heading / 30) % 12;
       if (b.every(n => n > 0)) { $('hd').textContent = 'المسح خلص. الرسم تحت.'; break; }
-      if (b[cur] > 0) { $('hd').textContent = `الاتجاه ده اتقاس. لف لحد ما توصل لمربع فاضي (${b.filter(n => !n).length} فاضيين).`; ring(); await wait(300); continue; }
-      $('hd').textContent = 'اثبت… بيقيس.';
+      if (b[cur] > 0) { $('hd').innerHTML = `<b>لف ببطء</b> لحد مربع فاضي (فاضل ${b.filter(n => !n).length}). اللي عليه إطار هو اتجاهك دلوقتي.`; ring(); lastBin = -1; await wait(250); continue; }
+      if (lastBin !== cur) { lastBin = cur; $('hd').innerHTML = '<b>اقف مكانك!</b> هيبدأ يقيس…'; ring(); await wait(1200); continue; }
+      $('hd').innerHTML = '<b>اثبت…</b> بيقيس (حوالي ٢ ثانية).';
       busy = true;
       try {
-        const { r, h, moved } = await capture(); show(r);
-        if (!moved) { marks.push(toMark(r, h)); keep(); }
-        else { $('hd').textContent = 'اتحركت أثناء القياس. اثبت شوية.'; await wait(800); }
+        const { r, h, moved } = await capture(12); show(r);
+        if (!moved && h != null) { marks.push(toMark(r, h)); keep(); $('hd').innerHTML = '<b>تمام.</b> لف للمربع الفاضي اللي بعده.'; }
+        else { $('hd').innerHTML = '<b>اتحركت</b> أثناء القياس. اثبت وهيعيد.'; }
       } finally { busy = false; }
       ring(); room(); drawPolar();
-      await wait(400);
+      await wait(900);
     }
-  } catch (e) { $('hd').textContent = errMsg(e); }
+  } catch (e) { $('hd').innerHTML = `<span class="bad">${errMsg(e)}</span>`; }
   scanning = false; btn.textContent = 'ابدأ المسح'; ring();
 }
 

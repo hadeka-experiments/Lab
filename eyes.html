@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>اللي في عينك</title>
+<script src="shell.js"></script>
+<title>Eye Reflections</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -43,50 +44,51 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .outs figure.ai figcaption{color:var(--red)}
 input[type=file]{font:inherit;font-size:16px;width:100%}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>اللي في عينك</h1>
-<p class="sub">قرنية العين مراية كروية صغيرة، والنضارة الشمس مراية أكبر، والاتنين فيهم انعكاس للمكان اللي قدام الشخص. الصفحة بتطلّع الانعكاس ده <b>صورة عادية</b> للمكان: بتجمع صور كتير بدقة أعلى من البكسل، وبتفرد تقوّس القرنية لمنظر مسطح، وبتشيل نقشة القزحية. وفيه تحسين بالـ AI اختياري، بيظهر جنب الصورة الحقيقية مش مكانها.</p>
+<h1>Eye Reflections</h1>
+<p class="sub">The cornea is a tiny spherical mirror, and sunglasses are a bigger one; both reflect the scene in front of the person. The page extracts that reflection as a <b>normal picture</b> of the scene: it stacks many frames for sub‑pixel detail, unwraps the cornea’s curve into a flat view, and removes the iris pattern. Optional AI enhancement is shown beside the real picture, never instead of it.</p>
 
-<div class="seg" role="group" aria-label="المصدر"><button id="s-cam" aria-pressed="true">صوّر بالكاميرا</button><button id="s-up" aria-pressed="false">ارفع صور أو فيديو</button></div>
-<div class="seg" role="group" aria-label="نوع الانعكاس"><button id="m-eye" aria-pressed="true">قرنية العين</button><button id="m-gl" aria-pressed="false">نضارة شمس</button><button id="m-man" aria-pressed="false">أي مكان (يدوي)</button></div>
+<div class="seg" role="group" aria-label="Source"><button id="s-cam" aria-pressed="true">Use camera</button><button id="s-up" aria-pressed="false">Upload photos or video</button></div>
+<div class="seg" role="group" aria-label="Reflection type"><button id="m-eye" aria-pressed="true">Cornea (eye)</button><button id="m-gl" aria-pressed="false">Sunglasses</button><button id="m-man" aria-pressed="false">Anywhere (manual)</button></div>
 
 <div id="camBox">
-  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button class="ghost" id="b-flip" disabled>الكاميرا الأمامية</button></div>
+  <div class="row"><button id="b-cam">Start camera</button><button class="ghost" id="b-flip" disabled>Front camera</button></div>
   <div class="stage"><video id="vid" playsinline muted autoplay></video></div>
-  <div class="row"><button id="b-shot" disabled>صوّر وجمّع ٢٠ صورة</button></div>
-  <p class="lbl">أحسن نتيجة: الكاميرا الخلفية بزوم ٢x، على بعد ٢٠–٣٠ سم من العين، والمكان اللي الشخص باصص عليه منوّر. الصفحة بتجمع ٢٠ صورة وتظبطهم على بعض بدقة أقل من البكسل.</p>
+  <div class="row"><button id="b-shot" disabled>Capture and stack 20 frames</button></div>
+  <p class="lbl">Best result: rear camera at 2× zoom, 20–30 cm from the eye, with the scene the person is looking at well lit. The page stacks 20 frames and aligns them with sub‑pixel accuracy.</p>
 </div>
 <div id="upBox" hidden>
   <input type="file" id="file" accept="image/*,video/*" multiple>
-  <p class="lbl">ارفع <b>كذا صورة</b> لنفس الشخص ورا بعض (زي صور الـ Burst)، أو <b>فيديو قصير</b> ثابت للوش. الصفحة هتاخد لحد ٣٠ صورة منه وتجمعهم، وده بيدّي دقة أعلى بجد. الصورة الواحدة بتشتغل برضه، بس من غير التجميع. وكله بيتعمل على التليفون، ومفيش حاجة بتترفع لأي مكان.</p>
+  <p class="lbl">Upload <b>several photos</b> of the same person in a row (like Burst shots), or a <b>short, steady video</b> of the face. The page takes up to 30 frames and stacks them, which genuinely improves resolution. A single photo works too, without stacking. Everything runs on the phone; nothing is uploaded.</p>
 </div>
 
 <div class="stage" id="picBox" hidden><canvas id="pic"></canvas></div>
 <div id="manBox" hidden>
-  <p class="lbl">دوس على مكان الانعكاس في الصورة (عين، نضارة، معلقة، شباك عربية…)، وظبط حجم المربع.</p>
-  <label>حجم المربع <b id="vZ"></b><input type="range" id="Z" min="1" max="40" step="0.5" value="8"></label>
+  <p class="lbl">Tap the reflection in the picture (eye, sunglasses, spoon, car window…) and adjust the box size.</p>
+  <label>Box size <b id="vZ"></b><input type="range" id="Z" min="1" max="40" step="0.5" value="8"></label>
 </div>
 <div class="msg" id="msg"></div>
 
 <div id="viewCtl" hidden>
-  <label>بص يمين وشمال <b id="vY"></b><input type="range" id="Y" min="-60" max="60" step="1" value="0"></label>
-  <label>بص فوق وتحت <b id="vP"></b><input type="range" id="P" min="-45" max="45" step="1" value="0"></label>
-  <label>زاوية الرؤية <b id="vF"></b><input type="range" id="F" min="40" max="120" step="5" value="75"></label>
+  <label>Look left / right <b id="vY"></b><input type="range" id="Y" min="-60" max="60" step="1" value="0"></label>
+  <label>Look up / down <b id="vP"></b><input type="range" id="P" min="-45" max="45" step="1" value="0"></label>
+  <label>Field of view <b id="vF"></b><input type="range" id="F" min="40" max="120" step="5" value="75"></label>
 </div>
-<div class="row"><button class="ghost" id="b-mir">اقلب زي المراية: شغال</button><button class="ghost" id="b-iris">شيل نقشة القزحية: شغال</button><button class="ghost" id="b-ai" disabled>تحسين AI ×٤</button></div>
+<div class="row"><button class="ghost" id="b-mir">Mirror flip: on</button><button class="ghost" id="b-iris">Remove iris pattern: on</button><button class="ghost" id="b-ai" disabled>AI enhance ×4</button></div>
 <div class="res" id="res"></div>
 <p class="lbl" id="note"></p>
 
-<details><summary>إيه الحقيقي وإيه التخمين؟</summary>
+<details><summary>What’s real and what’s a guess?</summary>
 <ul>
-<li><b>تجميع الصور (حقيقي):</b> كل صورة الانعكاس فيها مزحوح جزء صغير من البكسل عن التانية. الصفحة بتحسب الزحزحة دي بالظبط (phase correlation) وتظبط الصور على بعض قبل ما تجمعهم، فالضوضاء بتقل والتفاصيل الحقيقية بتزيد شوية. ده بيحتاج كذا صورة أو فيديو.</li>
-<li><b>الصورة العادية (حقيقي):</b> القرنية كروية، فكل نقطة فيها بتعكس اتجاه مختلف. الصفحة بتحسب لكل بكسل في الصورة الناتجة جه من أنهي اتجاه، وتطلّع منظر مسطح زي كاميرا عادية. وتقدر تلف بالـ sliders يمين وشمال وفوق وتحت.</li>
-<li><b>شيل نقشة القزحية (تقريبي):</b> القزحية أغمق من الانعكاس، ونقشتها بتتغير ببطء. الصفحة بتقدّرها وتطرحها، وبتظبط الألوان عشان لون العين ما يصبغش الصورة. ده ممكن ياكل جزء من الحاجات الكبيرة الغامقة في الانعكاس.</li>
-<li><b>تحسين AI (تخمين):</b> موديل ESRGAN بيكبّر ٤ مرات، وبيرسم تفاصيل شبه اللي اتعلمها من صور تانية. أي حاجة تظهر في نسخة الـ AI ومش موجودة في النسخة الحقيقية تبقى <b>تأليف من الموديل</b>، زي وش أو كلام أو نقشة. عشان كده النسختين جنب بعض، ونسخة الـ AI مكتوب عليها بالأحمر.</li>
-<li><b>الحد الحقيقي:</b> عدد البكسلات اللي القزحية واخداها في الصورة. الصفحة بتكتبه تحت. قزحية ٤٠ بكسل بتدّي انعكاس فيه أشكال كبيرة بس، و١٥٠ بكسل بتدّي تفاصيل أوضح بكتير.</li>
-<li>استخدمها على صورك، أو صور ناس موافقين. الانعكاس ممكن يبيّن مكان الشخص.</li>
+<li><b>Frame stacking (real):</b> In each frame the reflection is shifted by a fraction of a pixel. The page measures that shift precisely (phase correlation) and aligns frames before stacking, so noise drops and real detail improves a little. This needs several frames or a video.</li>
+<li><b>Normal picture (real):</b> The cornea is curved, so each point reflects a different direction. The page computes which direction each output pixel came from and produces a flat view like an ordinary camera. Use the sliders to look left, right, up and down.</li>
+<li><b>Remove iris pattern (approximate):</b> The iris is darker than the reflection and its pattern changes slowly. The page estimates and subtracts it, and balances colours so the eye colour doesn’t tint the image. This can eat some large dark objects in the reflection.</li>
+<li><b>AI enhancement (a guess):</b> An ESRGAN model upscales 4× and paints details resembling what it learned from other images. Anything that appears in the AI version but not in the real version is <b>invented by the model</b>, such as a face, text or a pattern. That’s why both versions are shown side by side, with the AI one labelled in red.</li>
+<li><b>The real limit:</b> how many pixels the iris occupies in the image. The page shows it below. A 40‑pixel iris gives only large shapes; 150 pixels gives much clearer detail.</li>
+<li>Use it on your own photos, or photos of people who agree. A reflection can reveal where someone is.</li>
 </ul></details>
 </div>
 <script>
@@ -225,13 +227,13 @@ $('s-cam').onclick = () => { src = 'cam'; seg(['s-cam', 's-up'], 's-cam'); $('ca
 $('s-up').onclick = () => { src = 'up'; seg(['s-cam', 's-up'], 's-up'); $('camBox').hidden = true; $('upBox').hidden = false; };
 const setMode = m => { mode = m; seg(['m-eye', 'm-gl', 'm-man'], { eye: 'm-eye', gl: 'm-gl', man: 'm-man' }[m]); $('manBox').hidden = m !== 'man'; $('viewCtl').hidden = m !== 'eye'; if (picData) $('picBox').hidden = false; aiUrls = {}; if (srcFrames.length) process(); };
 $('m-eye').onclick = () => setMode('eye'); $('m-gl').onclick = () => setMode('gl'); $('m-man').onclick = () => setMode('man');
-$('b-mir').onclick = () => { mirror = !mirror; $('b-mir').textContent = 'اقلب زي المراية: ' + (mirror ? 'شغال' : 'مقفول'); aiUrls = {}; render(); };
-$('b-iris').onclick = () => { iris = !iris; $('b-iris').textContent = 'شيل نقشة القزحية: ' + (iris ? 'شغال' : 'مقفول'); aiUrls = {}; render(); };
+$('b-mir').onclick = () => { mirror = !mirror; $('b-mir').textContent = 'Mirror flip: ' + (mirror ? 'on' : 'off'); aiUrls = {}; render(); };
+$('b-iris').onclick = () => { iris = !iris; $('b-iris').textContent = 'Remove iris pattern: ' + (iris ? 'on' : 'off'); aiUrls = {}; render(); };
 $('viewCtl').hidden = false;
 
 async function models() {
   if (lmI) return;
-  say('بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…');
+  say('Loading the face‑tracking model (about 4 MB)…');
   V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
   const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const o = (d, rm) => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: rm, numFaces: 1 });
@@ -241,22 +243,22 @@ async function models() {
 async function openCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
   stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing === 'user' ? 'user' : { ideal: 'environment' }, width: { ideal: 3840 }, height: { ideal: 2160 } }, audio: false });
-  video.srcObject = stream; await video.play(); $('b-flip').textContent = facing === 'user' ? 'الكاميرا الخلفية' : 'الكاميرا الأمامية';
+  video.srcObject = stream; await video.play(); $('b-flip').textContent = facing === 'user' ? 'Rear camera' : 'Front camera';
 }
 $('b-cam').onclick = async () => {
   $('b-cam').disabled = true;
-  try { if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.'); await openCam(); await models(); $('b-cam').style.display = 'none'; $('b-shot').disabled = $('b-flip').disabled = false; say(`الكاميرا شغالة بدقة ${video.videoWidth}×${video.videoHeight}.`); }
-  catch (e) { $('b-cam').disabled = false; say(e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e), true); }
+  try { if (!window.isSecureContext) throw new Error('This page must be opened over https.'); await openCam(); await models(); $('b-cam').style.display = 'none'; $('b-shot').disabled = $('b-flip').disabled = false; say(`Camera running at ${video.videoWidth}×${video.videoHeight}.`); }
+  catch (e) { $('b-cam').disabled = false; say(e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e), true); }
 };
-$('b-flip').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; try { await openCam(); say(`الكاميرا شغالة بدقة ${video.videoWidth}×${video.videoHeight}.`); } catch (e) { say('مقدرتش أفتح الكاميرا التانية.', true); } };
+$('b-flip').onclick = async () => { facing = facing === 'user' ? 'environment' : 'user'; try { await openCam(); say(`Camera running at ${video.videoWidth}×${video.videoHeight}.`); } catch (e) { say('Couldn’t open the other camera.', true); } };
 
 // regions in pixels
 function regions(pts, W, H) {
   const P = i => ({ x: pts[i].x * W, y: pts[i].y * H }), d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), out = [];
-  if (mode === 'eye') for (const [c, rim, lab] of [[468, [469, 470, 471, 472], 'العين اللي على شمال الصورة'], [473, [474, 475, 476, 477], 'العين اللي على يمين الصورة']]) {
+  if (mode === 'eye') for (const [c, rim, lab] of [[468, [469, 470, 471, 472], 'Eye on the left of the image'], [473, [474, 475, 476, 477], 'Eye on the right of the image']]) {
     if (pts.length <= c) continue; const C = P(c), r = rim.reduce((s, i) => s + d(C, P(i)), 0) / 4; out.push({ x: C.x, y: C.y, s: 2 * r * 1.02, r, lab });
   }
-  if (mode === 'gl') for (const [a, b, lab] of [[33, 133, 'العدسة اللي على شمال الصورة'], [362, 263, 'العدسة اللي على يمين الصورة']]) { const A = P(a), B = P(b), ew = d(A, B); out.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 - 0.1 * ew, s: 2.1 * ew, lab }); }
+  if (mode === 'gl') for (const [a, b, lab] of [[33, 133, 'Lens on the left of the image'], [362, 263, 'Lens on the right of the image']]) { const A = P(a), B = P(b), ew = d(A, B); out.push({ x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 - 0.1 * ew, s: 2.1 * ew, lab }); }
   return out;
 }
 // keep only a patch around each region (memory) -> frame {src(patch), x, y, s}
@@ -277,13 +279,13 @@ function process() {
     const g = c.getContext('2d', { willReadFrequently: true }), full = { w: c.width, h: c.height, data: g.getImageData(0, 0, c.width, c.height).data };
     if (k === srcFrames.length - 1) { picData = full; }
     let regs = [];
-    if (mode === 'man') { if (manPt) regs = [{ x: manPt.x * c.width, y: manPt.y * c.height, s: c.width * $('Z').value / 100, lab: 'المنطقة اللي اخترتها' }]; }
+    if (mode === 'man') { if (manPt) regs = [{ x: manPt.x * c.width, y: manPt.y * c.height, s: c.width * $('Z').value / 100, lab: 'Selected area' }]; }
     else if (lmI) { const res = lmI.detect(c), pts = res.faceLandmarks && res.faceLandmarks[0]; if (pts) regs = regions(pts, c.width, c.height); }
     regs.forEach((g, i) => { (per[i] = per[i] || { lab: g.lab, frames: [] }).frames.push(patch(full, g)); });
   });
   drawPic();
   sets = Object.values(per);
-  if (!sets.length) { $('res').innerHTML = ''; say(mode === 'man' ? 'دوس على مكان الانعكاس في الصورة.' : 'ما لقيتش وش في الصورة. جرّب «أي مكان (يدوي)».', mode !== 'man'); $('b-ai').disabled = true; return; }
+  if (!sets.length) { $('res').innerHTML = ''; say(mode === 'man' ? 'Tap the reflection in the picture.' : 'No face found in the picture. Try “Anywhere (manual)”.', mode !== 'man'); $('b-ai').disabled = true; return; }
   // super-resolve each region once
   for (const st of sets) {
     const s = Math.max(...st.frames.map(f => f.s)), n = s * 2 >= 200 ? 256 : s * 2 >= 100 ? 128 : 64;
@@ -325,23 +327,23 @@ function render() {
   const fig = (url, cap, cls, key) => `<figure class="${cls || ''}"><img alt="" src="${url}" ${key ? `data-k="${key}"` : ''}><figcaption>${cap}</figcaption></figure>`;
   if (both) {
     const u = toUrl(both.img, both.n, both.mask);
-    html += `<h3>المنظر من العينين مع بعض</h3><div class="outs">${fig(u, 'صورة حقيقية: العينين متظبطين على بعض ومتجمّعين')}${aiUrls.both ? fig(aiUrls.both, 'تخمين AI ×٤: التفاصيل الصغيرة ممكن تكون متألّفة', 'ai') : ''}</div>`;
+    html += `<h3>View from both eyes combined</h3><div class="outs">${fig(u, 'Real image: both eyes aligned and stacked')}${aiUrls.both ? fig(aiUrls.both, 'AI guess ×4: small details may be invented', 'ai') : ''}</div>`;
     both.url = u;
   }
   sets.forEach((st, i) => {
     const raw = toUrl(st.img, st.n, mode === 'eye' ? circleMask(st.n, 0.98) : null), v = toUrl(views[i].img, views[i].n, views[i].mask); views[i].url = v;
-    html += `<h3>${st.lab}</h3><div class="outs">${fig(raw, `الانعكاس متجمّع من ${st.used} صورة`)}${fig(v, mode === 'eye' ? 'صورة عادية: التقوّس متفرد' : 'صورة عادية: متعدّل اللون والاتجاه')}${aiUrls[i] ? fig(aiUrls[i], 'تخمين AI ×٤: التفاصيل الصغيرة ممكن تكون متألّفة', 'ai') : ''}</div>`;
+    html += `<h3>${st.lab}</h3><div class="outs">${fig(raw, `Reflection stacked from ${st.used} frames`)}${fig(v, mode === 'eye' ? 'Normal picture: curve unwrapped' : 'Normal picture: colour and orientation corrected')}${aiUrls[i] ? fig(aiUrls[i], 'AI guess ×4: small details may be invented', 'ai') : ''}</div>`;
   });
   $('res').innerHTML = html; render.views = views; render.both = both;
   const px = sets.map(s => s.px), total = sets.reduce((a, s) => Math.max(a, s.used), 0);
-  $('note').textContent = (mode === 'eye' ? `قطر القزحية حوالي ${px.join(' و')} بكسل.` : `المنطقة حوالي ${px.join(' و')} بكسل.`) + ` اتجمّع لحد ${total} صورة.` + (total === 1 ? ' صورة واحدة بس، فمفيش تجميع. ارفع كذا صورة أو فيديو عشان دقة أعلى.' : '') + (mode === 'eye' && Math.min(...px) < 60 ? ' العين صغيرة في الصورة، فالتفاصيل محدودة مهما اتحسنت.' : '') + ' اضغط مطوّل على أي صورة عشان تحفظها.';
+  $('note').textContent = (mode === 'eye' ? `Iris diameter about ${px.join(' and')} px.` : `Area about ${px.join(' and')} px.`) + ` Stacked up to ${total} frames.` + (total === 1 ? ' Only one picture, so no stacking. Upload several photos or a video for higher detail.' : '') + (mode === 'eye' && Math.min(...px) < 60 ? ' The eye is small in the picture, so detail is limited however much it’s enhanced.' : '') + ' Long‑press any image to save it.';
 }
 
 $('b-shot').onclick = async () => {
   if (mode === 'man') { srcFrames = []; addFrame(video, video.videoWidth, video.videoHeight); process(); return; }
-  $('b-shot').disabled = true; say('اثبت… بيجمّع ٢٠ صورة.'); srcFrames = [];
+  $('b-shot').disabled = true; say('Hold still… stacking 20 frames.'); srcFrames = [];
   for (let k = 0; k < 20; k++) { await new Promise(r => requestAnimationFrame(r)); await wait(40); addFrame(video, video.videoWidth, video.videoHeight); }
-  say('بيظبط الصور على بعض…'); await wait(30); process(); $('b-shot').disabled = false;
+  say('Aligning frames…'); await wait(30); process(); $('b-shot').disabled = false;
 };
 $('file').onchange = async e => {
   const fl = Array.from(e.target.files); if (!fl.length) return;
@@ -349,15 +351,15 @@ $('file').onchange = async e => {
     if (mode !== 'man') await models(); srcFrames = []; aiUrls = {};
     for (const f of fl) {
       if (f.type.startsWith('video/')) {
-        say('بيقرا الفيديو…'); const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(f);
+        say('Reading the video…'); const v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(f);
         await new Promise((r, j) => { v.onloadeddata = r; v.onerror = j; v.load(); });
         const dur = Math.min(v.duration || 2, 4), N = 30;
         for (let k = 0; k < N && srcFrames.length < 30; k++) { v.currentTime = dur * (k + 0.5) / N; await new Promise(r => { v.onseeked = r; }); addFrame(v, v.videoWidth, v.videoHeight); }
         URL.revokeObjectURL(v.src);
       } else if (srcFrames.length < 30) { const b = await createImageBitmap(f); addFrame(b, b.width, b.height); }
     }
-    say(`بيظبط ${srcFrames.length} صورة على بعض…`); await wait(30); process();
-  } catch (err) { say('مقدرتش أقرا الملف.', true); }
+    say(`Aligning ${srcFrames.length} frames…`); await wait(30); process();
+  } catch (err) { say('Couldn’t read the file.', true); }
 };
 
 // optional AI x4 (ESRGAN, runs on the phone)
@@ -366,14 +368,14 @@ const loadJs = u => new Promise((r, j) => { const s = document.createElement('sc
 $('b-ai').onclick = async () => {
   if (!render.views) return; $('b-ai').disabled = true;
   try {
-    if (!up) { say('بيحمّل موديل التحسين (حوالي ٤ ميجا)…');
+    if (!up) { say('Loading the enhancement model (about 4 MB)…');
       await loadJs('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js'); await loadJs('https://cdn.jsdelivr.net/npm/@upscalerjs/default-model@1.0.0/dist/umd/index.min.js');
       await loadJs('https://cdn.jsdelivr.net/npm/upscaler@1.0.0/dist/browser/umd/upscaler.min.js'); await loadJs('https://cdn.jsdelivr.net/npm/@upscalerjs/esrgan-medium@1.0.0/dist/umd/models/esrgan-medium/src/x4/index.min.js');
       up = new window.Upscaler({ model: window.ESRGANMedium4x }); }
     const jobs = render.both ? [['both', render.both.url]] : []; render.views.forEach((v, i) => jobs.push([i, v.url]));
-    for (const [k, url] of jobs) { say(`الـ AI شغال… (${jobs.indexOf(jobs.find(j => j[0] === k)) + 1} من ${jobs.length})`); const img = new Image(); img.src = url; await img.decode(); aiUrls[k] = await up.upscale(img, { patchSize: 64, padding: 4 }); }
-    say('خلص. قارن نسخة الـ AI بالنسخة الحقيقية جنبها.'); render();
-  } catch (e) { say('موديل التحسين ما اشتغلش على الجهاز ده.', true); }
+    for (const [k, url] of jobs) { say(`AI working… (${jobs.indexOf(jobs.find(j => j[0] === k)) + 1} of ${jobs.length})`); const img = new Image(); img.src = url; await img.decode(); aiUrls[k] = await up.upscale(img, { patchSize: 64, padding: 4 }); }
+    say('Done. Compare the AI version with the real one beside it.'); render();
+  } catch (e) { say('The enhancement model didn’t run on this device.', true); }
   $('b-ai').disabled = false;
 };
 }

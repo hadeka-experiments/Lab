@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>نبض الكوبري</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>نبض الكوبري</h1>
+<p class="sub">كل كوبري وكل عمارة عالية بيتهز ببطء على «نغمة» طبيعية خاصة بيه، زي وتر الجيتار بس أبطأ بكتير. حساس الحركة في التليفون يقدر يلقطها، والصفحة تفصلها عن اهتزاز العربية والشارع.</p>
+<div class="card">
+  <b>الطريقة</b>
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li><b>سجّل مرجع:</b> نفس الظروف بس برة الكوبري. نفس العربية على طريق عادي، أو واقف على الأرض جنب الكوبري. ده بيعلّم الصفحة الاهتزاز «العادي».</li>
+    <li><b>سجّل على الكوبري:</b> ٣٠ ثانية على الأقل. أحسن حاجة إنك تكون <b>واقف على كوبري مشاة</b>، أو قاعد في عربية واقفة في زحمة فوق الكوبري.</li>
+    <li>التليفون يكون <b>على الأرض أو على الكرسي</b>، مش في إيدك.</li>
+  </ol>
+  <label>اسم الكوبري أو العمارة<input type="text" id="name" placeholder="مثلاً: كوبري قصر النيل"></label>
+  <div class="row"><button id="b-ref">سجّل مرجع</button><button id="b-br">سجّل على الكوبري</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<div class="fig"><canvas id="live"></canvas></div>
+<p class="lbl" id="liveL">الاهتزاز الرأسي دلوقتي.</p>
+<div id="res"></div>
+<h2>التسجيلات</h2>
+<ul class="list" id="recs"></ul>
+<details style="margin-top:14px"><summary>إزاي بتشتغل؟ وإيه حدودها؟</summary>
+<ul>
+<li>الصفحة بتحلل الاهتزاز لترددات (كام هزة في الثانية) من ٠.٣ لحد ٢٥ هرتز. الكباري الكبيرة بتتهز عادةً أبطأ من ١٠ هرتز، والعمارات العالية أبطأ من ٢ هرتز.</li>
+<li>بتقارن تسجيل الكوبري بالمرجع. التردد اللي <b>قوته أعلى بكتير على الكوبري</b> هو المرشح إنه نغمة الكوبري نفسه.</li>
+<li><b>العربية ليها اهتزازها:</b> المساعدين بتوعها بيهتزوا حوالي ١–٢ هرتز، والموتور أسرع. عشان كده المرجع لازم يكون بنفس العربية. وعشان كده كوبري المشاة أنضف.</li>
+<li><b>التأكيد الحقيقي هو التكرار:</b> لو نفس التردد ظهر في كذا تسجيل على نفس الكوبري في أيام مختلفة، يبقى غالباً نغمة الكوبري فعلاً. الصفحة بتجمعلك ده تحت.</li>
+<li>الآيفون بيقرا الحساس على الويب حوالي ٦٠ مرة في الثانية، فأعلى تردد ينفع يتقاس حوالي ٢٥–٣٠ هرتز.</li>
+</ul></details>
+</div>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+let recs = LS.get('recs', []), cur = null, buf = [], g = null;
+function vert(e) {
+  const A = e.acceleration, G = e.accelerationIncludingGravity; if (!G || G.x == null) return null;
+  let ax, ay, az; if (A && A.x != null) { ax = A.x; ay = A.y; az = A.z; } else { g = g || { x: G.x, y: G.y, z: G.z }; g.x += 0.02 * (G.x - g.x); g.y += 0.02 * (G.y - g.y); g.z += 0.02 * (G.z - g.z); ax = G.x - g.x; ay = G.y - g.y; az = G.z - g.z; }
+  let ux = G.x - ax, uy = G.y - ay, uz = G.z - az; const un = Math.hypot(ux, uy, uz) || 1;
+  return (ax * ux + ay * uy + az * uz) / un;
+}
+addEventListener('devicemotion', e => { const v = vert(e); if (v == null) return; const t = (e.timeStamp || performance.now()) / 1000; buf.push({ t, v }); if (buf.length > 60 * 40) buf.shift(); if (cur) cur.s.push([t, v]); });
+function spectrum(s) {
+  const dt = (s[s.length - 1][0] - s[0][0]) / (s.length - 1), fs = 1 / dt;
+  const x = s.map(p => p[1]); const r = welchPS(x, fs, Math.min(512, Math.pow(2, Math.floor(Math.log2(x.length / 2)))));
+  const f = [], P = []; r.f.forEach((v, k) => { if (v >= 0.3 && v <= Math.min(25, fs / 2 - 1)) { f.push(+v.toFixed(3)); P.push(+(10 * Math.log10(r.P[k] + 1e-20)).toFixed(2)); } });
+  return { fs: +fs.toFixed(1), f, P };
+}
+async function rec(kind) {
+  if (cur) return;
+  const name = $('name').value.trim() || 'بدون اسم';
+  try { await motionPerm(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; return; }
+  cur = { kind, name, ts: Date.now(), s: [] }; const D = 40;
+  $('b-ref').disabled = $('b-br').disabled = true;
+  for (let i = D; i > 0; i--) { $('st').textContent = `بيسجّل ${kind === 'ref' ? 'المرجع' : 'الكوبري'}… ${ar(i)} ثانية. ماتلمسش التليفون.`; await sleepMs(1000); }
+  const r = cur; cur = null; $('b-ref').disabled = $('b-br').disabled = false;
+  if (r.s.length < 600) { $('st').innerHTML = '<span class="bad">الحساس ماوصلش منه قراءات كفاية.</span>'; return; }
+  const sp = spectrum(r.s); recs.unshift({ kind, name, ts: r.ts, ...sp }); recs = recs.slice(0, 40); LS.set('recs', recs);
+  $('st').innerHTML = `<span class="ok">اتسجل.</span> (${sp.fs} قراءة في الثانية)`; analyse();
+}
+$('b-ref').onclick = () => rec('ref'); $('b-br').onclick = () => rec('br');
+function peaksOf(br, ref) { // frequencies where the bridge is clearly stronger than the reference
+  const out = []; const d = br.f.map((f, k) => { const j = ref ? nearestIdx(ref.f, f) : -1; return br.P[k] - (j >= 0 ? ref.P[j] : median(br.P)); });
+  for (let k = 2; k < d.length - 2; k++) if (d[k] > 9 && d[k] >= d[k - 1] && d[k] >= d[k + 1] && d[k] >= d[k - 2] && d[k] >= d[k + 2]) out.push({ f: br.f[k], db: d[k] });
+  return out.sort((a, b) => b.db - a.db).slice(0, 4);
+}
+const nearestIdx = (arr, v) => { let b = 0; for (let i = 1; i < arr.length; i++) if (Math.abs(arr[i] - v) < Math.abs(arr[b] - v)) b = i; return b; };
+const median = a => { const s = a.slice().sort((x, y) => x - y); return s[s.length >> 1]; };
+function analyse() {
+  drawRecs();
+  const br = recs.find(r => r.kind === 'br'); if (!br) { $('res').innerHTML = ''; return; }
+  const ref = recs.find(r => r.kind === 'ref' && r.ts > br.ts - 6 * 3600e3) || recs.find(r => r.kind === 'ref');
+  const pk = peaksOf(br, ref);
+  // repeatability over all recordings of the same name
+  const same = recs.filter(r => r.kind === 'br' && r.name === br.name), hits = {};
+  for (const r of same) { const rf = recs.find(x => x.kind === 'ref' && Math.abs(x.ts - r.ts) < 6 * 3600e3) || ref; for (const p of peaksOf(r, rf)) { const key = (Math.round(p.f / 0.1) * 0.1).toFixed(1); hits[key] = (hits[key] || 0) + 1; } }
+  const rep = Object.entries(hits).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]);
+  $('res').innerHTML = `<div class="fig"><canvas id="spec"></canvas></div><p class="lbl">الأحمر: على الكوبري · الرمادي: المرجع${ref ? '' : ' (لسه مفيش مرجع، فالمقارنة بالمتوسط بس)'}.</p>
+  <div class="card"><b>${esc(br.name)}</b><p>${pk.length ? 'ترددات أقوى بوضوح على الكوبري: ' + pk.map(p => `<b>${p.f.toFixed(2)} هرتز</b> (+${Math.round(p.db)} ديسيبل)`).join('، ') + '.' : 'مفيش تردد واضح زيادة عن المرجع في التسجيل ده.'}</p>
+  ${same.length > 1 ? `<p>${rep.length ? `اتكرر في أكتر من تسجيل: ${rep.map(([f, n]) => `<b>${f} هرتز</b> (${ar(n)} من ${ar(same.length)})`).join('، ')}. ده المرشح الأقوى إنه نغمة الكوبري.` : `في ${ar(same.length)} تسجيلات على نفس الاسم، ومفيش تردد اتكرر لسه.`}</p>` : '<p class="lbl">سجّل على نفس الكوبري مرة أو اتنين كمان، في يوم تاني لو تقدر، عشان نتأكد إن التردد ده بيتكرر.</p>'}</div>`;
+  requestAnimationFrame(() => drawSpec(br, ref, pk));
+}
+function drawSpec(br, ref, pk) {
+  const cv = $('spec'); if (!cv) return; const [c, w, h] = fitCanvas(cv); c.clearRect(0, 0, w, h);
+  const all = br.P.concat(ref ? ref.P : []), lo = Math.min(...all), hi = Math.max(...all), fx = f => w - 30 - (Math.log(f / 0.3) / Math.log(25 / 0.3)) * (w - 40), fy = p => h - 18 - (p - lo) / (hi - lo + 1e-9) * (h - 30);
+  c.fillStyle = '#7c8790'; c.font = '11px sans-serif'; [0.5, 1, 2, 5, 10, 20].forEach(f => { c.fillText(f + '', fx(f) - 6, h - 4); c.fillRect(fx(f), h - 18, 1, 4); });
+  const line = (r, col) => { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); r.f.forEach((f, k) => { const x = fx(f), y = fy(r.P[k]); k ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); };
+  if (ref) line(ref, '#7c8790'); line(br, '#e8251a');
+  c.fillStyle = '#e8251a'; pk.forEach(p => { const x = fx(p.f); c.fillRect(x - 1, 8, 2, h - 26); });
+}
+function drawRecs() { $('recs').innerHTML = recs.length ? recs.map((r, i) => `<li><span>${r.kind === 'ref' ? 'مرجع' : esc(r.name)}</span><span>${new Date(r.ts).toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} <button class="ghost" data-i="${i}">امسح</button></span></li>`).join('') : '<li>لسه مفيش.</li>'; }
+$('recs').onclick = e => { const b = e.target.closest('button'); if (!b) return; recs.splice(+b.dataset.i, 1); LS.set('recs', recs); analyse(); };
+function liveDraw() {
+  requestAnimationFrame(liveDraw); const [c, w, h] = fitCanvas($('live')); c.clearRect(0, 0, w, h); if (buf.length < 2) return;
+  const now = buf[buf.length - 1].t, pts = buf.filter(p => p.t > now - 10); const m = pts.reduce((s, p) => s + p.v, 0) / pts.length; let a = 0.05; for (const p of pts) a = Math.max(a, Math.abs(p.v - m));
+  c.strokeStyle = cur ? '#e8251a' : '#7c8790'; c.lineWidth = 1.2; c.beginPath(); pts.forEach((p, i) => { const x = w - (now - p.t) / 10 * w, y = h / 2 - (p.v - m) / a * h * 0.42; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
+  $('liveL').textContent = `الاهتزاز الرأسي دلوقتي (أعلى ${a.toFixed(3)} م/ث²).`;
+}
+analyse(); liveDraw();
+</script>
+</body>
+</html>

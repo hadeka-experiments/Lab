@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>محادثة الليل مع الطيور</title>
+<script src="shell.js"></script>
+<title>Night Birds</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -41,43 +42,44 @@ ul.ev{list-style:none;padding:0;margin:6px 0;display:grid;gap:4px;font-size:14px
 ul.ev button{min-height:32px;padding:0 10px;font-size:13px;margin-inline-start:8px}
 .live{font-size:15px}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>محادثة الليل مع الطيور</h1>
-<p class="sub">سيب التليفون جنب الشباك وروح نام. الصفحة بتسمع طول الليل، وBirdNET بيعرف كل طائر يتكلم، والصفحة بترد عليه لوحدها بصوته هو، وتقيس هو رد إزاي. ولما تصحى تلاقي تقرير كامل.</p>
+<h1>Night Birds</h1>
+<p class="sub">Leave the phone by the window and go to sleep. The page listens all night, BirdNET identifies every bird that calls, and the page answers each one with its own voice and measures how it reacts. When you wake up, a full report is waiting.</p>
 
 <div class="card">
-  <div class="row"><button id="b-go">ابدأ الليلة</button><button class="ghost" id="b-geo">فلتر حسب مكاني</button></div>
-  <div class="lbl live" id="st">قبل ما تنام: حط التليفون على الشاحن جنب الشباك، والصفحة مفتوحة. الشاشة هتفضل منورة طول الليل لأن الآيفون بيوقف الصفحة لو الشاشة طفت.</div>
+  <div class="row"><button id="b-go">Start the night</button><button class="ghost" id="b-geo">Filter by my location</button></div>
+  <div class="lbl live" id="st">Before sleeping: put the phone on its charger by the window with this page open. The screen stays on all night, because phones pause the page when the screen turns off.</div>
 </div>
 
-<h2>الرد الأوتوماتيك</h2>
+<h2>Automatic replies</h2>
 <div class="card">
-  <label style="display:flex;gap:10px;align-items:center;color:var(--ink)"><input type="checkbox" id="auto" checked style="width:22px;height:22px;accent-color:var(--red)"> الصفحة ترد على الطيور لوحدها</label>
-  <label>أقصى عدد ردود في الساعة <b id="vH"></b><input type="range" id="H" min="1" max="10" step="1" value="4"></label>
-  <label>أقصى عدد ردود في الليلة كلها <b id="vN"></b><input type="range" id="N" min="5" max="40" step="1" value="20"></label>
-  <label>أقل وقت بين ردّين <b id="vC"></b><input type="range" id="C" min="1" max="15" step="1" value="3"></label>
-  <label>أقل ثقة في النوع عشان ترد <b id="vT"></b><input type="range" id="T" min="0.4" max="0.95" step="0.05" value="0.65"></label>
-  <label>علو الرد <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.5"></label>
-  <p class="lbl">الحدود دي موجودة عشان الطائر. الرد بصوته بيخليه فاكر إن فيه منافس في منطقته، والتكرار طول الليل بيوتره ويصرف طاقته. وخلي بالك إن الصوت ممكن يصحّي حد في البيت.</p>
+  <label style="display:flex;gap:10px;align-items:center;color:var(--ink)"><input type="checkbox" id="auto" checked style="width:22px;height:22px;accent-color:var(--red)"> The page answers birds on its own</label>
+  <label>Max replies per hour <b id="vH"></b><input type="range" id="H" min="1" max="10" step="1" value="4"></label>
+  <label>Max replies per night <b id="vN"></b><input type="range" id="N" min="5" max="40" step="1" value="20"></label>
+  <label>Minimum time between replies <b id="vC"></b><input type="range" id="C" min="1" max="15" step="1" value="3"></label>
+  <label>Minimum species confidence to reply <b id="vT"></b><input type="range" id="T" min="0.4" max="0.95" step="0.05" value="0.65"></label>
+  <label>Reply volume <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.5"></label>
+  <p class="lbl">These limits protect the bird. Hearing its own call makes it think a rival is in its territory, and repeating that all night stresses it and drains its energy. The sound may also wake someone at home.</p>
 </div>
 
-<h2>التقرير</h2>
-<div class="card" id="report"><p class="lbl">التقرير هيظهر هنا وهيتحدّث وانت نايم.</p></div>
-<div class="row"><button class="ghost" id="b-csv" disabled>حمّل السجل (CSV)</button><button class="ghost" id="b-json" disabled>كل البيانات (JSON)</button><button class="ghost" id="b-wav" disabled>كل الأصوات في ملف واحد (WAV)</button><button class="ghost" id="b-old" hidden>تقرير الليلة اللي فاتت</button></div>
+<h2>Report</h2>
+<div class="card" id="report"><p class="lbl">The report appears here and updates while you sleep.</p></div>
+<div class="row"><button class="ghost" id="b-csv" disabled>Download log (CSV)</button><button class="ghost" id="b-json" disabled>All data (JSON)</button><button class="ghost" id="b-wav" disabled>All sounds in one file (WAV)</button><button class="ghost" id="b-old" hidden>Last night’s report</button></div>
 
-<h2>كل الأحداث</h2>
+<h2>All events</h2>
 <ul class="ev" id="ev"></ul>
 
-<details><summary>هيعرف إيه عن الطائر؟ وإيه اللي مش هيعرفه؟</summary>
+<details><summary>What will it learn about the bird, and what won’t it?</summary>
 <ul>
-<li><b>هيعرف:</b> هو أنهي نوع، وبيتكلم إمتى وكام مرة، وأشكال أصواته وترددها. ولما الصفحة ترد، هيعرف هو رد عليها ولا لأ، وبعد كام ثانية، وهل نداءاته زادت بعدها، وهل صوته بقى أعلى (يمكن قرّب). وده بالظبط اللي علماء الطيور بيقيسوه في تجارب الـ playback.</li>
-<li><b>مش هيعرف:</b> هو بيقول إيه، ولا بيفكر في إيه، ولا شايف العالم إزاي. مفيش أي موديل بيعرف يترجم أصوات الطيور لكلام أو أفكار. فالتقرير فيه السلوك المقاس بس، ومافيهوش أي جملة متألفة على لسان الطائر.</li>
-<li><b>الرد:</b> زي التجربة اللي في فيديو Earth Species Project، التوقيت هو أهم حاجة. الصفحة بتتعلم من الطائر نفسه هو بيسكت قد إيه بين نداء والتاني، وبترد بعد نفس المدة. وبتختار صوت من آخر ٥ أصوات قالهم بدل ما تكرر نفس التسجيل، لأن في الفيديو الطائر ما اتعاملش مع التسجيل المتكرر كأنه طائر حقيقي. الفرق إن الموديل في الفيديو بيولّد أصوات جديدة، والصفحة بتعيد أصوات الطائر نفسه. ما بتردش على صوت إنسان، ولا على صوت ثقتها فيه أقل من الحد.</li>
-<li><b>الليل:</b> أغلب الطيور بتنام بالليل، وأكتر وقت هتسمع فيه حاجة هو الفجر، لما الطيور بتبدأ تغني. ولو فيه بومة أو طائر ليلي، هيتسجل.</li>
-<li>الأصوات بتتحفظ مقاطع بس، مش تسجيل الليل كله، عشان الذاكرة. والتقرير بيتحفظ على التليفون، فلو الصفحة قفلت لأي سبب هتلاقي «تقرير الليلة اللي فاتت».</li>
-<li>الموديل: BirdNET Live من BirdNET-Team (الكود MIT، والموديل CC BY-SA 4.0).</li>
+<li><b>It will learn:</b> which species it is, when and how often it calls, and the shape and pitch of its calls. When the page replies, it learns whether the bird answered, after how many seconds, whether its calling increased afterwards, and whether it got louder (maybe it came closer). That’s exactly what ornithologists measure in playback experiments.</li>
+<li><b>It won’t learn:</b> what the bird is saying, thinking, or how it sees the world. No model can translate bird calls into words or thoughts. So the report contains measured behaviour only, never invented sentences put in the bird’s mouth.</li>
+<li><b>Replying:</b> As in the Earth Species Project video, timing matters most. The page learns from the bird itself how long it pauses between calls and replies after the same gap. It picks one of the bird’s last 5 calls instead of repeating one recording, because in the video the bird didn’t treat a repeated recording as a real bird. The difference is that the video’s model generated new calls, while this page replays the bird’s own calls. It never replies to human voices, or to sounds below the confidence threshold.</li>
+<li><b>Night time:</b> Most birds sleep at night; you’ll hear the most at dawn, when birds start singing. Owls or other night birds will be recorded too.</li>
+<li>Only sound clips are saved, not the whole night, to save memory. The report is saved on the phone, so if the page closes for any reason you’ll find it under “Last night’s report”.</li>
+<li>Model: BirdNET Live by the BirdNET Team (code MIT, model CC BY-SA 4.0).</li>
 </ul></details>
 </div>
 <script>
@@ -129,11 +131,11 @@ function describe(t0, fs, floor) {
   const mx = Math.max(...fs.map(f => f.e)); let syl = 0, down = true;
   for (const f of fs) { if (down && f.e > mx * 0.5) { syl++; down = false; } else if (!down && f.e < mx * 0.2) down = true; }
   const range = hi - lo; let pat;
-  if (dur < 0.35 && syl <= 1) pat = ['نداء قصير', 'short call'];
-  else if (syl >= 4 && range < 1500 && dur / syl < 0.15) pat = ['تريل: تكرار سريع لنفس النغمة', 'trill'];
-  else if (syl >= 3 && range >= 1500 && dur >= 0.8) pat = ['مقطع غنا متنوّع', 'song phrase'];
-  else if (syl >= 2) pat = ['نداء متكرر', 'repeated call'];
-  else pat = ['نداء', 'call'];
+  if (dur < 0.35 && syl <= 1) pat = ['Short call', 'short call'];
+  else if (syl >= 4 && range < 1500 && dur / syl < 0.15) pat = ['Trill: fast repeats of one note', 'trill'];
+  else if (syl >= 3 && range >= 1500 && dur >= 0.8) pat = ['Varied song phrase', 'song phrase'];
+  else if (syl >= 2) pat = ['Repeated call', 'repeated call'];
+  else pat = ['Call', 'call'];
   return { t0, t1: t0 + dur, dur, peak, lo, hi, syl, pat, snr: 10 * Math.log10(mx / (floor || 1e-12)) };
 }
 
@@ -141,22 +143,22 @@ function describe(t0, fs, floor) {
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const SR = 48000, MODELS = 'https://birdnet-team.github.io/real-time-pwa/models', TF = 'https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.14.0/tf.min.js';
-const UNITS = { H: '', N: '', C: ' د', T: '', V: '' };
+const UNITS = { H: '', N: '', C: ' min', T: '', V: '' };
 for (const k in UNITS) { const f = () => $('v' + k).textContent = $(k).value + UNITS[k]; $(k).addEventListener('input', f); f(); }
 const NONBIRD = /^(Dog|Engine|Fireworks|Gun|Human non-vocal|Human vocal|Human whistle|Noise|Power tools|Siren|Environmental)$/;
 let ctx, stream, worker, ready = false, busy = false, running = false, geo = null, startWall = 0;
 let ring = new Float32Array(SR * 3), ringPos = 0, filled = 0, proc0 = 0, frameBuf = new Float32Array(1024), fbN = 0, seg = Segmenter();
 let hist = new Float32Array(SR * 6), hpos = 0; // last 6 s for clips
 let events = [], clips = new Map(), pendingSegs = [], replies = [], mutedUntil = 0, lastPredAt = -10, quietSince = 0, lastSegEnd = 0;
-const tNow = () => proc0 / SR, clock = s => new Date(startWall + s * 1000).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+const tNow = () => proc0 / SR, clock = s => new Date(startWall + s * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 const nm = p => p.commonNameI18n && p.commonNameI18n !== p.commonName ? p.commonNameI18n : p.commonName;
 
 function startWorker() {
   return new Promise((res, rej) => {
-    worker = new Worker('birdnet-worker.js?' + new URLSearchParams({ tf: TF, root: MODELS, lang: 'ar' }));
-    worker.onerror = () => rej(new Error('الموديل ما اتحمّلش. اتأكد إن birdnet-worker.js مرفوع جنب الصفحة.'));
+    worker = new Worker('birdnet-worker.js?' + new URLSearchParams({ tf: TF, root: MODELS, lang: 'en' }));
+    worker.onerror = () => rej(new Error('The model failed to load. Make sure birdnet-worker.js is uploaded next to this page.'));
     worker.onmessage = ({ data }) => {
-      if (data.message === 'load_model') $('st').textContent = `بيحمّل الموديل… ${data.progress}%`;
+      if (data.message === 'load_model') $('st').textContent = `Loading model… ${data.progress}%`;
       else if (data.message === 'loaded') { ready = true; res(); }
       else if (data.message === 'segments') onPred(data.segments[0]);
     };
@@ -222,8 +224,8 @@ function response(me) {
   const first = after[0], lv = a => a.length ? a.reduce((s, x) => s + x.snr, 0) / a.length : null;
   return { before: before.length, after: after.length, latency: first ? first.t0 - me.t1 : null, louder: lv(before) != null && lv(after) != null ? lv(after) - lv(before) : null };
 }
-const respTxt = r => !r ? 'لسه بيقيس…' : r.after === 0 ? 'ما ردّش في الدقيقة اللي بعدها.' :
-  `ردّ بعد ${r.latency.toFixed(1)} ث. نداءاته: ${r.before} في الدقيقة اللي قبل ← ${r.after} في الدقيقة اللي بعد.` + (r.louder != null && r.louder > 3 ? ` صوته بقى أعلى بحوالي ${Math.round(r.louder)} dB، يمكن قرّب.` : '');
+const respTxt = r => !r ? 'Still measuring…' : r.after === 0 ? 'No response within the following minute.' :
+  `Replied after ${r.latency.toFixed(1)} s. Its calls: ${r.before} in the minute before → ${r.after} in the minute after.` + (r.louder != null && r.louder > 3 ? ` Its call got about ${Math.round(r.louder)} dB louder; it may have come closer.` : '');
 
 function render() {
   const snd = events.filter(e => e.kind === 'sound'), birds = snd.filter(e => e.sp && !NONBIRD.test(e.sp.sci)), mine = events.filter(e => e.kind === 'me');
@@ -232,12 +234,12 @@ function render() {
   const mx = Math.max(1, ...h), med = a => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
   const rows = Object.entries(sp).sort((a, b) => b[1].n - a[1].n);
   const answered = mine.filter(m => m.resp && m.resp.after > 0);
-  $('report').innerHTML = `<p>${running ? 'شغال' : 'متوقف'} من ${Math.round(T / 60)} دقيقة. اتسمع ${snd.length} صوت، منهم ${birds.length} لطيور، من ${rows.length} نوع. الصفحة ردّت ${mine.length} مرة${mine.length ? `، والطائر ردّ ${answered.length} منهم في خلال دقيقة` : ''}.</p>` +
-    (rows.length ? `<table><tr><th>النوع</th><th>كام مرة</th><th>من / لحد</th><th>أكتر شكل</th><th>التردد</th></tr>${rows.map(([k, o]) => `<tr><td><b>${esc(o.ar)}</b><br><small class="lbl">${esc(o.en)} · ثقة لحد ${Math.round(o.conf * 100)}%</small></td><td>${o.n}</td><td>${clock(o.first)}<br>${clock(o.last)}</td><td>${esc(Object.entries(o.pats).sort((a, b) => b[1] - a[1])[0][0])}</td><td>${(med(o.peaks) / 1000).toFixed(1)} ك.هـ</td></tr>`).join('')}</table>` : '') +
-    `<div class="hist">${h.map(v => `<i style="height:${100 * v / mx}%"></i>`).join('')}</div><div class="hlbl"><span>${clock(0)}</span><span>نشاط الطيور</span><span>${clock(T)}</span></div>` +
-    (mine.length ? `<h2 style="font-size:17px">الردود</h2><table><tr><th>الوقت</th><th>رد على</th><th>رد فعله</th></tr>${mine.map(m => `<tr><td>${clock(m.t0)}<br><small class="lbl">بعد ${(m.gap || 1.5).toFixed(1)} ث</small></td><td>${esc(m.to.ar)}</td><td>${respTxt(m.resp)}</td></tr>`).join('')}</table>` : '');
-  $('ev').innerHTML = events.slice(-150).reverse().map(e => e.kind === 'me' ? `<li class="me">${clock(e.t0)} · الصفحة ردّت على ${esc(e.to.ar)} بصوت من أصواته، بعد سكوت ${e.gap.toFixed(1)} ث</li>` :
-    `<li>${clock(e.t0)} · <b>${e.sp ? esc(e.sp.ar) : 'صوت مش متعرف'}</b>${e.sp ? ` <small class="lbl">${Math.round(e.sp.conf * 100)}%</small>` : ''} · ${e.pat[0]} · ${e.dur.toFixed(2)} ث · ${(e.peak / 1000).toFixed(1)} ك.هـ<button class="ghost" data-play="${e.id}">اسمع</button></li>`).join('');
+  $('report').innerHTML = `<p>${running ? 'Running for' : 'Stopped after'} ${Math.round(T / 60)} minutes. ${snd.length} sounds heard, ${birds.length} of them birds, from ${rows.length} species. The page replied ${mine.length} times${mine.length ? `, and the bird answered ${answered.length} of them within a minute` : ''}.</p>` +
+    (rows.length ? `<table><tr><th>Species</th><th>Count</th><th>From / to</th><th>Most common shape</th><th>Frequency</th></tr>${rows.map(([k, o]) => `<tr><td><b>${esc(o.ar)}</b><br><small class="lbl">${esc(o.en)} · confidence up to ${Math.round(o.conf * 100)}%</small></td><td>${o.n}</td><td>${clock(o.first)}<br>${clock(o.last)}</td><td>${esc(Object.entries(o.pats).sort((a, b) => b[1] - a[1])[0][0])}</td><td>${(med(o.peaks) / 1000).toFixed(1)} kHz</td></tr>`).join('')}</table>` : '') +
+    `<div class="hist">${h.map(v => `<i style="height:${100 * v / mx}%"></i>`).join('')}</div><div class="hlbl"><span>${clock(0)}</span><span>Bird activity</span><span>${clock(T)}</span></div>` +
+    (mine.length ? `<h2 style="font-size:17px">Replies</h2><table><tr><th>Time</th><th>Replied to</th><th>Its reaction</th></tr>${mine.map(m => `<tr><td>${clock(m.t0)}<br><small class="lbl">after ${(m.gap || 1.5).toFixed(1)} s</small></td><td>${esc(m.to.ar)}</td><td>${respTxt(m.resp)}</td></tr>`).join('')}</table>` : '');
+  $('ev').innerHTML = events.slice(-150).reverse().map(e => e.kind === 'me' ? `<li class="me">${clock(e.t0)} · the page replied to ${esc(e.to.ar)} with one of its calls, after a ${e.gap.toFixed(1)} s pause</li>` :
+    `<li>${clock(e.t0)} · <b>${e.sp ? esc(e.sp.ar) : 'Unrecognised sound'}</b>${e.sp ? ` <small class="lbl">${Math.round(e.sp.conf * 100)}%</small>` : ''} · ${e.pat[0]} · ${e.dur.toFixed(2)} s · ${(e.peak / 1000).toFixed(1)} kHz<button class="ghost" data-play="${e.id}">Listen</button></li>`).join('');
   $('b-csv').disabled = $('b-json').disabled = $('b-wav').disabled = !events.length;
 }
 $('ev').addEventListener('click', async e => {
@@ -255,29 +257,29 @@ function loadClip(id) { return new Promise(r => { try { const q = db.transaction
 let lastSave = 0;
 function persist(force) { if (!force && Date.now() - lastSave < 20000) return; lastSave = Date.now(); try { localStorage.setItem('nightBirds', JSON.stringify({ startWall, T: tNow(), geo, events })); } catch (e) {} }
 dbOpen();
-try { const old = JSON.parse(localStorage.getItem('nightBirds') || 'null'); if (old && old.events && old.events.length) { $('b-old').hidden = false; $('b-old').onclick = () => { startWall = old.startWall; events = old.events; proc0 = old.T * SR; geo = old.geo; render(); $('st').textContent = 'ده تقرير الليلة اللي فاتت. «ابدأ الليلة» هيبدأ ليلة جديدة.'; }; } } catch (e) {}
+try { const old = JSON.parse(localStorage.getItem('nightBirds') || 'null'); if (old && old.events && old.events.length) { $('b-old').hidden = false; $('b-old').onclick = () => { startWall = old.startWall; events = old.events; proc0 = old.T * SR; geo = old.geo; render(); $('st').textContent = 'This is last night’s report. “Start the night” begins a new night.'; }; } } catch (e) {}
 
 $('b-geo').addEventListener('click', () => {
   if (!navigator.geolocation) return;
-  navigator.geolocation.getCurrentPosition(p => { geo = { lat: p.coords.latitude, lon: p.coords.longitude }; if (ready) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); $('st').textContent = 'الفلتر هيشيل الأنواع اللي مش متوقعة في مكانك.'; }, () => { $('st').textContent = 'إذن المكان اترفض.'; }, { timeout: 15000 });
+  navigator.geolocation.getCurrentPosition(p => { geo = { lat: p.coords.latitude, lon: p.coords.longitude }; if (ready) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); $('st').textContent = 'The filter removes species not expected at your location.'; }, () => { $('st').textContent = 'Location permission denied.'; }, { timeout: 15000 });
 });
 let srcNode, procNode, timer;
 $('b-go').addEventListener('click', async () => {
-  if (running) { running = false; try { srcNode.disconnect(); procNode.disconnect(); } catch (e) {} stream.getTracks().forEach(t => t.stop()); $('b-go').textContent = 'ابدأ ليلة جديدة'; persist(true); render(); $('st').textContent = 'وقف. التقرير تحت.'; return; }
+  if (running) { running = false; try { srcNode.disconnect(); procNode.disconnect(); } catch (e) {} stream.getTracks().forEach(t => t.stop()); $('b-go').textContent = 'Start a new night'; persist(true); render(); $('st').textContent = 'Stopped. Report below.'; return; }
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR }); await ctx.resume();
-    if (ctx.sampleRate !== SR) throw new Error('المتصفح ما رضيش يشتغل على ٤٨ كيلوهرتز، والموديل محتاجها.');
+    if (ctx.sampleRate !== SR) throw new Error('The browser refused to run at 48 kHz, which the model needs.');
     events = []; clips.clear(); proc0 = 0; filled = 0; seg = Segmenter(); startWall = Date.now(); try { db && db.transaction('clips', 'readwrite').objectStore('clips').clear(); } catch (e) {}
     const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
     proc.onaudioprocess = e => { if (running) onAudio(e.inputBuffer.getChannelData(0)); }; src.connect(proc); proc.connect(mute); mute.connect(ctx.destination); srcNode = src; procNode = proc;
-    running = true; $('b-go').textContent = 'وقّف'; $('b-old').hidden = true;
+    running = true; $('b-go').textContent = 'Stop'; $('b-old').hidden = true;
     try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
     if (!worker) { await startWorker(); if (geo) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); }
-    if (!timer) timer = setInterval(() => { tick(); if (running) { persist(); $('st').textContent = `بيسمع من ${Math.round(tNow() / 60)} دقيقة. سيبه وروح نام.`; } }, 1000);
+    if (!timer) timer = setInterval(() => { tick(); if (running) { persist(); $('st').textContent = `Listening for ${Math.round(tNow() / 60)} min. Leave it and go to sleep.`; } }, 1000);
     setInterval(render, 30000); render();
-  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : (e.message || e))}</span>`; }
+  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'Microphone permission needed: allow it in your browser’s site settings, then reload.' : (e.message || e))}</span>`; }
 });
 document.addEventListener('visibilitychange', async () => { if (document.visibilityState === 'visible' && running) { try { await navigator.wakeLock.request('screen'); } catch (e) {} } });
 

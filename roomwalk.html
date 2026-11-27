@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>امشي جوه أوضتك</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}
+.sub{color:var(--mute);margin:0 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+.view{position:relative;width:100%;aspect-ratio:3/4;max-height:62vh;background:#000;border-radius:14px;overflow:hidden;margin-top:10px}
+.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view canvas{position:absolute;inset:0;width:100%;height:100%}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:10px}
+.grid i{aspect-ratio:1;border-radius:4px;background:var(--line);opacity:.4}
+.grid i.now{outline:3px solid var(--red);opacity:1}
+.grid i.done{background:var(--ok);opacity:1}
+progress{width:100%;height:10px;accent-color:var(--red)}
+#walk{position:fixed;inset:0;background:#000;z-index:50;display:none}
+#walk canvas{width:100%;height:100%;display:block;touch-action:none}
+#walk .bar{position:absolute;top:max(10px,env(safe-area-inset-top));inset-inline:10px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+#walk .bar button{pointer-events:auto}
+#walk .hint{background:rgba(0,0,0,.55);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px;max-width:70%}
+</style>
+</head>
+<body>
+<div class="wrap" id="main">
+<h1>امشي جوه أوضتك</h1>
+<p class="sub">صوّر لفة واحدة وانت واقف مكانك، والذكاء الاصطناعي على تليفونك يخمّن عمق كل صورة ويبني أوضتك مجسّمة. بعدين امشي جواها بصباعك وقرّب من الحاجات.</p>
+<div class="card">
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>دوس «ابدأ التصوير» واسمح للكاميرا وللحركة.</li>
+    <li><b>قف مكانك وما تتحركش منه</b> — التليفون بيلف حوالين نفسه بس، زي البانوراما: لفة قدّام، ولفة مائل لفوق، ولفة مائل لتحت.</li>
+    <li>لما الشبكة تخضرّ، دوس «ابني الـ3D». أول مرة بينزّل موديل العمق (حوالي ٥٠ ميجا، بيتخزن للمرات الجاية).</li>
+    <li>في المشهد: <b>اسحب في شمال الشاشة عشان تمشي</b>، واسحب في اليمين عشان تبص حواليك (أو لف بالتليفون).</li>
+  </ol>
+  <div class="row"><button id="b-go">ابدأ التصوير</button><button class="ghost" id="b-build" disabled>ابني الـ3D</button></div>
+  <div class="msg" id="st"></div>
+  <progress id="pg" value="0" max="1" hidden></progress>
+</div>
+<div class="view" id="vw" hidden>
+  <video id="v" playsinline muted autoplay></video>
+  <canvas id="ov"></canvas>
+</div>
+<div class="grid" id="grid" hidden></div>
+<details><summary>إزاي بيشتغل؟ وبأمانة إيه اللي مش حقيقي؟</summary>
+<ul>
+<li>الجيروسكوب بيعرف التليفون باصص فين، والصفحة بتاخد ٢٤ صورة تغطي كل النواحي وانت لفيت مكانك.</li>
+<li>موديل Depth Anything V2 من جوجل/هاجينج فيس بيشتغل <b>على تليفونك نفسه</b> (مفيش صورة بتطلع لأي سيرفر) ويخمّن بُعد كل نقطة في كل صورة عن الكاميرا.</li>
+<li>الصفحة بتحوّل الصور والأعماق لسحابة نقط ملوّنة في فراغ 3D حقيقي: تقدر تمشي فيه، وتقرب من الحاجات، والمنظور بيتغير صح.</li>
+<li><b>بأمانة:</b> العمق تخمين ذكاء اصطناعي من صورة واحدة، مش قياس ليزر. المقاس النسبي تقريبي، والحيطان ممكن تبان معوّجة شوية، والفواصل بين الصور ممكن تبان. مفيش تصادم: تقدر تعدّي جوه الحيطة. والتصوير لازم يكون من نقطة واحدة — لو مشيت وانت بتصوّر المجسّم يتكسر.</li>
+<li>الموديل بينزّل أول مرة بس، والمتصفح بيخزنه.</li>
+</ul></details>
+</div>
+<div id="walk">
+  <canvas id="w3d"></canvas>
+  <div class="bar"><span class="hint">شمال الشاشة: امشِ · يمينها: بص حواليك</span><button id="b-again">صوّر تاني</button></div>
+</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+const $=id=>document.getElementById(id);
+const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
+async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.');}};
+  await ask(window.DeviceMotionEvent);await ask(window.DeviceOrientationEvent);}
+async function camera(facing,w=1280,h=720){
+  if(!window.isSecureContext)throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:w},height:{ideal:h}},audio:false});}
+
+const YAWS=8,PITCHES=[-28,0,28],NT=YAWS*PITCHES.length,HFOV=58;
+let stream=null,orient=null,yaw0=null,frames=new Array(NT).fill(null),taken=0,phase='idle',lastCap=0;
+
+function relYaw(y){let d=(y-yaw0)%360;if(d<0)d+=360;return d;}
+function pitchOf(b){return Math.max(-60,Math.min(60,b-90));}
+function onOrient(e){
+  let yaw;
+  if(typeof e.webkitCompassHeading==='number')yaw=e.webkitCompassHeading;
+  else if(typeof e.alpha==='number')yaw=(360-e.alpha)%360;
+  else return;
+  orient={yaw,pitch:pitchOf(typeof e.beta==='number'?e.beta:90),gyro:true};
+}
+function buildGrid(){const g=$('grid');g.innerHTML='';for(let i=0;i<NT;i++){const s=document.createElement('i');s.id='g'+i;g.appendChild(s);}}
+function nearestTarget(yaw,pitch){
+  let best=-1,bd=1e9;
+  for(let p=0;p<PITCHES.length;p++)for(let y=0;y<YAWS;y++){
+    const i=p*YAWS+y;if(frames[i])continue;
+    const ty=y*45,tp=PITCHES[p];
+    let dy=Math.abs(relYaw(yaw)-ty);if(dy>180)dy=360-dy;
+    const d=dy+Math.abs(pitch-tp)*1.5;
+    if(d<bd){bd=d;best=i;}
+  }
+  return best;
+}
+async function startCapture(){
+  $('st').className='msg';$('st').textContent='';
+  try{await motionPerm();stream=await camera('environment',1280,720);}
+  catch(err){$('st').className='msg err';$('st').textContent='مش قادر أفتح الكاميرا أو الحساسات: '+(err&&err.message?err.message:err);return;}
+  const v=$('v');v.srcObject=stream;try{await v.play();}catch(e){}
+  await sleepMs(600);
+  yaw0=null;frames.fill(null);taken=0;phase='capture';
+  $('vw').hidden=false;$('grid').hidden=false;buildGrid();
+  $('b-build').disabled=true;$('b-go').disabled=true;
+  $('st').textContent='لف ببطء… الصفحة بتاخد الصور لوحدها لما تبص ناحية فاضية.';
+  window.addEventListener('deviceorientation',onOrient);
+  loop();
+}
+function grab(yaw,pitch,idx){
+  const v=$('v');if(!v.videoWidth)return false;
+  const t=document.createElement('canvas');t.width=480;t.height=640;
+  t.getContext('2d').drawImage(v,0,0,480,640);
+  frames[idx]={c:t,yaw,pitch};taken++;
+  const el=$('g'+idx);if(el)el.className='done';
+  return true;
+}
+function loop(){
+  if(phase!=='capture')return;
+  requestAnimationFrame(loop);
+  if(!orient)return;
+  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='تمام، دي نقطة البداية. لف ببطء…';}
+  const now=performance.now();
+  const idx=nearestTarget(orient.yaw,orient.pitch);
+  document.querySelectorAll('.grid i.now').forEach(x=>x.classList.remove('now'));
+  if(idx<0){$('st').innerHTML='خلصت كل النواحي <span class="ok">'+taken+'/'+NT+'</span> — دوس «ابني الـ3D».';$('b-build').disabled=false;drawOv(null);return;}
+  $('g'+idx).className='now';
+  const ty=(idx%YAWS)*45,tp=PITCHES[Math.floor(idx/YAWS)];
+  let dy=relYaw(orient.yaw)-ty;if(dy>180)dy-=360;if(dy<-180)dy+=360;
+  const dp=orient.pitch-tp;
+  drawOv({dy,dp});
+  $('st').textContent='صوّرنا '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'لف يمين':'لف شمال'):(dp>14?'ارفع التليفون فوق':dp<-14?'نزّل التليفون تحت':'ثبّت كده…'));
+  if(Math.abs(dy)<=14&&Math.abs(dp)<=14&&now-lastCap>350){
+    if(grab(relYaw(orient.yaw),orient.pitch,idx)){
+      lastCap=now;
+      if(taken>=Math.min(8,NT))$('b-build').disabled=false;
+      if(taken===NT)$('st').innerHTML='الصور كملت <span class="ok">24/24</span> — دوس «ابني الـ3D».';
+    }
+  }
+}
+function drawOv(t){
+  const c=$('ov'),vw=$('vw');
+  c.width=vw.clientWidth;c.height=vw.clientHeight;
+  const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+  if(!t)return;
+  const cx=c.width/2,cy=c.height/2;
+  x.strokeStyle=Math.abs(t.dy)<=14&&Math.abs(t.dp)<=14?'#1d9e75':'#fff';
+  x.lineWidth=3;x.beginPath();x.arc(cx,cy,40,0,7);x.stroke();
+  if(Math.abs(t.dy)>14||Math.abs(t.dp)>14){
+    const a=Math.atan2(-t.dp,-t.dy);
+    x.fillStyle='#e8251a';x.save();x.translate(cx,cy);x.rotate(a);
+    x.beginPath();x.moveTo(58,0);x.lineTo(40,-10);x.lineTo(40,10);x.closePath();x.fill();x.restore();
+  }
+}
+
+// ---------- depth + point cloud ----------
+async function buildCloud(){
+  const have=frames.filter(Boolean);
+  if(have.length<8){$('st').className='msg err';$('st').textContent='لسه محتاجين صور أكتر (٨ على الأقل). كمّل لفة الأول.';return;}
+  phase='build';$('b-build').disabled=true;$('pg').hidden=false;$('pg').value=0;
+  $('st').textContent='بينزّل موديل العمق…';
+  let est;
+  try{
+    const tf=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3');
+    const opts=p=>{if(p&&p.status==='progress'&&p.total)$('st').textContent='بينزّل موديل العمق… '+Math.round(100*(p.loaded||0)/p.total)+'%';};
+    try{est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{device:'webgpu',dtype:'fp16',progress_callback:opts});}
+    catch(e1){
+      $('st').textContent='WebGPU مش متاح، بنكمّل على المعالج (أبطأ شوية)…';
+      try{est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{device:'wasm',dtype:'fp16',progress_callback:opts});}
+      catch(e2){est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{progress_callback:opts});}
+    }
+    let done=0;
+    for(const f of frames){
+      if(!f)continue;
+      $('st').textContent='بيخمّن العمق… صورة '+(++done)+' من '+have.length;
+      $('pg').value=done/have.length;
+      const img=tf.RawImage.fromCanvas(f.c);
+      const out=await est(img);
+      const t=out.predicted_depth;
+      const dh=t.dims[t.dims.length-2],dw=t.dims[t.dims.length-1];
+      f.dep=t.data;f.dh=dh;f.dw=dw;
+    }
+  }catch(err){
+    $('st').className='msg err';$('st').textContent='موديل العمق ما اشتغلش: '+(err&&err.message?err.message:err);
+    phase='capture';$('b-build').disabled=false;return;
+  }
+  // scale alignment between neighbouring frames (model depth is relative per image)
+  const scales=new Array(NT).fill(1);
+  const midRow=PITCHES.indexOf(0)>=0?PITCHES.indexOf(0):1;
+  function depAt(f,u,v){ // u,v in 0..1 of frame
+    if(!f||!f.dep)return null;
+    const x=Math.min(f.dw-1,Math.max(0,Math.round(u*(f.dw-1))));
+    const y=Math.min(f.dh-1,Math.max(0,Math.round(v*(f.dh-1))));
+    const d=f.dep[y*f.dw+x];
+    return d>0?1/d:null;
+  }
+  // chain around the middle row
+  for(let y=1;y<YAWS;y++){
+    const a=frames[midRow*YAWS+y-1],b=frames[midRow*YAWS+y];
+    if(!a||!b||!a.dep||!b.dep)continue;
+    const ratios=[];
+    for(let u=0.02;u<0.2;u+=0.04)for(let v=0.2;v<0.8;v+=0.2){
+      const da=depAt(a,1-u,v),db=depAt(b,u,v);
+      if(da&&db&&db>0)ratios.push(da/db);
+    }
+    if(ratios.length>=4){ratios.sort((p,q)=>p-q);scales[midRow*YAWS+y]=scales[midRow*YAWS+y-1]*ratios[ratios.length>>1];}
+  }
+  // other rows align to middle row at same yaw
+  for(let p=0;p<PITCHES.length;p++){
+    if(p===midRow)continue;
+    for(let y=0;y<YAWS;y++){
+      const a=frames[p*YAWS+y],b=frames[midRow*YAWS+y];
+      if(!a||!b||!a.dep||!b.dep)continue;
+      const ratios=[];
+      const top=p<midRow;
+      for(let u=0.15;u<0.85;u+=0.14)for(let v=0.02;v<0.2;v+=0.06){
+        const da=depAt(a,u,top?1-v:v),db=depAt(b,u,top?v:1-v);
+        if(da&&db&&db>0)ratios.push(da/db);
+      }
+      if(ratios.length>=4){ratios.sort((x,y)=>x-y);scales[p*YAWS+y]=ratios[ratios.length>>1];}
+    }
+  }
+  // emit points
+  const W=480,H=640,STR=5;
+  const fx=W/2/Math.tan(HFOV/2*Math.PI/180);
+  const pos=[],col=[];
+  for(let i=0;i<NT;i++){
+    const f=frames[i];if(!f||!f.dep)continue;
+    const ctx=f.c.getContext('2d');
+    const img=ctx.getImageData(0,0,W,H).data;
+    const yaw=f.yaw*Math.PI/180,pitch=f.pitch*Math.PI/180;
+    const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+    const sc=scales[i];
+    for(let py=STR>>1;py<H;py+=STR)for(let px=STR>>1;px<W;px+=STR){
+      const dx=Math.min(f.dw-1,Math.round(px/W*(f.dw-1)));
+      const dy=Math.min(f.dh-1,Math.round(py/H*(f.dh-1)));
+      const dd=f.dep[dy*f.dw+dx];
+      if(!(dd>0))continue;
+      let d=sc/(dd);
+      if(!(d>0.05)||d>40)continue;
+      // z-depth -> point on ray: local (lx,ly,-1)*d
+      const lx=(px-W/2)/fx,ly=(H/2-py)/fx;
+      // pitch around x, then yaw around y (compass right = +)
+      const y1=ly*cp+sp, z1=ly*sp-cp, x1=lx;
+      const X=(x1*cy - z1*sy)*d, Y=y1*d, Z=(x1*sy + z1*cy)*d;
+      pos.push(X,Y,Z);
+      const o=(py*W+px)*4;
+      col.push(img[o]/255,img[o+1]/255,img[o+2]/255);
+    }
+  }
+  if(pos.length<3000){$('st').className='msg err';$('st').textContent='السحابة طلعت فاضية — جرّب تصوّر تاني في نور أحسن.';phase='capture';$('b-build').disabled=false;return;}
+  window.__cloud={pos:new Float32Array(pos),col:new Float32Array(col),n:pos.length/3};
+  phase='walk';
+  $('main').style.display='none';$('walk').style.display='block';
+  startWalk();
+}
+
+// ---------- three.js walk viewer ----------
+let W3=null;
+function startWalk(){
+  const cv=$('w3d');
+  const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();scene.background=new THREE.Color(0x000000);
+  const cam=new THREE.PerspectiveCamera(70,1,0.02,200);
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(window.__cloud.pos,3));
+  geo.setAttribute('color',new THREE.BufferAttribute(window.__cloud.col,3));
+  const mat=new THREE.PointsMaterial({size:0.025,vertexColors:true,sizeAttenuation:true});
+  scene.add(new THREE.Points(geo,mat));
+  let yaw=0,pitch=0,px=0,pz=0;
+  const move={x:0,y:0};
+  const pointers=new Map();
+  cv.addEventListener('pointerdown',e=>{
+    pointers.set(e.pointerId,{x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,move:e.clientX<innerWidth/2});
+  });
+  cv.addEventListener('pointermove',e=>{
+    const p=pointers.get(e.pointerId);if(!p)return;
+    if(p.move){p.x=e.clientX;p.y=e.clientY;
+      move.x=Math.max(-1,Math.min(1,(p.x-p.x0)/70));
+      move.y=Math.max(-1,Math.min(1,(p.y0-p.y)/70));
+    }else{
+      yaw-=(e.clientX-p.x)*0.35;p.x=e.clientX;
+      pitch=Math.max(-1.4,Math.min(1.4,pitch-(e.clientY-p.y)*0.35));p.y=e.clientY;
+    }
+  });
+  const up=e=>{pointers.delete(e.pointerId);if(![...pointers.values()].some(p=>p.move)){move.x=0;move.y=0;}};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  const clock=new THREE.Clock();
+  function frame(){
+    if(phase!=='walk')return;
+    requestAnimationFrame(frame);
+    const dt=Math.min(clock.getDelta(),0.1);
+    const w=innerWidth,h=innerHeight;
+    renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();
+    let vyaw,vpt;
+    if(orient&&orient.gyro){vyaw=-orient.yaw*Math.PI/180;vpt=-orient.pitch*Math.PI/180;}
+    else{vyaw=yaw*Math.PI/180;vpt=pitch*Math.PI/180;}
+    cam.rotation.order='YXZ';cam.rotation.set(vpt,vyaw,0);
+    const spd=1.6*dt;
+    const s=Math.sin(vyaw),c=Math.cos(vyaw);
+    px+=(-s*move.y + c*move.x)*spd;
+    pz+=(-c*move.y - s*move.x)*spd;
+    cam.position.set(px,0,pz);
+    renderer.render(scene,cam);
+  }
+  frame();
+}
+function exitWalk(){
+  phase='idle';$('walk').style.display='none';$('main').style.display='';
+  $('b-go').disabled=false;$('st').textContent='';$('pg').hidden=true;
+}
+$('b-go').onclick=startCapture;
+$('b-build').onclick=buildCloud;
+$('b-again').onclick=()=>{exitWalk();startCapture();};
+window.__test={frames:()=>frames,set taken(v){taken=v},get taken(){return taken},buildCloud,set phase(v){phase=v},get phase(){return phase}};
+</script>
+</body>
+</html>

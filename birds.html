@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>محادثة مع طائر</title>
+<script src="shell.js"></script>
+<title>Bird Talk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -45,35 +46,36 @@ ul.log .h{display:flex;justify-content:space-between;gap:8px;font-weight:600}
 ul.log .d{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
 ul.log button{min-height:36px;padding:0 12px;margin-top:6px;font-size:14px}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>محادثة مع طائر</h1>
-<p class="sub">التليفون بيسمع. موديل BirdNET من مختبر كورنيل بيعرف نوع الطائر (وكمان ضفادع وحشرات وكلاب وصوت إنسان) من بين أكتر من ٦٥٠٠ نوع. وكل صوت بيتسجل لوحده: وقته، ومدته، وتردده، وشكله. وتقدر ترد على الطائر بإنك تعيدله نفس الصوت بتاعه.</p>
+<h1>Bird Talk</h1>
+<p class="sub">Your phone listens. BirdNET, Cornell Lab’s AI model, identifies the species (plus frogs, insects, dogs and human voices) among more than 6,500 types. Every sound is logged on its own: time, duration, pitch and shape. You can answer a bird by playing its own call back to it.</p>
 
 <div class="card">
-  <div class="row"><button id="b-go">ابدأ الاستماع</button><button class="ghost" id="b-geo">فلتر حسب مكاني</button></div>
-  <div class="lbl" id="st">الموديل حجمه حوالي ٦٥ ميجا، وبيتحمّل مرة واحدة. الأحسن على واي فاي.</div>
+  <div class="row"><button id="b-go">Start listening</button><button class="ghost" id="b-geo">Filter by my location</button></div>
+  <div class="lbl" id="st">The model is about 65 MB and downloads once. Wi‑Fi recommended.</div>
   <canvas id="spec"></canvas>
-  <div class="lbl" style="margin-top:8px">بيسمع دلوقتي (آخر ٣ ثواني)</div>
+  <div class="lbl" style="margin-top:8px">Listening now (last 3 seconds)</div>
   <div class="now" id="now"></div>
 </div>
 
-<h2>المحادثة</h2>
-<ul class="log" id="log"><li class="lbl">لسه مفيش أصوات.</li></ul>
-<div class="row"><button class="ghost" id="b-wav" disabled>حمّل التسجيل الخام (WAV)</button><button class="ghost" id="b-csv" disabled>حمّل السجل (CSV)</button><button class="ghost" id="b-json" disabled>حمّل كل البيانات (JSON)</button></div>
+<h2>Conversation</h2>
+<ul class="log" id="log"><li class="lbl">No sounds yet.</li></ul>
+<div class="row"><button class="ghost" id="b-wav" disabled>Download raw audio (WAV)</button><button class="ghost" id="b-csv" disabled>Download log (CSV)</button><button class="ghost" id="b-json" disabled>Download all data (JSON)</button></div>
 
-<label>أقل ثقة عشان النوع يتكتب <b id="vT"></b><input type="range" id="T" min="0.2" max="0.9" step="0.05" value="0.5"></label>
-<label>علو الرد <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.7"></label>
+<label>Minimum confidence to name a species <b id="vT"></b><input type="range" id="T" min="0.2" max="0.9" step="0.05" value="0.5"></label>
+<label>Reply volume <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.7"></label>
 
-<details><summary>إيه اللي حقيقي هنا؟ وإيه حدوده؟</summary>
+<details><summary>What’s real here, and what are the limits?</summary>
 <ul>
-<li><b>نوع الطائر:</b> من موديل BirdNET (Kahl وآخرين، 2021)، ودقته عالية مع الأصوات الواضحة. الرقم جنب الاسم هو ثقة الموديل. لو شغّلت «فلتر حسب مكاني»، الأنواع اللي مش متوقع وجودها في مصر في الأسبوع ده بتتشال.</li>
-<li><b>شكل الصوت:</b> الصفحة بتوصف الصوت من الطيف بتاعه: نداء قصير، تريل، مقطع غنا، نداء متكرر. ده <b>وصف للشكل</b>، مش ترجمة لمعنى.</li>
-<li><b>الترجمة:</b> مفيش موديل في العالم بيترجم كلام الطيور لجمل. العلماء يعرفوا وظايف عامة للأصوات في أنواع قليلة اتدرست كويس، زي نداء إنذار أو غنا تزاوج، بس ده بيختلف من نوع للتاني ومحتاج دراسة لكل نوع. عشان كده العمود الإنجليزي في السجل فيه اسم النوع وشكل الصوت، مش ترجمة.</li>
-<li><b>الرد:</b> زرار «رد» بيعيد للطائر نفس صوته. الطيور غالباً بترد لأنها فاكرة إن فيه طائر تاني في منطقتها، وده بيضايقها، خصوصاً في موسم التعشيش. استخدمه مرات قليلة، ووقف لو الطائر باين عليه متوتر.</li>
-<li><b>البيانات:</b> التسجيل الخام بيتحفظ على التليفون بس (لحد ٣٠ دقيقة)، وما بيترفعش لأي مكان.</li>
-<li>الموديل: BirdNET Live من BirdNET-Team (الكود MIT، والموديل CC BY-SA 4.0).</li>
+<li><b>Species:</b> From the BirdNET model (Kahl et al., 2021), which is very accurate on clear recordings. The number next to the name is the model’s confidence. With “Filter by my location” on, species not expected where you are this week are removed.</li>
+<li><b>Sound shape:</b> The page describes each sound from its spectrum: short call, trill, song phrase, repeated call. That is a <b>description of shape</b>, not a translation of meaning.</li>
+<li><b>Translation:</b> No model in the world translates bird calls into sentences. Scientists know the general function of calls for a few well-studied species (alarm calls, mating songs), but it differs between species. So the English column in the log holds the species and the sound shape, not a translation.</li>
+<li><b>Replying:</b> The “Reply” button plays the bird’s own call back. Birds often answer because they think a rival is in their territory, which stresses them, especially in nesting season. Use it sparingly and stop if the bird seems agitated.</li>
+<li><b>Data:</b> The raw recording stays on your phone only (up to 30 minutes) and is never uploaded.</li>
+<li>Model: BirdNET Live by the BirdNET Team (code MIT, model CC BY-SA 4.0).</li>
 </ul></details>
 </div>
 <script>
@@ -125,11 +127,11 @@ function describe(t0, fs, floor) {
   const mx = Math.max(...fs.map(f => f.e)); let syl = 0, down = true;
   for (const f of fs) { if (down && f.e > mx * 0.5) { syl++; down = false; } else if (!down && f.e < mx * 0.2) down = true; }
   const range = hi - lo; let pat;
-  if (dur < 0.35 && syl <= 1) pat = ['نداء قصير', 'short call'];
-  else if (syl >= 4 && range < 1500 && dur / syl < 0.15) pat = ['تريل: تكرار سريع لنفس النغمة', 'trill'];
-  else if (syl >= 3 && range >= 1500 && dur >= 0.8) pat = ['مقطع غنا متنوّع', 'song phrase'];
-  else if (syl >= 2) pat = ['نداء متكرر', 'repeated call'];
-  else pat = ['نداء', 'call'];
+  if (dur < 0.35 && syl <= 1) pat = ['Short call', 'short call'];
+  else if (syl >= 4 && range < 1500 && dur / syl < 0.15) pat = ['Trill: fast repeats of one note', 'trill'];
+  else if (syl >= 3 && range >= 1500 && dur >= 0.8) pat = ['Varied song phrase', 'song phrase'];
+  else if (syl >= 2) pat = ['Repeated call', 'repeated call'];
+  else pat = ['Call', 'call'];
   return { t0, t1: t0 + dur, dur, peak, lo, hi, syl, pat };
 }
 
@@ -147,15 +149,15 @@ const NONBIRD = /^(Dog|Engine|Fireworks|Gun|Human non-vocal|Human vocal|Human wh
 
 function startWorker() {
   return new Promise((res, rej) => {
-    const q = new URLSearchParams({ tf: TF, root: MODELS, lang: 'ar' });
+    const q = new URLSearchParams({ tf: TF, root: MODELS, lang: 'en' });
     worker = new Worker('birdnet-worker.js?' + q.toString());
-    worker.onerror = e => rej(new Error('الموديل ما اتحمّلش.'));
+    worker.onerror = e => rej(new Error('The model failed to load.'));
     worker.onmessage = ({ data }) => {
-      if (data.message === 'load_model') $('st').textContent = `بيحمّل الموديل… ${data.progress}%`;
-      else if (data.message === 'warmup') $('st').textContent = 'بيجهّز الموديل…';
+      if (data.message === 'load_model') $('st').textContent = `Loading model… ${data.progress}%`;
+      else if (data.message === 'warmup') $('st').textContent = 'Preparing model…';
       else if (data.message === 'loaded') { ready = true; res(); }
       else if (data.message === 'segments') onPred(data.segments[0]);
-      else if (data.message === 'area-scores') $('st').textContent = 'الفلتر شغال: الأنواع المتوقعة في مكانك والأسبوع ده بس.';
+      else if (data.message === 'area-scores') $('st').textContent = 'Filter on: only species expected at your location this week.';
     };
   });
 }
@@ -163,7 +165,7 @@ function onPred(s) {
   busy = false; if (!s) return;
   const th = +$('T').value, t = sentAt;
   const list = s.preds.filter(p => !geo || NONBIRD.test(p.scientificName) || p.geoscore >= 0.03).sort((a, b) => b.confidence - a.confidence).slice(0, 4);
-  $('now').innerHTML = list.filter(p => p.confidence > 0.1).map(p => `<div class="sp"><span><b>${esc(name(p))}</b> <small>${esc(p.scientificName)}</small><div class="bar"><i style="width:${Math.round(p.confidence * 100)}%"></i></div></span><span>${Math.round(p.confidence * 100)}%</span></div>`).join('') || '<div class="lbl">مفيش صوت متعرف عليه.</div>';
+  $('now').innerHTML = list.filter(p => p.confidence > 0.1).map(p => `<div class="sp"><span><b>${esc(name(p))}</b> <small>${esc(p.scientificName)}</small><div class="bar"><i style="width:${Math.round(p.confidence * 100)}%"></i></div></span><span>${Math.round(p.confidence * 100)}%</span></div>`).join('') || '<div class="lbl">No recognised sound.</div>';
   for (const p of list) if (p.confidence >= th) dets.push({ t0: t - 3, t1: t, p: { sci: p.scientificName, en: p.commonName, ar: name(p), conf: p.confidence } });
   // attach species to recent segments that fall inside this window
   for (const e of log) if (e.who === 'sound' && !e.sp && e.t0 >= t - 3.2 && e.t1 <= t + 0.2) { const d = dets.filter(d => d.t0 <= e.t0 + 0.2 && d.t1 >= e.t1 - 0.2).sort((a, b) => b.p.conf - a.p.conf)[0]; if (d) { e.sp = d.p; draw(); } }
@@ -184,11 +186,11 @@ function draw() {
   const items = log.slice().reverse().slice(0, 60);
   $('log').innerHTML = items.length ? items.map(e => {
     const tm = fmtT(e.t0);
-    if (e.who === 'me') return `<li class="me"><div class="h"><span>انت: رديت بصوت ${esc(e.of)}</span><span>${tm}</span></div><div class="d">مدة ${e.dur.toFixed(2)} ث</div></li>`;
-    const sp = e.sp ? `${esc(e.sp.ar)} <small class="lbl">${Math.round(e.sp.conf * 100)}%</small>` : 'صوت (النوع مش مؤكد)';
+    if (e.who === 'me') return `<li class="me"><div class="h"><span>You: replied with the ${esc(e.of)} call</span><span>${tm}</span></div><div class="d">Duration ${e.dur.toFixed(2)} s</div></li>`;
+    const sp = e.sp ? `${esc(e.sp.ar)} <small class="lbl">${Math.round(e.sp.conf * 100)}%</small>` : 'Sound (species uncertain)';
     const human = e.sp && /^Human/.test(e.sp.sci);
-    return `<li><div class="h"><span>${sp}</span><span>${tm}</span></div><div class="d">${e.pat[0]} · ${e.dur.toFixed(2)} ث · ${(e.peak / 1000).toFixed(1)} كيلوهرتز (${(e.lo / 1000).toFixed(1)}–${(e.hi / 1000).toFixed(1)}) · ${e.syl} مقطع</div>${human ? '' : `<button class="ghost" data-reply="${e.id}">رد بنفس الصوت</button>`}</li>`;
-  }).join('') : '<li class="lbl">لسه مفيش أصوات.</li>';
+    return `<li><div class="h"><span>${sp}</span><span>${tm}</span></div><div class="d">${e.pat[0]} · ${e.dur.toFixed(2)} s · ${(e.peak / 1000).toFixed(1)} kHz (${(e.lo / 1000).toFixed(1)}–${(e.hi / 1000).toFixed(1)}) · ${e.syl} syllables</div>${human ? '' : `<button class="ghost" data-reply="${e.id}">Reply with the same call</button>`}</li>`;
+  }).join('') : '<li class="lbl">No sounds yet.</li>';
   $('b-wav').disabled = $('b-csv').disabled = $('b-json').disabled = !storeLen;
 }
 const fmtT = s => { s = Math.max(0, s); const m = Math.floor(s / 60), r = (s % 60).toFixed(1); return `${m}:${r.padStart(4, '0')}`; };
@@ -196,35 +198,35 @@ function slice(a, b) { const S = Math.round(a * 24000), E = Math.round(b * 24000
 $('log').addEventListener('click', e => {
   const b = e.target.closest('[data-reply]'); if (!b || !ctx) return;
   const s = log[+b.dataset.reply]; const tNow = Date.now(); playCount = playCount.filter(x => tNow - x < 600000);
-  if (playCount.length >= 5) { $('st').innerHTML = '<span class="bad">رديت ٥ مرات في آخر ١٠ دقايق. استنى شوية عشان ما تضايقش الطائر.</span>'; return; }
+  if (playCount.length >= 5) { $('st').innerHTML = '<span class="bad">You replied 5 times in the last 10 minutes. Wait a while so you don’t stress the bird.</span>'; return; }
   const pcm = slice(Math.max(0, s.t0 - 0.05), s.t1 + 0.05), buf = ctx.createBuffer(1, pcm.length, 24000), ch = buf.getChannelData(0), g = +$('V').value;
   for (let i = 0; i < pcm.length; i++) ch[i] = g * pcm[i] / 32767;
   const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.start();
   mutedUntil = now() + buf.duration + 0.3; playCount.push(tNow);
-  log.push({ who: 'me', t0: now(), t1: now() + buf.duration, dur: buf.duration, of: s.sp ? s.sp.ar : 'الصوت', ofId: s.id, id: log.length }); draw();
+  log.push({ who: 'me', t0: now(), t1: now() + buf.duration, dur: buf.duration, of: s.sp ? s.sp.ar : 'Sound', ofId: s.id, id: log.length }); draw();
 });
 $('b-geo').addEventListener('click', () => {
-  if (!navigator.geolocation) { $('st').textContent = 'المتصفح ما بيدّيش المكان.'; return; }
-  navigator.geolocation.getCurrentPosition(p => { geo = { lat: p.coords.latitude, lon: p.coords.longitude }; if (ready) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); else $('st').textContent = 'المكان اتحفظ، والفلتر هيشتغل لما الموديل يخلص تحميل.'; },
-    () => { $('st').textContent = 'إذن المكان اترفض. الأنواع هتظهر من غير فلتر.'; }, { maximumAge: 600000, timeout: 15000 });
+  if (!navigator.geolocation) { $('st').textContent = 'This browser doesn’t provide location.'; return; }
+  navigator.geolocation.getCurrentPosition(p => { geo = { lat: p.coords.latitude, lon: p.coords.longitude }; if (ready) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); else $('st').textContent = 'Location saved. The filter turns on once the model finishes loading.'; },
+    () => { $('st').textContent = 'Location permission denied. Species will show without a filter.'; }, { maximumAge: 600000, timeout: 15000 });
 });
 $('b-go').addEventListener('click', async () => {
-  if (running) { running = false; stream.getTracks().forEach(t => t.stop()); try { srcNode.disconnect(); procNode.disconnect(); } catch (e) {} $('b-go').textContent = 'كمّل الاستماع'; $('st').textContent = 'وقف.'; return; }
+  if (running) { running = false; stream.getTracks().forEach(t => t.stop()); try { srcNode.disconnect(); procNode.disconnect(); } catch (e) {} $('b-go').textContent = 'Resume listening'; $('st').textContent = 'Stopped.'; return; }
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: SR });
     await ctx.resume();
-    if (ctx.sampleRate !== SR) throw new Error('المتصفح ما رضيش يشتغل على ٤٨ كيلوهرتز، والموديل محتاجها.');
+    if (ctx.sampleRate !== SR) throw new Error('The browser refused to run at 48 kHz, which the model needs.');
     const src = ctx.createMediaStreamSource(stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
     analyser = ctx.createAnalyser(); analyser.fftSize = 1024; src.connect(analyser);
     proc.onaudioprocess = e => { if (running) onAudio(e.inputBuffer.getChannelData(0)); };
     src.connect(proc); proc.connect(mute); mute.connect(ctx.destination); srcNode = src; procNode = proc;
-    running = true; $('b-go').textContent = 'وقّف'; specLoop();
+    running = true; $('b-go').textContent = 'Stop'; specLoop();
     try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
-    if (!worker) { await startWorker(); $('st').textContent = 'بيسمع.'; if (geo) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); setInterval(tick, 1500); }
-    else $('st').textContent = 'بيسمع.';
-  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : (e.message || e))}</span>`; }
+    if (!worker) { await startWorker(); $('st').textContent = 'Listening.'; if (geo) worker.postMessage({ message: 'area-scores', latitude: geo.lat, longitude: geo.lon }); setInterval(tick, 1500); }
+    else $('st').textContent = 'Listening.';
+  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'Microphone permission needed: allow it in your browser’s site settings, then reload.' : (e.message || e))}</span>`; }
 });
 function specLoop() {
   const c = $('spec'), d = devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
@@ -248,7 +250,7 @@ $('b-wav').addEventListener('click', () => {
   dl(`bird-session-${stamp()}.wav`, new Blob([buf], { type: 'audio/wav' }));
 });
 const rows = () => log.map(e => e.who === 'me'
-  ? { time_s: e.t0.toFixed(2), speaker: 'human (playback)', species_sci: '', species_en: '', species_ar: '', confidence: '', duration_s: e.dur.toFixed(2), peak_hz: '', low_hz: '', high_hz: '', syllables: '', sound_shape_en: `replayed segment #${e.ofId}`, sound_shape_ar: 'رد بنفس الصوت' }
+  ? { time_s: e.t0.toFixed(2), speaker: 'human (playback)', species_sci: '', species_en: '', species_ar: '', confidence: '', duration_s: e.dur.toFixed(2), peak_hz: '', low_hz: '', high_hz: '', syllables: '', sound_shape_en: `replayed segment #${e.ofId}`, sound_shape_ar: 'Reply with the same call' }
   : { time_s: e.t0.toFixed(2), speaker: e.sp ? (/^Human/.test(e.sp.sci) ? 'human' : 'animal') : 'unknown', species_sci: e.sp ? e.sp.sci : '', species_en: e.sp ? e.sp.en : '', species_ar: e.sp ? e.sp.ar : '', confidence: e.sp ? e.sp.conf.toFixed(3) : '', duration_s: e.dur.toFixed(2), peak_hz: Math.round(e.peak), low_hz: Math.round(e.lo), high_hz: Math.round(e.hi), syllables: e.syl, sound_shape_en: e.pat[1], sound_shape_ar: e.pat[0] });
 $('b-csv').addEventListener('click', () => {
   const r = rows(); if (!r.length) return; const keys = Object.keys(r[0]), q = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v;

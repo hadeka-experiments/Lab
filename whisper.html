@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>رسايل مش مسموعة</title>
+<script src="shell.js"></script>
+<title>Silent Messages</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -37,40 +38,41 @@ textarea{width:100%;min-height:90px;font:inherit;font-size:17px;padding:10px;bor
 ul.list li{display:block}ul.list li .m{font-size:19px;font-weight:600;overflow-wrap:anywhere}
 .meter{height:8px;background:var(--bg);border-radius:4px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;width:0;background:var(--ok)}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>رسايل مش مسموعة</h1>
-<p class="sub">تليفون بيبعت رسالة لتليفون تاني على شكل صفير فوق سمعي، والتاني يسمعه ويفكّه ويكتبه. مفيش إنترنت ولا بلوتوث ولا واي فاي، والكبار اللي حواليك مش سامعين حاجة. افتح الصفحة دي على التليفونين.</p>
+<h1>Silent Messages</h1>
+<p class="sub">One phone sends a message to another as ultrasonic whistles, and the other hears, decodes and displays it. No internet, Bluetooth or Wi‑Fi, and adults nearby hear nothing. Open this page on both phones.</p>
 
 <div class="card">
-  <h2 style="margin-top:0">الاستقبال</h2>
-  <div class="row"><button id="b-rx">شغّل الاستقبال</button></div>
-  <div class="lbl" id="rxSt">مقفول</div>
+  <h2 style="margin-top:0">Receive</h2>
+  <div class="row"><button id="b-rx">Start receiving</button></div>
+  <div class="lbl" id="rxSt">off</div>
   <div class="meter"><i id="lvl"></i></div>
   <ul class="list" id="inbox"></ul>
 </div>
 
 <div class="card" style="margin-top:12px">
-  <h2 style="margin-top:0">الإرسال</h2>
-  <textarea id="txt" maxlength="60" placeholder="اكتب رسالة قصيرة"></textarea>
+  <h2 style="margin-top:0">Send</h2>
+  <textarea id="txt" maxlength="60" placeholder="Type a short message"></textarea>
   <div class="lbl" id="cnt"></div>
-  <label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.2" max="1" step="0.05" value="0.9"></label>
-  <div class="row"><button id="b-tx">ابعت</button></div>
+  <label>Volume <b id="vV"></b><input type="range" id="V" min="0.2" max="1" step="0.05" value="0.9"></label>
+  <div class="row"><button id="b-tx">Send</button></div>
   <div class="msg" id="txSt"></div>
 </div>
 
-<label>نطاق الترددات (لازم يبقى نفسه على التليفونين)
-<select id="band"><option value="17500">عالي: ١٧–٢٠ كيلوهرتز (مش مسموع للكبار)</option><option value="15500">أوطى: ١٥–١٨ كيلوهرتز (أضمن، بس ممكن يتسمع خفيف)</option></select></label>
+<label>Frequency band (must match on both phones)
+<select id="band"><option value="17500">High: 17–20 kHz (inaudible to adults)</option><option value="15500">Lower: 15–18 kHz (more reliable, may be faintly audible)</option></select></label>
 
-<details><summary>بيشتغل إزاي؟ وإيه حدوده؟</summary>
+<details><summary>How does it work, and what are the limits?</summary>
 <ul>
-<li>كل حرف بيتحول لأرقام، وكل رقم بيتبعت كنغمة من ١٦ نغمة بين ١٧.٥ و١٩ كيلوهرتز. يعني كل نغمة بتشيل ٤ بت، وكل حرف عربي بياخد حوالي ربع ثانية.</li>
-<li>قبل الرسالة فيه «صفارة نداء» صاعدة، التليفون التاني بيدوّر عليها عشان يعرف إن فيه رسالة بدأت.</li>
-<li>في آخر الرسالة رقم تأكيد. لو الرسالة اتلخبطت في السكة، المستقبل بيعرف ويقول إنها اتلخبطت بدل ما يكتب كلام غلط.</li>
-<li>جرّب لوحدك بتليفون واحد: شغّل الاستقبال وابعت، والتليفون هيسمع نفسه.</li>
-<li>المدى من نص متر لكام متر في أوضة هادية. لو مش بيوصل، علّي الصوت، أو قرّب التليفونين، أو جرّب النطاق الأوطى.</li>
-<li>الأطفال والحيوانات بيسمعوا الترددات دي.</li>
+<li>Each character is turned into numbers, and each number is sent as one of 16 tones between 17.5 and 19 kHz, so each tone carries 4 bits. A typical character takes about a quarter of a second.</li>
+<li>Before the message there’s a rising “call” chirp that the other phone listens for to know a message is starting.</li>
+<li>At the end is a checksum. If the message gets garbled on the way, the receiver knows and says so instead of displaying wrong text.</li>
+<li>Try it alone with one phone: start receiving and send, and the phone will hear itself.</li>
+<li>Range is from half a metre to a few metres in a quiet room. If it doesn’t get through, raise the volume, bring the phones closer, or try the lower band.</li>
+<li>Children and pets can hear these frequencies.</li>
 </ul></details>
 </div>
 <script>
@@ -142,7 +144,7 @@ const enc = new TextEncoder(), dec = new TextDecoder('utf-8', { fatal: false });
 const setBand = () => { const b = +$('band').value; MD.base = b; MD.c0 = b - 500; MD.c1 = b + 2200; };
 $('band').addEventListener('change', setBand); setBand();
 $('V').addEventListener('input', () => $('vV').textContent = $('V').value); $('vV').textContent = $('V').value;
-const count = () => { const n = enc.encode($('txt').value).length; $('cnt').textContent = `${n} من ٦٠ بايت · حوالي ${(0.2 + (n + 2) * 0.13).toFixed(1)} ثانية`; };
+const count = () => { const n = enc.encode($('txt').value).length; $('cnt').textContent = `${n} of 60 bytes · about ${(0.2 + (n + 2) * 0.13).toFixed(1)} s`; };
 $('txt').addEventListener('input', count); count();
 async function getCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); await ctx.resume(); return ctx; }
 
@@ -159,17 +161,17 @@ function tick() {
     if (!r || r.need) { if (total - pending > sr * 15) pending = null; return; }
     if (r.bad) { pending = null; lastDone = total - sr * 0.5; return; }
     const text = r.ok ? dec.decode(new Uint8Array(r.bytes)) : null, mine = r.ok && lastSent && text === lastSent.text && Date.now() - lastSent.t < 20000;
-    const t = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    $('inbox').insertAdjacentHTML('afterbegin', r.ok ? `<li><div class="m">${esc(text)}</div><div class="lbl">${t}${mine ? ' · رسالتك، التليفون سمع نفسه' : ''} · وضوح ${Math.min(99, Math.round(r.conf))}</div></li>` : `<li><div class="m bad">اتلقطت رسالة بس اتلخبطت في السكة</div><div class="lbl">${t} · قرّب التليفونين أو علّي الصوت</div></li>`);
-    lastDone = pending + msgLenSamples(r.len, sr); pending = null; $('rxSt').textContent = 'بيسمع…';
+    const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    $('inbox').insertAdjacentHTML('afterbegin', r.ok ? `<li><div class="m">${esc(text)}</div><div class="lbl">${t}${mine ? ' · your own message, the phone heard itself' : ''} · clarity ${Math.min(99, Math.round(r.conf))}</div></li>` : `<li><div class="m bad">A message was caught but got garbled on the way</div><div class="lbl">${t} · bring the phones closer or raise the volume</div></li>`);
+    lastDone = pending + msgLenSamples(r.len, sr); pending = null; $('rxSt').textContent = 'Listening…';
     return;
   }
   const a = Math.max(lastDone, total - Math.round(sr * 1.2)), x = windowFrom(a, total); if (!x || x.length < sr * 0.3) return;
   const p = findPreamble(x, sr);
-  if (p && p.score > 15) { pending = a + p.idx; $('rxSt').textContent = 'فيه رسالة جاية…'; }
+  if (p && p.score > 15) { pending = a + p.idx; $('rxSt').textContent = 'Message incoming…'; }
 }
 $('b-rx').addEventListener('click', async () => {
-  if (rx) { rx = false; clearInterval(timer); try { src.disconnect(); proc.disconnect(); } catch (e) {} stream.getTracks().forEach(t => t.stop()); $('b-rx').textContent = 'شغّل الاستقبال'; $('rxSt').textContent = 'مقفول'; return; }
+  if (rx) { rx = false; clearInterval(timer); try { src.disconnect(); proc.disconnect(); } catch (e) {} stream.getTracks().forEach(t => t.stop()); $('b-rx').textContent = 'Start receiving'; $('rxSt').textContent = 'off'; return; }
   try {
     if (!window.isSecureContext) throw new Error('https');
     stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
@@ -181,17 +183,17 @@ $('b-rx').addEventListener('click', async () => {
       let m = 0; for (let i = 0; i < c.length; i += 8) m = Math.max(m, Math.abs(c[i])); $('lvl').style.width = Math.min(100, m * 300) + '%';
     };
     src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-    rx = true; $('b-rx').textContent = 'اقفل الاستقبال'; $('rxSt').textContent = 'بيسمع…'; timer = setInterval(tick, 200);
-  } catch (e) { $('rxSt').innerHTML = `<span class="bad">${e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : 'الصفحة لازم تتفتح من لينك https.'}</span>`; }
+    rx = true; $('b-rx').textContent = 'Stop receiving'; $('rxSt').textContent = 'Listening…'; timer = setInterval(tick, 200);
+  } catch (e) { $('rxSt').innerHTML = `<span class="bad">${e && e.name === 'NotAllowedError' ? 'Microphone permission needed: allow it in your browser’s site settings, then reload.' : 'This page must be opened over https.'}</span>`; }
 });
 $('b-tx').addEventListener('click', async () => {
-  const text = $('txt').value.trim(); if (!text) { $('txSt').textContent = 'اكتب رسالة الأول.'; return; }
-  const bytes = [...enc.encode(text)]; if (bytes.length > 60) { $('txSt').textContent = 'الرسالة طويلة. قصّرها.'; return; }
+  const text = $('txt').value.trim(); if (!text) { $('txSt').textContent = 'Type a message first.'; return; }
+  const bytes = [...enc.encode(text)]; if (bytes.length > 60) { $('txSt').textContent = 'The message is too long. Shorten it.'; return; }
   const c = await getCtx(), sig = encodeMsg(bytes, c.sampleRate), b = c.createBuffer(1, sig.length, c.sampleRate), g = +$('V').value;
   b.getChannelData(0).set(sig.map(v => v * g));
   const s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start();
-  lastSent = { text, t: Date.now() }; $('b-tx').disabled = true; $('txSt').textContent = `بيبعت… (${(sig.length / c.sampleRate).toFixed(1)} ثانية)`;
-  s.onended = () => { $('b-tx').disabled = false; $('txSt').textContent = 'اتبعتت.'; };
+  lastSent = { text, t: Date.now() }; $('b-tx').disabled = true; $('txSt').textContent = `Sending… (${(sig.length / c.sampleRate).toFixed(1)} s)`;
+  s.onended = () => { $('b-tx').disabled = false; $('txSt').textContent = 'Sent.'; };
 });
 }
 </script>

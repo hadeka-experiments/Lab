@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>وشك بالصوت</title>
+<script src="shell.js"></script>
+<title>Echo Face</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -36,43 +37,44 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .fig.tall{height:260px}
 .step{font-size:20px;font-weight:600;margin:4px 0}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>وشك بالصوت</h1>
-<p class="sub">التليفون بيطلّع تكّات صغيرة ويسمع صداها وهو راجع من وشك. من غير كاميرا ولا نور، بيعرف وشك متكوّن من كام طبقة وكل طبقة على بعد قد إيه، وبيقدر يتعلم يفرّق بين وش ووش.</p>
+<h1>Echo Face</h1>
+<p class="sub">The phone emits tiny clicks and listens to their echoes coming back from your face. With no camera and no light, it works out how many layers your face has and how far each is, and can learn to tell faces apart.</p>
 
 <div class="card">
-  <div class="step" id="step">١. بصمة المكان من غير وشك</div>
-  <p class="lbl" id="hint">امسك التليفون قدامك على بعد حوالي ٣٠ سم، والشاشة ناحيتك زي ما بتصوّر سيلفي. بعدين ميّل راسك بعيد خالص عن قدام التليفون، من غير ما تحرك إيدك، ودوس «سجّل».</p>
-  <div class="row"><button id="b-go">سجّل</button><button class="ghost" id="b-reset">من الأول</button></div>
+  <div class="step" id="step">1. Room fingerprint without your face</div>
+  <p class="lbl" id="hint">Hold the phone about 30 cm in front of you, screen facing you like a selfie. Then lean your head well away from the front of the phone, without moving your hand, and tap “Record”.</p>
+  <div class="row"><button id="b-go">Record</button><button class="ghost" id="b-reset">Start over</button></div>
   <div class="msg" id="msg"></div>
 </div>
 
-<h2>الطبقات اللي الصوت شافها</h2>
+<h2>Layers the sound detected</h2>
 <div class="fig tall"><canvas id="cvL"></canvas></div>
 <div class="fig"><canvas id="cvP"></canvas></div>
 <p class="lbl" id="layers"></p>
 
-<h2>مين ده؟</h2>
+<h2>Who is this?</h2>
 <div class="card">
   <div class="big" id="who" style="font-size:40px">—</div>
-  <div class="lbl" id="whoNote">سجّل وشّين على الأقل، كل واحد ٣ مرات، وبعدين أي قياس جديد هيتقارن بيهم.</div>
-  <input type="text" id="name" placeholder="اسم صاحب الوش اللي اتقاس دلوقتي" maxlength="20" style="margin-top:10px">
-  <div class="row"><button class="ghost" id="b-save" disabled>احفظ القياس ده باسمه</button></div>
+  <div class="lbl" id="whoNote">Save at least two faces, 3 times each; every new measurement is then compared with them.</div>
+  <input type="text" id="name" placeholder="Name of the person just measured" maxlength="20" style="margin-top:10px">
+  <div class="row"><button class="ghost" id="b-save" disabled>Save this measurement under that name</button></div>
   <ul class="list" id="ppl"></ul>
 </div>
 
-<label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.5"></label>
+<label>Volume <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.5"></label>
 
-<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<details><summary>How does it know, and what are the limits?</summary>
 <ul>
-<li>التكّة صفارة بتعلى بسرعة من ٢ لـ ٢٠ كيلوهرتز. الصفحة بتسمع الصدى، وبتحسب كل صدى جه من على بعد قد إيه.</li>
-<li>عشان الصفحة تفصل وشك عن الحيطان والسقف، بتسجّل المكان مرة من غير وشك وتطرحه من القياس اللي فيه وشك.</li>
-<li>دقة المسافة حوالي ٢ سم. يعني بتفرّق بين طرف مناخيرك وخدودك وودانك، بس مش بتشوف تفاصيل أصغر من كده.</li>
-<li>السماعة والمايك بيسمعوا من كل الاتجاهات، فالصفحة بتعرف كل طبقة <b>على بعد قد إيه</b>، بس مش بتعرف هي فوق ولا تحت ولا يمين ولا شمال. عشان كده الرسمة طبقات، مش صورة وش.</li>
-<li>التعرّف على الوش هنا تجربة، مش قفل أمان. الوشوش المتشابهة في الحجم ممكن تتلخبط.</li>
-<li>التكّات مسموعة بس واطية، وكل قياس حوالي ثانيتين.</li>
+<li>The click is a chirp sweeping fast from 2 to 20 kHz. The page listens to the echoes and computes how far each one came from.</li>
+<li>To separate your face from walls and ceiling, the page records the room once without your face and subtracts it from the measurement with your face.</li>
+<li>Distance resolution is about 2 cm: it tells your nose tip from your cheeks and ears, but nothing finer.</li>
+<li>The speaker and mic hear in every direction, so the page knows how <b>far away each layer is</b>, but not whether it’s up, down, left or right. That’s why the drawing shows layers, not a picture of a face.</li>
+<li>Face recognition here is an experiment, not a security lock. Faces of similar size can be confused.</li>
+<li>The clicks are audible but quiet; each measurement takes about 2 seconds.</li>
 </ul></details>
 </div>
 <script>
@@ -199,7 +201,7 @@ $('V').addEventListener('input', () => $('vV').textContent = $('V').value); $('v
 
 async function capture() {
   if (!ctx) {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
     ctx = new (window.AudioContext || window.webkitAudioContext)();
   }
@@ -214,7 +216,7 @@ async function capture() {
   await wait((total + 0.4) * 1000); rec = false; src.disconnect(); proc.disconnect();
   const n = chunks.reduce((a, b) => a + b.length, 0), x = new Float32Array(n); let o = 0; for (const b of chunks) { x.set(b, o); o += b.length; }
   const r = analyse(x, chirp, { sr, period: PERIOD, count: COUNT, c: C, maxRange: MAXR, minRange: 0.05, relDb: -60 });
-  if (!r || r.dsnr < 15) throw new Error('المايك مش سامع التكّات كويس. علّي الصوت وشيل الآيفون من الصامت.');
+  if (!r || r.dsnr < 15) throw new Error('The mic can’t hear the clicks well. Raise the volume and turn off silent mode.');
   return r.prof;
 }
 const dist = i => i / sr * C / 2, idx = d => Math.round(d * 2 / C * sr);
@@ -245,54 +247,54 @@ function draw(d) {
   const L = d ? layersOf(d) : [], dmin = L.length ? Math.max(0.05, L[0].d - 0.08) : 0.15, dmax = L.length ? Math.min(0.9, L[L.length - 1].d + 0.08) : 0.6;
   const X = x => W - 40 - (W - 80) * (x - dmin) / (dmax - dmin);
   g.fillStyle = css('--mute'); g.font = '12px system-ui'; g.textAlign = 'center';
-  g.fillStyle = css('--ink'); g.fillRect(W - 30, H / 2 - 30, 12, 60); g.fillStyle = css('--mute'); g.fillText('التليفون', W - 24, H / 2 + 46);
-  if (!L.length) { g.fillText(d ? 'ما ظهرش صدى واضح من وشك' : 'سجّل الخطوتين عشان تظهر الطبقات', W / 2, H / 2); }
+  g.fillStyle = css('--ink'); g.fillRect(W - 30, H / 2 - 30, 12, 60); g.fillStyle = css('--mute'); g.fillText('Phone', W - 24, H / 2 + 46);
+  if (!L.length) { g.fillText(d ? 'No clear echo from your face' : 'Record both steps to see the layers', W / 2, H / 2); }
   L.forEach((l, k) => {
     const x = X(l.d), r = 40 + 60 * l.s; g.strokeStyle = css('--red'); g.globalAlpha = 0.35 + 0.65 * l.s; g.lineWidth = 2 + 6 * l.s;
     g.beginPath(); g.arc(x + r * 1.6, H / 2, r * 1.6, Math.PI * 0.82, Math.PI * 1.18); g.stroke(); g.globalAlpha = 1;
-    g.fillStyle = css('--ink'); g.fillText(`${(l.d * 100).toFixed(1)} سم`, x, H / 2 + r + 22 - (k % 2) * 14);
+    g.fillStyle = css('--ink'); g.fillText(`${(l.d * 100).toFixed(1)} cm`, x, H / 2 + r + 22 - (k % 2) * 14);
   });
   [g, W, H] = fit($('cvP')); g.clearRect(0, 0, W, H);
   if (!d) return;
   const a = idx(0.05), b = idx(0.9), seg = Array.from(d.subarray(a, b)), mx = Math.max(...seg) || 1;
   g.strokeStyle = css('--ink'); g.lineWidth = 1.5; g.beginPath();
   seg.forEach((v, i) => { const x = W - 10 - (W - 20) * i / seg.length, y = H - 22 - (H - 34) * v / mx; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
-  g.fillStyle = css('--mute'); for (const cm of [10, 30, 50, 70, 90]) g.fillText(cm + ' سم', W - 10 - (W - 20) * (idx(cm / 100) - a) / seg.length, H - 6);
+  g.fillStyle = css('--mute'); for (const cm of [10, 30, 50, 70, 90]) g.fillText(cm + ' cm', W - 10 - (W - 20) * (idx(cm / 100) - a) / seg.length, H - 6);
 }
 function recog() {
   const names = Object.keys(people).filter(n => people[n].length);
-  $('ppl').innerHTML = names.length ? names.map(n => `<li><span>${esc(n)} · ${people[n].length} قياس</span><button class="ghost" data-del="${esc(n)}">امسح</button></li>`).join('') : '';
+  $('ppl').innerHTML = names.length ? names.map(n => `<li><span>${esc(n)} · ${people[n].length} samples</span><button class="ghost" data-del="${esc(n)}">Delete</button></li>`).join('') : '';
   if (!face || !base) return;
   const s = sig(diffProf()); if (!s || names.length < 2) { $('who').textContent = '—'; return; }
   const sc = names.map(n => ({ n, v: Math.max(...people[n].map(p => cos(p, s))) })).sort((a, b) => b.v - a.v);
-  if (sc[0].v < 0.8) { $('who').textContent = 'وش مش معروف'; $('whoNote').textContent = `أقرب واحد ${sc[0].n} بتشابه ${Math.round(sc[0].v * 100)}% بس.`; }
-  else if (sc[0].v - sc[1].v < 0.04) { $('who').textContent = 'مش متأكد'; $('whoNote').textContent = `بين ${sc[0].n} (${Math.round(sc[0].v * 100)}%) و${sc[1].n} (${Math.round(sc[1].v * 100)}%).`; }
+  if (sc[0].v < 0.8) { $('who').textContent = 'Unknown face'; $('whoNote').textContent = `Closest is ${sc[0].n} at only ${Math.round(sc[0].v * 100)}% similarity.`; }
+  else if (sc[0].v - sc[1].v < 0.04) { $('who').textContent = 'Not sure'; $('whoNote').textContent = `Between ${sc[0].n} (${Math.round(sc[0].v * 100)}%) and ${sc[1].n} (${Math.round(sc[1].v * 100)}%).`; }
   else { $('who').textContent = sc[0].n; $('whoNote').textContent = sc.map(x => `${x.n} ${Math.round(x.v * 100)}%`).join(' · '); }
 }
 $('ppl').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (!b) return; delete people[b.dataset.del]; keep(); recog(); });
 function stepUi() {
-  if (!base) { $('step').textContent = '١. بصمة المكان من غير وشك'; $('hint').textContent = 'امسك التليفون قدامك على بعد حوالي ٣٠ سم، والشاشة ناحيتك زي ما بتصوّر سيلفي. بعدين ميّل راسك بعيد خالص عن قدام التليفون، من غير ما تحرك إيدك، ودوس «سجّل».'; }
-  else { $('step').textContent = '٢. وشك'; $('hint').textContent = 'رجّع وشك قدام التليفون في نفس المكان، والتليفون ما يتحركش، ودوس «سجّل». تقدر تعيد الخطوة دي كذا مرة لنفس بصمة المكان.'; }
+  if (!base) { $('step').textContent = '1. Room fingerprint without your face'; $('hint').textContent = 'Hold the phone about 30 cm in front of you, screen facing you like a selfie. Then lean your head well away from the front of the phone, without moving your hand, and tap “Record”.'; }
+  else { $('step').textContent = '2. Your face'; $('hint').textContent = 'Bring your face back in front of the phone in the same place, keep the phone still, and tap “Record”. You can repeat this step several times with the same room fingerprint.'; }
 }
 $('b-go').addEventListener('click', async () => {
-  $('b-go').disabled = true; $('msg').textContent = 'بيقيس… اثبت.';
+  $('b-go').disabled = true; $('msg').textContent = 'Measuring… hold still.';
   try {
     const p = await capture();
-    if (!base) { base = p; $('msg').textContent = 'اتسجلت بصمة المكان.'; }
+    if (!base) { base = p; $('msg').textContent = 'Room fingerprint saved.'; }
     else {
       face = p; const d = diffProf(), L = layersOf(d); draw(d);
-      $('layers').textContent = L.length ? `أقرب طبقة في وشك على بعد ${(L[0].d * 100).toFixed(1)} سم (غالباً طرف مناخيرك)، وظهر ${L.length} طبقات لحد ${(L[L.length - 1].d * 100).toFixed(1)} سم.` : 'ما ظهرش فرق واضح بين القياسين. اتأكد إن التليفون ما اتحركش، وإن وشك كان بعيد في الخطوة الأولى وقريب في التانية.';
-      $('b-save').disabled = !L.length; $('msg').textContent = 'خلص.'; recog();
+      $('layers').textContent = L.length ? `The nearest layer of your face is ${(L[0].d * 100).toFixed(1)} cm away (probably your nose tip), with ${L.length} layers out to ${(L[L.length - 1].d * 100).toFixed(1)} cm.` : 'No clear difference between the two measurements. Make sure the phone didn’t move, and that your face was away in step 1 and close in step 2.';
+      $('b-save').disabled = !L.length; $('msg').textContent = 'Done.'; recog();
     }
     stepUi();
-  } catch (e) { $('msg').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : (e.message || e))}</span>`; }
+  } catch (e) { $('msg').innerHTML = `<span class="bad">${esc(e && e.name === 'NotAllowedError' ? 'Microphone permission needed: allow it in your browser’s site settings, then reload.' : (e.message || e))}</span>`; }
   $('b-go').disabled = false;
 });
 $('b-reset').addEventListener('click', () => { base = face = null; draw(null); $('layers').textContent = ''; $('b-save').disabled = true; stepUi(); $('msg').textContent = ''; });
 $('b-save').addEventListener('click', () => {
-  const n = $('name').value.trim(); if (!n) { $('msg').textContent = 'اكتب الاسم الأول.'; return; }
+  const n = $('name').value.trim(); if (!n) { $('msg').textContent = 'Enter a name first.'; return; }
   const s = sig(diffProf()); if (!s) return;
-  (people[n] = people[n] || []).push(s); keep(); recog(); $('msg').textContent = `اتحفظ قياس لـ ${n} (${people[n].length}).`;
+  (people[n] = people[n] || []).push(s); keep(); recog(); $('msg').textContent = `Saved a sample for ${n} (${people[n].length}).`;
 });
 draw(null); recog();
 }

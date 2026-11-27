@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الأوضة 3D</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Room 360</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -33,18 +34,14 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 #explore .bar button{pointer-events:auto}
 #explore .hint{background:rgba(0,0,0,.55);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap" id="main">
-<h1>الأوضة 3D</h1>
-<p class="sub">قف مكانك ولف التليفون حواليك ببطء، والصفحة تلزق صور الكاميرا على كورة تحيط بيك من كل ناحية. بعدين لف التليفون في أي ناحية… وهتلاقي أوضتك هناك.</p>
+<h1>Room 360</h1>
+<p class="sub">Stand in place and turn slowly; the page stitches your camera photos onto a bubble around you. Then turn your phone any way… and your room is there.</p>
 <div class="card">
-  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li>دوس «ابدأ التصوير» واسمح للكاميرا وللحركة.</li>
-    <li>امسك التليفون قدامك و<b>لف بجسمك ببطء</b> في دايرة كاملة، مرة وانت باصص قدّام، ومرة فوق شوية، ومرة تحت شوية.</li>
-    <li>كل مربع في الشبكة تحت بيخضرّ لمّا تاخد صورته. لما تخلّص، دوس «ابني الكورة».</li>
-  </ol>
-  <div class="row"><button id="b-go">ابدأ التصوير</button><button class="ghost" id="b-build" disabled>ابني الكورة</button></div>
+  <div class="row"><button id="b-go">Start capture</button><button class="ghost" id="b-build" disabled>Build the bubble</button></div>
   <div class="msg" id="st"></div>
 </div>
 <div class="view" id="vw" hidden>
@@ -52,25 +49,25 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
   <canvas id="ov"></canvas>
 </div>
 <div class="grid" id="grid" hidden></div>
-<details><summary>إزاي بيشتغل؟ وبأمانة إيه اللي مش حقيقي؟</summary>
+<details><summary>How does it work? And honestly, what is not real?</summary>
 <ul>
-<li>الجيروسكوب والبوصلة في التليفون بيعرفوا انت باصص فين بالظبط. كل ما تبص ناحية جديدة، الصفحة بتاخد صورة من الكاميرا وتخزنها مع اتجاهها.</li>
-<li>في الآخر الصور بتتلزق على سطح كورة من جوا، وانت واقف في نصها. لما تلف التليفون، الصفحة بتدوّر نفس اللفة جوه الكورة، فتحس إن الأوضة حواليك.</li>
-<li><b>بأمانة:</b> مفيش قياس عمق حقيقي هنا. الكورة عبارة عن صور ملزوقة، فلو مشيت لقدّام مش هتقرب من الحيطة. العمق الحقيقي من حركة التليفون بيحتاج كاميرات وليدار زي اللي في تطبيقات المسح الكبيرة — دي نسخة الصفحة الصادقة من نفس الإحساس.</li>
-<li>اللزق بيتعمل على التليفون نفسه، ومفيش أي صورة بتتبعت لأي سيرفر.</li>
+<li>The phone's gyroscope and compass know exactly where you are looking. Every time you face a new direction, the page takes a photo and stores it with its direction.</li>
+<li>At the end the photos are pasted onto the inside of a sphere with you at its center. When you turn the phone, the page turns the same way inside the sphere, so the room feels around you.</li>
+<li><b>Honestly:</b> there is no real depth measurement here. The bubble is pasted photos, so if you walk forward you do not get closer to the wall. Real depth from phone motion needs cameras and lidar like the big scanning apps; this is the honest page version of the same feeling. For actual walkable depth, try Room Walk 3D.</li>
+<li>The stitching runs on your phone itself; no photo is sent to any server.</li>
 </ul></details>
 </div>
 <div id="explore">
   <canvas id="sphere"></canvas>
-  <div class="bar"><span class="hint">لف التليفون حواليك عشان تبص جوه أوضتك</span><button id="b-again">صوّر تاني</button></div>
+  <div class="bar"><span class="hint">Turn your phone to look around, or drag with a finger</span><button id="b-again">Capture again</button></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
 const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
-async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.');}};
+async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('Motion access is needed: tap Allow when the phone asks.');}};
   await ask(window.DeviceMotionEvent);await ask(window.DeviceOrientationEvent);}
 async function camera(facing,w=1280,h=720){
-  if(!window.isSecureContext)throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if(!window.isSecureContext)throw new Error('This page must be opened from an https link.');
   return navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:w},height:{ideal:h}},audio:false});}
 
 const YAWS=8,PITCHES=[-28,0,28],HFOV=58;
@@ -110,15 +107,16 @@ async function startCapture(){
   try{
     await motionPerm();
     stream=await camera('environment',1280,720);
-  }catch(err){$('st').className='msg err';$('st').textContent='مش قادر أفتح الكاميرا أو الحساسات: '+(err&&err.message?err.message:err);return;}
+  }catch(err){$('st').className='msg err';$('st').textContent='Could not open the camera or sensors: '+(err&&err.message?err.message:err);return;}
   const v=$('v');v.srcObject=stream;
   try{await v.play();}catch(e){}
   await sleepMs(600);
   yaw0=null;frames.fill(null);taken=0;phase='capture';
   $('vw').hidden=false;$('grid').hidden=false;buildGrid();
   $('b-build').disabled=true;$('b-go').disabled=true;
-  $('st').textContent='لف ببطء… الصفحة بتاخد الصور لوحدها لما تبص ناحية فاضية.';
+  $('st').textContent='Turn slowly… the page takes photos by itself when you face an empty direction.';
   window.addEventListener('deviceorientation',onOrient);
+  setTimeout(()=>{if(phase==='capture'&&!orient){$('st').className='msg err';$('st').textContent='No motion-sensor data yet. On iPhone tap Allow when asked; some browsers do not expose the gyroscope.';}},5000);
   loop();
 }
 function grab(yaw,pitch,idx){
@@ -145,22 +143,22 @@ function loop(){
   if(phase!=='capture')return;
   requestAnimationFrame(loop);
   if(!orient)return;
-  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='تمام، دي نقطة البداية. لف ببطء…';}
+  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='Good, that is the starting point. Keep turning slowly…';}
   const now=performance.now();
   const idx=nearestTarget(orient.yaw,orient.pitch);
   document.querySelectorAll('.grid i.now').forEach(x=>x.classList.remove('now'));
-  if(idx<0){$('st').innerHTML='خلصت كل النواحي <span class="ok">'+taken+'/'+NT+'</span> — دوس «ابني الكورة».';$('b-build').disabled=false;drawOv(null);return;}
+  if(idx<0){$('st').innerHTML='All directions captured <span class="ok">'+taken+'/'+NT+'</span> — tap \'Build the bubble\'.';$('b-build').disabled=false;drawOv(null);return;}
   $('g'+idx).className='now';
   const ty=(idx%YAWS)*45,tp=PITCHES[Math.floor(idx/YAWS)];
   let dy=relYaw(orient.yaw)-ty;if(dy>180)dy-=360;if(dy<-180)dy+=360;
   const dp=orient.pitch-tp;
   drawOv({dy,dp});
-  $('st').textContent='صوّرنا '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'لف يمين':'لف شمال'):(dp>14?'ارفع التليفون فوق':dp<-14?'نزّل التليفون تحت':'ثبّت كده…'));
+  $('st').textContent='Captured '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'turn right':'turn left'):(dp>14?'tilt the phone up':dp<-14?'tilt the phone down':'hold still…'));
   if(Math.abs(dy)<=14&&Math.abs(dp)<=14&&now-lastCap>350){
     if(grab(relYaw(orient.yaw),orient.pitch,idx)){
       lastCap=now;
       if(taken>=Math.min(8,NT))$('b-build').disabled=false;
-      if(taken===NT){$('st').innerHTML='الكورة كملت <span class="ok">24/24</span> — دوس «ابني الكورة».';$('b-build').disabled=false;}
+      if(taken===NT){$('st').innerHTML='All done <span class="ok">24/24</span> — tap \'Build the bubble\'.';$('b-build').disabled=false;}
     }
   }
 }
@@ -182,7 +180,7 @@ function drawOv(t){
   }
 }
 function buildSphere(){
-  if(taken<8){$('st').className='msg err';$('st').textContent='لسه محتاجين صور أكتر (٨ على الأقل). كمّل لفة الأول.';return;}
+  if(taken<8){$('st').className='msg err';$('st').textContent='Need more photos first (at least 8). Keep turning.';return;}
   eqx.fillStyle='#000';eqx.fillRect(0,0,2048,1024);
   const fw=HFOV/360*2048,fh=HFOV*(640/480)/180*1024;
   for(const f of frames){
@@ -204,7 +202,7 @@ function buildSphere(){
 function startViewer(){
   const cv=$('sphere');
   const gl=cv.getContext('webgl',{antialias:true});
-  if(!gl){alert('المتصفح مش قادر يشغّل WebGL.');exitExplore();return;}
+  if(!gl){alert('This browser cannot run WebGL.');exitExplore();return;}
   const vs=`attribute vec3 p;attribute vec2 uv;uniform mat4 m;varying vec2 v;void main(){v=uv;gl_Position=m*vec4(p,1.0);}`;
   const fs=`precision mediump float;uniform sampler2D t;varying vec2 v;void main(){gl_FragColor=texture2D(t,v);}`;
   function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}

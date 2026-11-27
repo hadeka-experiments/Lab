@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كلام من غير صوت</title>
+<script src="shell.js"></script>
+<title>Silent Speech</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -36,40 +37,41 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .out{font-size:26px;font-weight:600;min-height:2.2em;line-height:1.4;margin:6px 0;overflow-wrap:anywhere}
 .cue{font-size:20px;font-weight:600;min-height:1.6em}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>كلام من غير صوت</h1>
-<p class="sub">بتحرك شفايفك بكلمة من غير ما تطلّع صوت، والكاميرا الأمامية بتقرا حركة شفايفك وتكتب الكلمة. بتعلّمها الكلمات الأول، وبعدين تعرفها منك.</p>
+<h1>Silent Speech</h1>
+<p class="sub">Move your lips to say a word without making a sound, and the front camera reads your lip movement and writes the word. You teach it the words first, then it recognises them from you.</p>
 
 <div class="card">
-  <div class="lbl">اللي اتقال</div>
+  <div class="lbl">What was said</div>
   <div class="out" id="out"></div>
   <div class="cue" id="cue"></div>
   <div class="lbl" id="cand"></div>
-  <div class="row"><button id="b-read" disabled>اقرا كلمة</button><button class="ghost" id="b-cont" disabled>قراية متواصلة</button><button class="ghost" id="b-clear">امسح</button></div>
+  <div class="row"><button id="b-read" disabled>Read a word</button><button class="ghost" id="b-cont" disabled>Continuous reading</button><button class="ghost" id="b-clear">Delete</button></div>
 </div>
 <div class="msg" id="msg"></div>
 
 <div class="cam"><video id="vid" playsinline muted autoplay></video></div>
-<div class="row"><button id="b-cam">شغّل الكاميرا</button></div>
+<div class="row"><button id="b-cam">Start camera</button></div>
 
-<h2>علّمها كلمة</h2>
+<h2>Teach it a word</h2>
 <div class="card">
-  <input type="text" id="word" placeholder="الكلمة، مثلاً: شغّل" maxlength="20">
-  <p class="lbl">دوس «سجّل»، ولما يظهر «قول دلوقتي» حرّك شفايفك بالكلمة من غير صوت. كرر كل كلمة ٣ مرات على الأقل. الكلمات اللي شكل الشفايف فيها مختلف (زي «أيوه» و«لأ» و«مية») بتتعرف أحسن من الكلمات المتشابهة.</p>
-  <div class="row"><button id="b-rec" disabled>سجّل</button></div>
+  <input type="text" id="word" placeholder="The word, e.g. play" maxlength="20">
+  <p class="lbl">Tap “Record”, and when “Say it now” appears, mouth the word silently. Repeat each word at least 3 times. Words with distinct lip shapes (like “yes”, “no”, “water”) are recognised better than similar‑looking words.</p>
+  <div class="row"><button id="b-rec" disabled>Record</button></div>
 </div>
 <ul class="list" id="words"></ul>
 <p class="lbl" id="acc"></p>
 
-<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<details><summary>How does it know, and what are the limits?</summary>
 <ul>
-<li>موديل تتبع الوش بيطلّع ٣٠ مرة في الثانية حوالي ٢٥ رقم بيوصفوا شكل بقك: فاتح قد إيه، مدوّر، مشدود، الشفايف ملمومة، وهكذا.</li>
-<li>كل كلمة بتبقى «منحنى» من الأرقام دي على مدار الوقت. الصفحة بتقارن المنحنى الجديد بكل اللي اتسجلوا بطريقة اسمها DTW، بتسامح لو قلت الكلمة أسرع أو أبطأ، وبتختار الأقرب.</li>
-<li>لو المنحنى بعيد عن كل الكلمات، بتقول «مش فاهم» بدل ما تخمّن.</li>
-<li>مش بتقرا أي كلمة في الدنيا، بتقرا الكلمات اللي علّمتهالها انت، ومنك انت. والحروف اللي بتطلع من جوه البق (زي ق وك وه) شكل الشفايف فيها مش بيبان.</li>
-<li>الكلمات متخزنة على التليفون ده بس.</li>
+<li>A face‑tracking model outputs about 25 numbers 30 times per second describing your mouth’s shape: how open, rounded, stretched, pursed, and so on.</li>
+<li>Each word becomes a “curve” of those numbers over time. The page compares the new curve with every recorded one using a method called DTW, which tolerates saying the word faster or slower, and picks the closest.</li>
+<li>If the curve is far from every word, it says “didn’t understand” instead of guessing.</li>
+<li>It doesn’t read any word in the world, only the words you taught it, from you. Sounds made inside the mouth (like k, g, h) don’t show on the lips.</li>
+<li>Words are stored on this phone only.</li>
 </ul></details>
 </div>
 
@@ -130,7 +132,7 @@ const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' +
 let lm = null, video = $('vid'), idx = null, feed = [], ev = null, busy = false, cont = false;
 
 async function loadModel() {
-  say('بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…');
+  say('Loading the face‑tracking model (about 4 MB)…');
   const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
   const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true });
@@ -150,18 +152,18 @@ function frame() {
   (video.requestVideoFrameCallback ? video.requestVideoFrameCallback.bind(video) : requestAnimationFrame)(frame);
 }
 async function capture(sec) {
-  $('cue').textContent = 'قول دلوقتي'; $('cue').classList.add('pulse');
+  $('cue').textContent = 'Say it now'; $('cue').classList.add('pulse');
   const t0 = now(); await wait(sec * 1000);
   $('cue').classList.remove('pulse'); $('cue').textContent = '';
   const fr = feed.filter(x => x.t >= t0).map(x => x.f);
-  if (fr.length < 15) throw new Error('الكاميرا ما شافتش وشك كويس. قرّب ونوّر وشك.');
+  if (fr.length < 15) throw new Error('The camera didn’t see your face well. Move closer and light your face.');
   return trimSeg(fr);
 }
 function refresh() {
   const ws = Object.keys(words);
-  $('words').innerHTML = ws.length ? ws.map(w => `<li><span>${esc(w)} · ${words[w].length} مرة</span><button class="ghost" data-del="${esc(w)}">امسح</button></li>`).join('') : '<li>لسه مفيش كلمات.</li>';
+  $('words').innerHTML = ws.length ? ws.map(w => `<li><span>${esc(w)} · ${words[w].length} times</span><button class="ghost" data-del="${esc(w)}">Delete</button></li>`).join('') : '<li>No words yet.</li>';
   ev = evaluate(words);
-  $('acc').textContent = ev ? `دقة متوقعة: ${Math.round(100 * ev.acc)}% (اتحسبت بإن كل تسجيل اتشال واتقارن بالباقي). الصدفة ${Math.round(100 / ws.length)}%.` : 'محتاج كلمتين على الأقل، كل واحدة متسجلة مرتين على الأقل.';
+  $('acc').textContent = ev ? `Expected accuracy: ${Math.round(100 * ev.acc)}% (each recording was held out and compared with the rest). Chance is ${Math.round(100 / ws.length)}%.` : 'At least two words are needed, each recorded at least twice.';
   $('b-read').disabled = $('b-cont').disabled = !(ev && lm);
 }
 $('words').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (!b) return; delete words[b.dataset.del]; save(); refresh(); });
@@ -169,44 +171,44 @@ $('words').addEventListener('click', e => { const b = e.target.closest('[data-de
 $('b-cam').addEventListener('click', async () => {
   const b = $('b-cam'); b.disabled = true;
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
     video.srcObject = st; await video.play(); await loadModel(); frame();
-    say('الكاميرا شغالة. خلي بقك باين كويس.'); b.style.display = 'none'; $('b-rec').disabled = false; refresh();
-  } catch (e) { b.disabled = false; say(e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e), true); }
+    say('Camera running. Keep your mouth clearly visible.'); b.style.display = 'none'; $('b-rec').disabled = false; refresh();
+  } catch (e) { b.disabled = false; say(e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e), true); }
 });
 
 $('b-rec').addEventListener('click', async () => {
-  const w = $('word').value.trim(); if (!w) { say('اكتب الكلمة الأول.', true); return; }
+  const w = $('word').value.trim(); if (!w) { say('Enter the word first.', true); return; }
   if (busy) return; busy = true; $('b-rec').disabled = true;
   try {
-    $('cue').textContent = 'استعد…'; await wait(900);
+    $('cue').textContent = 'Get ready…'; await wait(900);
     const seg = await capture(2);
-    if (!seg) say('ما شفتش حركة شفايف واضحة. حرّك بقك أوضح شوية.', true);
-    else { (words[w] = words[w] || []).push(seg); save(); refresh(); say(`اتسجلت «${w}» (${words[w].length} مرة).`); }
+    if (!seg) say('No clear lip movement seen. Move your mouth a bit more clearly.', true);
+    else { (words[w] = words[w] || []).push(seg); save(); refresh(); say(`Recorded “${w}” (${words[w].length} times).`); }
   } catch (e) { say(e.message, true); }
   busy = false; $('b-rec').disabled = false;
 });
 
 async function readOnce() {
   const seg = await capture(2);
-  if (!seg) { $('cand').textContent = 'ما شفتش حركة.'; return; }
+  if (!seg) { $('cand').textContent = 'No movement seen.'; return; }
   const r = classify(words, seg), best = r[0], sec = r[1];
-  if (best.d > ev.thr) { $('cand').textContent = `مش فاهم (أقرب كلمة: ${best.w})`; return; }
+  if (best.d > ev.thr) { $('cand').textContent = `Didn’t understand (closest word: ${best.w})`; return; }
   const sure = sec ? best.d / sec.d : 0;
   $('out').textContent = ($('out').textContent + ' ' + best.w).trim();
-  $('cand').textContent = sure < 0.8 ? 'متأكد' : `مش متأكد أوي، ممكن تكون «${sec.w}»`;
+  $('cand').textContent = sure < 0.8 ? 'Confident' : `Not very sure; it might be “${sec.w}”`;
 }
 $('b-read').addEventListener('click', async () => {
   if (busy) return; busy = true; $('b-read').disabled = true;
-  try { $('cue').textContent = 'استعد…'; await wait(700); await readOnce(); } catch (e) { say(e.message, true); }
+  try { $('cue').textContent = 'Get ready…'; await wait(700); await readOnce(); } catch (e) { say(e.message, true); }
   busy = false; $('b-read').disabled = false;
 });
 $('b-cont').addEventListener('click', async () => {
   if (cont) { cont = false; return; }
-  if (busy) return; cont = busy = true; $('b-cont').textContent = 'وقّف'; $('b-read').disabled = true;
-  try { while (cont) { $('cue').textContent = 'استعد…'; await wait(700); if (!cont) break; await readOnce(); } } catch (e) { say(e.message, true); }
-  cont = busy = false; $('b-cont').textContent = 'قراية متواصلة'; $('b-read').disabled = false; $('cue').textContent = '';
+  if (busy) return; cont = busy = true; $('b-cont').textContent = 'Stop'; $('b-read').disabled = true;
+  try { while (cont) { $('cue').textContent = 'Get ready…'; await wait(700); if (!cont) break; await readOnce(); } } catch (e) { say(e.message, true); }
+  cont = busy = false; $('b-cont').textContent = 'Continuous reading'; $('b-read').disabled = false; $('cue').textContent = '';
 });
 $('b-clear').addEventListener('click', () => { $('out').textContent = ''; $('cand').textContent = ''; });
 refresh();

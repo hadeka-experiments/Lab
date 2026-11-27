@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الأوضة 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+.view{position:relative;width:100%;aspect-ratio:3/4;max-height:62vh;background:#000;border-radius:14px;overflow:hidden;margin-top:10px}
+.view video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.view canvas{position:absolute;inset:0;width:100%;height:100%}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:10px}
+.grid i{aspect-ratio:1;border-radius:4px;background:var(--line);opacity:.4}
+.grid i.now{outline:3px solid var(--red);opacity:1}
+.grid i.done{background:var(--ok);opacity:1}
+#explore{position:fixed;inset:0;background:#000;z-index:50;display:none}
+#explore canvas{width:100%;height:100%;display:block;touch-action:none}
+#explore .bar{position:absolute;top:max(10px,env(safe-area-inset-top));inset-inline:10px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+#explore .bar button{pointer-events:auto}
+#explore .hint{background:rgba(0,0,0,.55);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap" id="main">
+<h1>الأوضة 3D</h1>
+<p class="sub">قف مكانك ولف التليفون حواليك ببطء، والصفحة تلزق صور الكاميرا على كورة تحيط بيك من كل ناحية. بعدين لف التليفون في أي ناحية… وهتلاقي أوضتك هناك.</p>
+<div class="card">
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>دوس «ابدأ التصوير» واسمح للكاميرا وللحركة.</li>
+    <li>امسك التليفون قدامك و<b>لف بجسمك ببطء</b> في دايرة كاملة، مرة وانت باصص قدّام، ومرة فوق شوية، ومرة تحت شوية.</li>
+    <li>كل مربع في الشبكة تحت بيخضرّ لمّا تاخد صورته. لما تخلّص، دوس «ابني الكورة».</li>
+  </ol>
+  <div class="row"><button id="b-go">ابدأ التصوير</button><button class="ghost" id="b-build" disabled>ابني الكورة</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<div class="view" id="vw" hidden>
+  <video id="v" playsinline muted autoplay></video>
+  <canvas id="ov"></canvas>
+</div>
+<div class="grid" id="grid" hidden></div>
+<details><summary>إزاي بيشتغل؟ وبأمانة إيه اللي مش حقيقي؟</summary>
+<ul>
+<li>الجيروسكوب والبوصلة في التليفون بيعرفوا انت باصص فين بالظبط. كل ما تبص ناحية جديدة، الصفحة بتاخد صورة من الكاميرا وتخزنها مع اتجاهها.</li>
+<li>في الآخر الصور بتتلزق على سطح كورة من جوا، وانت واقف في نصها. لما تلف التليفون، الصفحة بتدوّر نفس اللفة جوه الكورة، فتحس إن الأوضة حواليك.</li>
+<li><b>بأمانة:</b> مفيش قياس عمق حقيقي هنا. الكورة عبارة عن صور ملزوقة، فلو مشيت لقدّام مش هتقرب من الحيطة. العمق الحقيقي من حركة التليفون بيحتاج كاميرات وليدار زي اللي في تطبيقات المسح الكبيرة — دي نسخة الصفحة الصادقة من نفس الإحساس.</li>
+<li>اللزق بيتعمل على التليفون نفسه، ومفيش أي صورة بتتبعت لأي سيرفر.</li>
+</ul></details>
+</div>
+<div id="explore">
+  <canvas id="sphere"></canvas>
+  <div class="bar"><span class="hint">لف التليفون حواليك عشان تبص جوه أوضتك</span><button id="b-again">صوّر تاني</button></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
+async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.');}};
+  await ask(window.DeviceMotionEvent);await ask(window.DeviceOrientationEvent);}
+async function camera(facing,w=1280,h=720){
+  if(!window.isSecureContext)throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:w},height:{ideal:h}},audio:false});}
+
+const YAWS=8,PITCHES=[-28,0,28],HFOV=58;
+const NT=YAWS*PITCHES.length;
+let stream=null,orient=null,yaw0=null,frames=new Array(NT).fill(null),taken=0,phase='idle',lastCap=0;
+const eq=document.createElement('canvas');eq.width=2048;eq.height=1024;
+const eqx=eq.getContext('2d');
+
+function relYaw(y){let d=(y-yaw0)%360;if(d<0)d+=360;return d;}
+function pitchOf(b){return Math.max(-60,Math.min(60,b-90));}
+
+function buildGrid(){
+  const g=$('grid');g.innerHTML='';
+  for(let i=0;i<NT;i++){const s=document.createElement('i');s.id='g'+i;g.appendChild(s);}
+}
+function nearestTarget(yaw,pitch){
+  let best=-1,bd=1e9;
+  for(let p=0;p<PITCHES.length;p++)for(let y=0;y<YAWS;y++){
+    const i=p*YAWS+y;if(frames[i])continue;
+    const ty=y*45,tp=PITCHES[p];
+    let dy=Math.abs(relYaw(yaw)-ty);if(dy>180)dy=360-dy;
+    const d=dy+Math.abs(pitch-tp)*1.5;
+    if(d<bd){bd=d;best=i;}
+  }
+  return best;
+}
+function onOrient(e){
+  let yaw;
+  if(typeof e.webkitCompassHeading==='number')yaw=e.webkitCompassHeading;
+  else if(typeof e.alpha==='number')yaw=(360-e.alpha)%360;
+  else return;
+  const pitch=pitchOf(typeof e.beta==='number'?e.beta:90);
+  orient={yaw,pitch,gyro:true};
+}
+async function startCapture(){
+  $('st').className='msg';$('st').textContent='';
+  try{
+    await motionPerm();
+    stream=await camera('environment',1280,720);
+  }catch(err){$('st').className='msg err';$('st').textContent='مش قادر أفتح الكاميرا أو الحساسات: '+(err&&err.message?err.message:err);return;}
+  const v=$('v');v.srcObject=stream;
+  try{await v.play();}catch(e){}
+  await sleepMs(600);
+  yaw0=null;frames.fill(null);taken=0;phase='capture';
+  $('vw').hidden=false;$('grid').hidden=false;buildGrid();
+  $('b-build').disabled=true;$('b-go').disabled=true;
+  $('st').textContent='لف ببطء… الصفحة بتاخد الصور لوحدها لما تبص ناحية فاضية.';
+  window.addEventListener('deviceorientation',onOrient);
+  loop();
+}
+function grab(yaw,pitch,idx){
+  const v=$('v');if(!v.videoWidth)return false;
+  const t=document.createElement('canvas');t.width=480;t.height=640;
+  const tc=t.getContext('2d');
+  tc.drawImage(v,0,0,480,640);
+  // feather edges so tiles blend
+  tc.globalCompositeOperation='destination-in';
+  let g=tc.createLinearGradient(0,0,480,0);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.18,'#000');g.addColorStop(.82,'#000');g.addColorStop(1,'rgba(0,0,0,0)');
+  tc.fillStyle=g;tc.fillRect(0,0,480,640);
+  g=tc.createLinearGradient(0,0,0,640);
+  g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.15,'#000');g.addColorStop(.85,'#000');g.addColorStop(1,'rgba(0,0,0,0)');
+  tc.fillStyle=g;tc.fillRect(0,0,480,640);
+  frames[idx]={c:t,yaw,pitch};
+  taken++;
+  const el=$('g'+idx);if(el)el.className='done';
+  return true;
+}
+function loop(){
+  if(phase!=='capture')return;
+  requestAnimationFrame(loop);
+  if(!orient)return;
+  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='تمام، دي نقطة البداية. لف ببطء…';}
+  const now=performance.now();
+  const idx=nearestTarget(orient.yaw,orient.pitch);
+  document.querySelectorAll('.grid i.now').forEach(x=>x.classList.remove('now'));
+  if(idx<0){$('st').innerHTML='خلصت كل النواحي <span class="ok">'+taken+'/'+NT+'</span> — دوس «ابني الكورة».';$('b-build').disabled=false;drawOv(null);return;}
+  $('g'+idx).className='now';
+  const ty=(idx%YAWS)*45,tp=PITCHES[Math.floor(idx/YAWS)];
+  let dy=relYaw(orient.yaw)-ty;if(dy>180)dy-=360;if(dy<-180)dy+=360;
+  const dp=orient.pitch-tp;
+  drawOv({dy,dp});
+  $('st').textContent='صوّرنا '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'لف يمين':'لف شمال'):(dp>14?'ارفع التليفون فوق':dp<-14?'نزّل التليفون تحت':'ثبّت كده…'));
+  if(Math.abs(dy)<=14&&Math.abs(dp)<=14&&now-lastCap>350){
+    if(grab(relYaw(orient.yaw),orient.pitch,idx)){
+      lastCap=now;
+      if(taken>=Math.min(8,NT))$('b-build').disabled=false;
+      if(taken===NT){$('st').innerHTML='الكورة كملت <span class="ok">24/24</span> — دوس «ابني الكورة».';$('b-build').disabled=false;}
+    }
+  }
+}
+function drawOv(t){
+  const c=$('ov'),vw=$('vw');
+  c.width=vw.clientWidth;c.height=vw.clientHeight;
+  const x=c.getContext('2d');
+  x.clearRect(0,0,c.width,c.height);
+  if(!t)return;
+  const cx=c.width/2,cy=c.height/2;
+  x.strokeStyle=Math.abs(t.dy)<=14&&Math.abs(t.dp)<=14?'#1d9e75':'#fff';
+  x.lineWidth=3;x.beginPath();x.arc(cx,cy,40,0,7);x.stroke();
+  if(Math.abs(t.dy)>14||Math.abs(t.dp)>14){
+    const a=Math.atan2(-t.dp,-t.dy);
+    x.fillStyle='#e8251a';
+    x.save();x.translate(cx,cy);x.rotate(a);
+    x.beginPath();x.moveTo(58,0);x.lineTo(40,-10);x.lineTo(40,10);x.closePath();x.fill();
+    x.restore();
+  }
+}
+function buildSphere(){
+  if(taken<8){$('st').className='msg err';$('st').textContent='لسه محتاجين صور أكتر (٨ على الأقل). كمّل لفة الأول.';return;}
+  eqx.fillStyle='#000';eqx.fillRect(0,0,2048,1024);
+  const fw=HFOV/360*2048,fh=HFOV*(640/480)/180*1024;
+  for(const f of frames){
+    if(!f)continue;
+    // lon = -yaw: compass yaw grows to the right, sphere lon grows to the left
+    const u=((-f.yaw)%360+360)%360;
+    const xc=u/360*2048,yc=(90-f.pitch)/180*1024;
+    // draw twice (wrap-around at seam)
+    for(const ox of [0,-2048,2048]){
+      eqx.drawImage(f.c,xc-fw/2+ox,yc-fh/2,fw,fh);
+    }
+  }
+  phase='explore';
+  $('main').style.display='none';
+  $('explore').style.display='block';
+  startViewer();
+}
+// ---------- WebGL sphere viewer ----------
+function startViewer(){
+  const cv=$('sphere');
+  const gl=cv.getContext('webgl',{antialias:true});
+  if(!gl){alert('المتصفح مش قادر يشغّل WebGL.');exitExplore();return;}
+  const vs=`attribute vec3 p;attribute vec2 uv;uniform mat4 m;varying vec2 v;void main(){v=uv;gl_Position=m*vec4(p,1.0);}`;
+  const fs=`precision mediump float;uniform sampler2D t;varying vec2 v;void main(){gl_FragColor=texture2D(t,v);}`;
+  function sh(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const pr=gl.createProgram();
+  gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(pr);gl.useProgram(pr);
+  const LON=64,LAT=48,verts=[],idxs=[];
+  for(let la=0;la<=LAT;la++){
+    const lat=(la/LAT-0.5)*Math.PI;
+    for(let lo=0;lo<=LON;lo++){
+      const lon=lo/LON*2*Math.PI;
+      verts.push(-Math.cos(lat)*Math.sin(lon),Math.sin(lat),-Math.cos(lat)*Math.cos(lon),lo/LON,1-la/LAT);
+    }
+  }
+  for(let la=0;la<LAT;la++)for(let lo=0;lo<LON;lo++){
+    const a=la*(LON+1)+lo,b=a+1,c=a+LON+1,d=c+1;
+    idxs.push(a,c,b,b,c,d); // inward-facing winding
+  }
+  const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);
+  const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idxs),gl.STATIC_DRAW);
+  const lp=gl.getAttribLocation(pr,'p'),lu=gl.getAttribLocation(pr,'uv');
+  gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,3,gl.FLOAT,false,20,0);
+  gl.enableVertexAttribArray(lu);gl.vertexAttribPointer(lu,2,gl.FLOAT,false,20,12);
+  const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,eq);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  const um=gl.getUniformLocation(pr,'m');
+  gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,1);
+  // rotation helpers
+  function mul(a,b){const o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s;}return o;}
+  function rotY(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);}
+  function rotX(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);}
+  function persp(fov,asp){const f=1/Math.tan(fov/2),n=.01,fa=10;
+    return new Float32Array([f/asp,0,0,0, 0,f,0,0, 0,0,(fa+n)/(n-fa),-1, 0,0,2*fa*n/(n-fa),0]);}
+  let dragYaw=0,dragPitch=0,dragging=false,lx=0,ly=0,gyroSeen=false;
+  cv.addEventListener('pointerdown',e=>{dragging=true;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointermove',e=>{if(!dragging)return;dragYaw+=(e.clientX-lx)*0.4;dragPitch=Math.max(-80,Math.min(80,dragPitch+(e.clientY-ly)*0.4));lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointerup',()=>dragging=false);
+  function frame(){
+    if(phase!=='explore')return;
+    requestAnimationFrame(frame);
+    const w=cv.clientWidth*devicePixelRatio,h=cv.clientHeight*devicePixelRatio;
+    if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;gl.viewport(0,0,w,h);}
+    let yaw,pitch;
+    if(orient&&orient.gyro){gyroSeen=true;yaw=-orient.yaw*Math.PI/180;pitch=-orient.pitch*Math.PI/180;}
+    else{yaw=dragYaw*Math.PI/180;pitch=dragPitch*Math.PI/180;}
+    const m=mul(persp(70*Math.PI/180,w/h),mul(rotX(pitch),rotY(yaw)));
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniformMatrix4fv(um,false,m);
+    gl.drawElements(gl.TRIANGLES,idxs.length,gl.UNSIGNED_SHORT,0);
+  }
+  frame();
+}
+function exitExplore(){
+  phase='idle';
+  $('explore').style.display='none';
+  $('main').style.display='';
+  $('b-go').disabled=false;
+  $('st').textContent='';
+}
+$('b-go').onclick=startCapture;
+$('b-build').onclick=buildSphere;
+$('b-again').onclick=()=>{exitExplore();startCapture();};
+</script>
+</body>
+</html>

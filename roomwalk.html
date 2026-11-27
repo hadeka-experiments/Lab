@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>امشي جوه أوضتك</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Room Walk 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -34,19 +35,14 @@ progress{width:100%;height:10px;accent-color:var(--red)}
 #walk .bar button{pointer-events:auto}
 #walk .hint{background:rgba(0,0,0,.55);color:#fff;border-radius:10px;padding:6px 12px;font-size:14px;max-width:70%}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap" id="main">
-<h1>امشي جوه أوضتك</h1>
-<p class="sub">صوّر لفة واحدة وانت واقف مكانك، والذكاء الاصطناعي على تليفونك يخمّن عمق كل صورة ويبني أوضتك مجسّمة. بعدين امشي جواها بصباعك وقرّب من الحاجات.</p>
+<h1>Room Walk 3D</h1>
+<p class="sub">Capture one spin in place; on-device AI guesses the depth of every photo and builds your room as a real 3D model. Then walk inside it and get closer to things.</p>
 <div class="card">
-  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li>دوس «ابدأ التصوير» واسمح للكاميرا وللحركة.</li>
-    <li><b>قف مكانك وما تتحركش منه</b> — التليفون بيلف حوالين نفسه بس، زي البانوراما: لفة قدّام، ولفة مائل لفوق، ولفة مائل لتحت.</li>
-    <li>لما الشبكة تخضرّ، دوس «ابني الـ3D». أول مرة بينزّل موديل العمق (حوالي ٥٠ ميجا، بيتخزن للمرات الجاية).</li>
-    <li>في المشهد: <b>اسحب في شمال الشاشة عشان تمشي</b>، واسحب في اليمين عشان تبص حواليك (أو لف بالتليفون).</li>
-  </ol>
-  <div class="row"><button id="b-go">ابدأ التصوير</button><button class="ghost" id="b-build" disabled>ابني الـ3D</button></div>
+  <div class="row"><button id="b-go">Start capture</button><button class="ghost" id="b-build" disabled>Build the 3D</button></div>
   <div class="msg" id="st"></div>
   <progress id="pg" value="0" max="1" hidden></progress>
 </div>
@@ -55,18 +51,18 @@ progress{width:100%;height:10px;accent-color:var(--red)}
   <canvas id="ov"></canvas>
 </div>
 <div class="grid" id="grid" hidden></div>
-<details><summary>إزاي بيشتغل؟ وبأمانة إيه اللي مش حقيقي؟</summary>
+<details><summary>How does it work? And honestly, what is not real?</summary>
 <ul>
-<li>الجيروسكوب بيعرف التليفون باصص فين، والصفحة بتاخد ٢٤ صورة تغطي كل النواحي وانت لفيت مكانك.</li>
-<li>موديل Depth Anything V2 من جوجل/هاجينج فيس بيشتغل <b>على تليفونك نفسه</b> (مفيش صورة بتطلع لأي سيرفر) ويخمّن بُعد كل نقطة في كل صورة عن الكاميرا.</li>
-<li>الصفحة بتحوّل الصور والأعماق لسحابة نقط ملوّنة في فراغ 3D حقيقي: تقدر تمشي فيه، وتقرب من الحاجات، والمنظور بيتغير صح.</li>
-<li><b>بأمانة:</b> العمق تخمين ذكاء اصطناعي من صورة واحدة، مش قياس ليزر. المقاس النسبي تقريبي، والحيطان ممكن تبان معوّجة شوية، والفواصل بين الصور ممكن تبان. مفيش تصادم: تقدر تعدّي جوه الحيطة. والتصوير لازم يكون من نقطة واحدة — لو مشيت وانت بتصوّر المجسّم يتكسر.</li>
-<li>الموديل بينزّل أول مرة بس، والمتصفح بيخزنه.</li>
+<li>The gyroscope knows where the phone is looking, and the page takes 24 photos covering every direction as you turn in place.</li>
+<li>The Depth Anything V2 model runs <b>on your phone itself</b> (no photo leaves for any server) and guesses how far every point in every photo is from the camera.</li>
+<li>The page turns the photos and depths into a colored point cloud in real 3D space: you can walk in it, get closer to things, and the perspective changes correctly.</li>
+<li><b>Honestly:</b> the depth is an AI guess from a single photo, not a laser measurement. Relative sizes are approximate, walls can look slightly bent, and seams between photos can show. There is no collision: you can pass through a wall. And the capture must be from one spot — if you walk while capturing, the model breaks.</li>
+<li>The model downloads only the first time; the browser keeps it.</li>
 </ul></details>
 </div>
 <div id="walk">
   <canvas id="w3d"></canvas>
-  <div class="bar"><span class="hint">شمال الشاشة: امشِ · يمينها: بص حواليك</span><button id="b-again">صوّر تاني</button></div>
+  <div class="bar"><span class="hint">Left half of the screen: walk · right half: look around</span><button id="b-again">Scan again</button></div>
 </div>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
@@ -75,10 +71,10 @@ progress{width:100%;height:10px;accent-color:var(--red)}
 import * as THREE from 'three';
 const $=id=>document.getElementById(id);
 const sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
-async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.');}};
+async function motionPerm(){const ask=async C=>{if(C&&typeof C.requestPermission==='function'){const r=await C.requestPermission();if(r!=='granted')throw new Error('Motion access is needed: tap Allow when the phone asks.');}};
   await ask(window.DeviceMotionEvent);await ask(window.DeviceOrientationEvent);}
 async function camera(facing,w=1280,h=720){
-  if(!window.isSecureContext)throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if(!window.isSecureContext)throw new Error('This page must be opened from an https link.');
   return navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:w},height:{ideal:h}},audio:false});}
 
 const YAWS=8,PITCHES=[-28,0,28],NT=YAWS*PITCHES.length,HFOV=58;
@@ -108,14 +104,15 @@ function nearestTarget(yaw,pitch){
 async function startCapture(){
   $('st').className='msg';$('st').textContent='';
   try{await motionPerm();stream=await camera('environment',1280,720);}
-  catch(err){$('st').className='msg err';$('st').textContent='مش قادر أفتح الكاميرا أو الحساسات: '+(err&&err.message?err.message:err);return;}
+  catch(err){$('st').className='msg err';$('st').textContent='Could not open the camera or sensors: '+(err&&err.message?err.message:err);return;}
   const v=$('v');v.srcObject=stream;try{await v.play();}catch(e){}
   await sleepMs(600);
   yaw0=null;frames.fill(null);taken=0;phase='capture';
   $('vw').hidden=false;$('grid').hidden=false;buildGrid();
   $('b-build').disabled=true;$('b-go').disabled=true;
-  $('st').textContent='لف ببطء… الصفحة بتاخد الصور لوحدها لما تبص ناحية فاضية.';
+  $('st').textContent='Turn slowly… the page takes photos by itself when you face an empty direction.';
   window.addEventListener('deviceorientation',onOrient);
+  setTimeout(()=>{if(phase==='capture'&&!orient){$('st').className='msg err';$('st').textContent='No motion-sensor data yet. On iPhone tap Allow when asked; some browsers do not expose the gyroscope.';}},5000);
   loop();
 }
 function grab(yaw,pitch,idx){
@@ -130,22 +127,22 @@ function loop(){
   if(phase!=='capture')return;
   requestAnimationFrame(loop);
   if(!orient)return;
-  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='تمام، دي نقطة البداية. لف ببطء…';}
+  if(yaw0===null){yaw0=orient.yaw;$('st').textContent='Good, that is the starting point. Keep turning slowly…';}
   const now=performance.now();
   const idx=nearestTarget(orient.yaw,orient.pitch);
   document.querySelectorAll('.grid i.now').forEach(x=>x.classList.remove('now'));
-  if(idx<0){$('st').innerHTML='خلصت كل النواحي <span class="ok">'+taken+'/'+NT+'</span> — دوس «ابني الـ3D».';$('b-build').disabled=false;drawOv(null);return;}
+  if(idx<0){$('st').innerHTML='All directions captured <span class="ok">'+taken+'/'+NT+'</span> — tap \'Build the 3D\'.';$('b-build').disabled=false;drawOv(null);return;}
   $('g'+idx).className='now';
   const ty=(idx%YAWS)*45,tp=PITCHES[Math.floor(idx/YAWS)];
   let dy=relYaw(orient.yaw)-ty;if(dy>180)dy-=360;if(dy<-180)dy+=360;
   const dp=orient.pitch-tp;
   drawOv({dy,dp});
-  $('st').textContent='صوّرنا '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'لف يمين':'لف شمال'):(dp>14?'ارفع التليفون فوق':dp<-14?'نزّل التليفون تحت':'ثبّت كده…'));
+  $('st').textContent='Captured '+taken+'/'+NT+' — '+(Math.abs(dy)>14?(dy>0?'turn right':'turn left'):(dp>14?'tilt the phone up':dp<-14?'tilt the phone down':'hold still…'));
   if(Math.abs(dy)<=14&&Math.abs(dp)<=14&&now-lastCap>350){
     if(grab(relYaw(orient.yaw),orient.pitch,idx)){
       lastCap=now;
       if(taken>=Math.min(8,NT))$('b-build').disabled=false;
-      if(taken===NT)$('st').innerHTML='الصور كملت <span class="ok">24/24</span> — دوس «ابني الـ3D».';
+      if(taken===NT)$('st').innerHTML='All done <span class="ok">24/24</span> — tap \'Build the 3D\'.';
     }
   }
 }
@@ -167,23 +164,23 @@ function drawOv(t){
 // ---------- depth + point cloud ----------
 async function buildCloud(){
   const have=frames.filter(Boolean);
-  if(have.length<8){$('st').className='msg err';$('st').textContent='لسه محتاجين صور أكتر (٨ على الأقل). كمّل لفة الأول.';return;}
+  if(have.length<8){$('st').className='msg err';$('st').textContent='Need more photos first (at least 8). Keep turning.';return;}
   phase='build';$('b-build').disabled=true;$('pg').hidden=false;$('pg').value=0;
-  $('st').textContent='بينزّل موديل العمق…';
+  $('st').textContent='Downloading the depth model…';
   let est;
   try{
     const tf=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3');
-    const opts=p=>{if(p&&p.status==='progress'&&p.total)$('st').textContent='بينزّل موديل العمق… '+Math.round(100*(p.loaded||0)/p.total)+'%';};
+    const opts=p=>{if(p&&p.status==='progress'&&p.total)$('st').textContent='Downloading the depth model… '+Math.round(100*(p.loaded||0)/p.total)+'%';};
     try{est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{device:'webgpu',dtype:'fp16',progress_callback:opts});}
     catch(e1){
-      $('st').textContent='WebGPU مش متاح، بنكمّل على المعالج (أبطأ شوية)…';
+      $('st').textContent='WebGPU is not available here, continuing on the CPU (slower)…';
       try{est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{device:'wasm',dtype:'fp16',progress_callback:opts});}
       catch(e2){est=await tf.pipeline('depth-estimation','onnx-community/depth-anything-v2-small',{progress_callback:opts});}
     }
     let done=0;
     for(const f of frames){
       if(!f)continue;
-      $('st').textContent='بيخمّن العمق… صورة '+(++done)+' من '+have.length;
+      $('st').textContent='Guessing depth… photo '+(++done)+' of '+have.length;
       $('pg').value=done/have.length;
       const img=tf.RawImage.fromCanvas(f.c);
       const out=await est(img);
@@ -192,7 +189,7 @@ async function buildCloud(){
       f.dep=t.data;f.dh=dh;f.dw=dw;
     }
   }catch(err){
-    $('st').className='msg err';$('st').textContent='موديل العمق ما اشتغلش: '+(err&&err.message?err.message:err);
+    $('st').className='msg err';$('st').textContent='The depth model did not work on this device: '+(err&&err.message?err.message:err);
     phase='capture';$('b-build').disabled=false;return;
   }
   // scale alignment between neighbouring frames (model depth is relative per image)
@@ -259,7 +256,7 @@ async function buildCloud(){
       col.push(img[o]/255,img[o+1]/255,img[o+2]/255);
     }
   }
-  if(pos.length<3000){$('st').className='msg err';$('st').textContent='السحابة طلعت فاضية — جرّب تصوّر تاني في نور أحسن.';phase='capture';$('b-build').disabled=false;return;}
+  if(pos.length<3000){$('st').className='msg err';$('st').textContent='The cloud came out empty — try again in better light.';phase='capture';$('b-build').disabled=false;return;}
   window.__cloud={pos:new Float32Array(pos),col:new Float32Array(col),n:pos.length/3};
   phase='walk';
   $('main').style.display='none';$('walk').style.display='block';

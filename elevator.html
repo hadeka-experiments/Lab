@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>عداد الأدوار</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Floor Counter</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -35,33 +36,34 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .floor{font-size:clamp(90px,30vw,150px);font-weight:700;line-height:1;text-align:center;font-variant-numeric:tabular-nums}
 .arrow{text-align:center;font-size:20px;color:var(--mute);min-height:1.6em}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>عداد الأدوار</h1>
-<p class="sub">من غير بارومتر ولا GPS: حساس الحركة بيحس بالأسانسير وهو بيبدأ يطلع أو ينزل وهو بيقف، والصفحة بتحسب من ده طلعت كام متر وبقيت في الدور الكام.</p>
+<h1>Floor Counter</h1>
+<p class="sub">No barometer, no GPS: the motion sensor feels the elevator push as it starts and brake as it stops, and the page works out how many metres you travelled and which floor you’re on.</p>
 <div class="card">
-  <label>انت دلوقتي في الدور<select id="start"><option value="-3">بدروم 3</option><option value="-2">بدروم 2</option><option value="-1">بدروم 1</option><option value="0">أرضي</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option></select></label>
-  <label>ارتفاع الدور <b id="hV"></b><input type="range" id="fh" min="2.6" max="4.5" step="0.05"></label>
-  <div class="row"><button id="b-go">ابدأ</button></div>
-  <div class="msg" id="st">ادخل الأسانسير، اضغط «ابدأ»، وامسك التليفون <b>ثابت</b> في إيدك أو حطه على الأرض. ماتمشيش بيه.</div>
+  <label>You’re now on floor<select id="start"><option value="-3">Basement 3</option><option value="-2">Basement 2</option><option value="-1">Basement 1</option><option value="0">Ground</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option></select></label>
+  <label>Floor height <b id="hV"></b><input type="range" id="fh" min="2.6" max="4.5" step="0.05"></label>
+  <div class="row"><button id="b-go">Start</button></div>
+  <div class="msg" id="st">Enter the elevator, tap “Start”, and hold the phone <b>still</b> in your hand or put it on the floor. Don’t walk with it.</div>
 </div>
 <div class="card" style="margin-top:10px"><div class="floor" id="floor">—</div><div class="arrow" id="arrow"></div></div>
 <div class="fig"><canvas id="cv"></canvas></div>
-<p class="lbl">فوق: العجلة الرأسية. تحت: الارتفاع المحسوب من أول الرحلة.</p>
-<h2>الرحلات</h2>
+<p class="lbl">Top: vertical acceleration. Bottom: height computed since the ride began.</p>
+<h2>Rides</h2>
 <ul class="list" id="rides"></ul>
 <div class="card" id="calCard" hidden style="margin-top:10px">
-  <b>عايرها على الرحلة الأخيرة</b>
-  <p class="lbl">لو عارف الرحلة اللي فاتت كانت كام دور، اختاره، والصفحة تحسب ارتفاع الدور في عمارتك.</p>
-  <div class="row"><select id="calN" style="width:auto"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option></select><button class="ghost" id="b-cal">عاير</button></div>
+  <b>Calibrate on the last ride</b>
+  <p class="lbl">If you know how many floors the last ride was, pick it and the page computes your building’s floor height.</p>
+  <div class="row"><select id="calN" style="width:auto"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option></select><button class="ghost" id="b-cal">Calibrate</button></div>
 </div>
-<details style="margin-top:14px"><summary>إزاي بتشتغل؟</summary>
+<details style="margin-top:14px"><summary>How does it work?</summary>
 <ul>
-<li>الأسانسير بيعمل «زقّة» لفوق وهو بيبدأ، و«فرملة» وهو بيقف. حساس الحركة بيحس بالاتنين حتى لو انت مش حاسس.</li>
-<li>الصفحة بتجمع العجلة عشان تطلع السرعة، وبتجمع السرعة عشان تطلع المسافة. وعشان أي غلطة صغيرة في الحساس بتكبر مع الوقت، بتصحّح الحساب على أساس إن الأسانسير واقف في أول الرحلة وفي آخرها.</li>
-<li>على الويب، الآيفون بيقرا الحساس حوالي ٦٠ مرة في الثانية. الدقة المتوقعة في حدود نص متر لمتر في الرحلة، فالدور ممكن يغلط بواحد في الرحلات الطويلة. العيارة بترفع الدقة.</li>
-<li>لو مشيت أو حرّكت التليفون جامد، الحساب بيبوظ. السلم مش بينفع.</li>
+<li>An elevator gives an upward “push” when it starts and a “brake” when it stops. The motion sensor feels both, even if you don’t.</li>
+<li>The page integrates acceleration into speed and speed into distance. Since tiny sensor errors grow over time, it corrects the calculation assuming the elevator is stopped at the start and end of the ride.</li>
+<li>Browsers read the sensor about 60 times per second. Expected accuracy is about 0.5–1 m per ride, so the floor can be off by one on long rides. Calibrating improves it.</li>
+<li>Walking or shaking the phone ruins the calculation. Stairs don’t work.</li>
 </ul></details>
 </div>
 <script>
@@ -71,16 +73,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -112,9 +114,9 @@ function rideFromSamples(S, quiet = 0.06) {
 }
 
 let fh = LS.get('fh', 3.0), floor = LS.get('floor', 0), running = false, S = [], buf = [], activeSince = null, quietSince = null, rides = LS.get('rides', []), lastRide = null, g = null;
-$('fh').value = fh; $('hV').textContent = fh.toFixed(2) + ' م'; $('fh').oninput = () => { fh = +$('fh').value; LS.set('fh', fh); $('hV').textContent = fh.toFixed(2) + ' م'; };
+$('fh').value = fh; $('hV').textContent = fh.toFixed(2) + ' m'; $('fh').oninput = () => { fh = +$('fh').value; LS.set('fh', fh); $('hV').textContent = fh.toFixed(2) + ' m'; };
 $('start').value = floor; $('start').onchange = () => { floor = +$('start').value; LS.set('floor', floor); show(); };
-const fname = f => f === 0 ? 'أرضي' : f < 0 ? 'بدروم ' + ar(-f) : ar(f);
+const fname = f => f === 0 ? 'Ground' : f < 0 ? 'Basement ' + ar(-f) : ar(f);
 function show(live) { $('floor').textContent = fname(Math.round(live != null ? live : floor)); }
 function onMotion(e) {
   if (!running) return;
@@ -132,21 +134,21 @@ function onMotion(e) {
   else if (activeSince != null) { if (quietSince == null) quietSince = t; if ((t - quietSince > 2.5 && Math.abs(vRun) < 0.25) || t - activeSince > 120) finishRide(); }
   // running vertical speed since the ride started (cruising at constant speed looks like rest to the sensor)
   if (activeSince != null) { if (lastT != null) vRun += (m - base) * (t - lastT); } else vRun = 0; lastT = t;
-  if (activeSince != null) { const seg = buf.filter(s => s.t >= activeSince - 2); const r = rideFromSamples(seg, 0.05); if (r) { show(floor + r.dz / fh); $('arrow').textContent = Math.abs(r.dz) > 0.4 ? (r.dz > 0 ? '▲ طالع' : '▼ نازل') + ` · ${Math.abs(r.dz).toFixed(1)} م` : 'بيتحرك…'; } }
+  if (activeSince != null) { const seg = buf.filter(s => s.t >= activeSince - 2); const r = rideFromSamples(seg, 0.05); if (r) { show(floor + r.dz / fh); $('arrow').textContent = Math.abs(r.dz) > 0.4 ? (r.dz > 0 ? '▲ Going up' : '▼ Going down') + ` · ${Math.abs(r.dz).toFixed(1)} m` : 'Moving…'; } }
 }
 let restV = 0, restN = 0, vRun = 0, lastT = null;
 function rest() { if (activeSince == null && buf.length > 30) { const w = buf.slice(-30).map(s => s.az).sort((a, b) => a - b); restV = w[15]; } return restV; }
 function finishRide() {
   const seg = buf.filter(s => s.t >= activeSince - 2); activeSince = null; quietSince = null;
   const r = rideFromSamples(seg, 0.05);
-  if (!r || r.dur < 2.5 || Math.abs(r.dz) < 1.5) { $('arrow').textContent = 'حركة صغيرة، مش رحلة أسانسير'; show(); return; }
+  if (!r || r.dur < 2.5 || Math.abs(r.dz) < 1.5) { $('arrow').textContent = 'Small movement, not an elevator ride'; show(); return; }
   const floors = r.dz / fh, nf = Math.round(floors); floor += nf; LS.set('floor', floor); $('start').value = Math.max(-3, Math.min(40, floor));
   lastRide = r; rides.unshift({ ts: Date.now(), dz: +r.dz.toFixed(2), dur: +r.dur.toFixed(1), peak: +r.peak.toFixed(2), floors: +floors.toFixed(2), to: floor }); rides = rides.slice(0, 30); LS.set('rides', rides);
-  $('arrow').textContent = `${nf > 0 ? '▲' : '▼'} ${ar(Math.abs(nf))} ${Math.abs(nf) === 1 ? 'دور' : 'أدوار'} (${Math.abs(r.dz).toFixed(1)} م في ${ar(r.dur.toFixed(0))} ثانية، أعلى سرعة ${r.peak.toFixed(1)} م/ث)`;
+  $('arrow').textContent = `${nf > 0 ? '▲' : '▼'} ${ar(Math.abs(nf))} ${Math.abs(nf) === 1 ? 'floor' : 'floors'} (${Math.abs(r.dz).toFixed(1)} m in ${ar(r.dur.toFixed(0))} s, top speed ${r.peak.toFixed(1)} m/s)`;
   show(); drawRides(); $('calCard').hidden = false;
 }
-function drawRides() { $('rides').innerHTML = rides.length ? rides.map(r => `<li><span>${new Date(r.ts).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span><span>${r.dz > 0 ? '▲' : '▼'} ${Math.abs(r.dz).toFixed(1)} م = ${Math.abs(r.floors).toFixed(1)} دور ← ${fname(r.to)}</span></li>`).join('') : '<li>لسه مفيش.</li>'; }
-$('b-cal').onclick = () => { if (!rides.length) return; const n = +$('calN').value, r = rides[0]; fh = Math.abs(r.dz) / n; fh = Math.max(2.4, Math.min(5, fh)); LS.set('fh', fh); $('fh').value = fh; $('hV').textContent = fh.toFixed(2) + ' م'; $('st').innerHTML = `<span class="ok">ارتفاع الدور عندك حوالي ${fh.toFixed(2)} متر.</span>`; };
+function drawRides() { $('rides').innerHTML = rides.length ? rides.map(r => `<li><span>${new Date(r.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span><span>${r.dz > 0 ? '▲' : '▼'} ${Math.abs(r.dz).toFixed(1)} m = ${Math.abs(r.floors).toFixed(1)} floors → ${fname(r.to)}</span></li>`).join('') : '<li>Nothing yet.</li>'; }
+$('b-cal').onclick = () => { if (!rides.length) return; const n = +$('calN').value, r = rides[0]; fh = Math.abs(r.dz) / n; fh = Math.max(2.4, Math.min(5, fh)); LS.set('fh', fh); $('fh').value = fh; $('hV').textContent = fh.toFixed(2) + ' m'; $('st').innerHTML = `<span class="ok">Your floor height is about ${fh.toFixed(2)} m.</span>`; };
 function draw() {
   requestAnimationFrame(draw); if (!running) return;
   const [c, w, h] = fitCanvas($('cv')); c.clearRect(0, 0, w, h); const now = buf.length ? buf[buf.length - 1].t : 0, win = 20;
@@ -157,8 +159,8 @@ function draw() {
   if (r && r.z.length > 1) { const zmax = Math.max(3, ...r.z.map(Math.abs)); c.strokeStyle = '#1d9e75'; c.lineWidth = 2; c.beginPath(); r.z.forEach((z, i) => { const x = w * i / (r.z.length - 1), y = h * 0.75 - z / zmax * h * 0.22; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); }
 }
 $('b-go').onclick = async () => {
-  if (running) { running = false; removeEventListener('devicemotion', onMotion); $('b-go').textContent = 'ابدأ'; return; }
-  try { await motionPerm(); buf = []; activeSince = null; addEventListener('devicemotion', onMotion); running = true; $('b-go').textContent = 'وقّف'; $('st').textContent = 'شغال. اضغط زرار الدور واستنى.'; show(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; }
+  if (running) { running = false; removeEventListener('devicemotion', onMotion); $('b-go').textContent = 'Start'; return; }
+  try { await motionPerm(); buf = []; activeSince = null; addEventListener('devicemotion', onMotion); running = true; $('b-go').textContent = 'Stop'; $('st').textContent = 'Running. Press the floor button and wait.'; show(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; }
 };
 drawRides(); show(); draw();
 </script>

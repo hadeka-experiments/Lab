@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>مين ماسكه؟</title>
+<script src="shell.js"></script>
+<title>Who’s Holding It?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: جهاز أمان هادي
-   IDEA: بصمة الإيد، زي جهاز بصمة بس بالحركة
-   PICTURE: اسم اللي ماسك التليفون كبير، وتحته أعمدة الاحتمالات
-   COLOUR and TYPE: معدن فاتح/ليلي، حبر، أحمر إنذار؛ IBM Plex Sans Arabic
-   LAYOUT: القراءة الحية فوق، التسجيل والناس تحت */
+/* VOICE: a calm security device
+   IDEA: a hand fingerprint, like a fingerprint scanner but with motion
+   PICTURE: the holder’s name large, with probability bars below
+   COLOUR and TYPE: light/night metal, ink, alarm red
+   LAYOUT: live reading on top, enrolment and people below */
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
@@ -40,45 +41,46 @@ ul.ppl button{min-height:40px;padding:0 12px}
 .msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
 details{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>مين ماسكه؟</h1>
-<p class="sub">كل واحد بيمسك التليفون ويحركه ويمشي بيه بطريقة مختلفة. الصفحة بتتعلم بصمة حركة كل واحد من حساسات الحركة، وبعدين تعرف مين اللي ماسكه.</p>
+<h1>Who’s Holding It?</h1>
+<p class="sub">Everyone holds, moves and walks with a phone differently. The page learns each person’s motion fingerprint from the motion sensors, then recognises who’s holding it.</p>
 
 <div class="card">
-  <div class="lbl">اللي ماسك التليفون دلوقتي</div>
+  <div class="lbl">Holding the phone now</div>
   <div class="who" id="who">—</div>
-  <div class="lbl" id="whoNote">سجّل شخصين على الأقل، وبعدين دوس «ابدأ التعرّف».</div>
+  <div class="lbl" id="whoNote">Enrol at least two people, then tap “Start recognising”.</div>
   <div class="bars" id="bars"></div>
-  <div class="row"><button id="live" disabled>ابدأ التعرّف</button></div>
+  <div class="row"><button id="live" disabled>Start recognising</button></div>
 </div>
 <div class="msg" id="msg"></div>
 
-<h2>الناس</h2>
+<h2>People</h2>
 <ul class="ppl" id="ppl"></ul>
 <p class="lbl" id="acc"></p>
 
-<h2>سجّل حد جديد</h2>
+<h2>Enrol someone new</h2>
 <div class="card" id="enroll">
-  <input type="text" id="name" placeholder="الاسم" maxlength="20">
-  <p class="lbl">التسجيل ٣ مراحل، كل واحدة ٢٠ ثانية. خلي الشخص نفسه هو اللي ماسك التليفون طول الوقت.</p>
-  <div class="row"><button id="rec">ابدأ التسجيل</button></div>
+  <input type="text" id="name" placeholder="Name" maxlength="20">
+  <p class="lbl">Enrolment has 3 stages of 20 seconds each. The same person should hold the phone the whole time.</p>
+  <div class="row"><button id="rec">Start enrolment</button></div>
   <div id="recUi" hidden>
     <div class="step" id="step"></div>
     <div class="lbl" id="stepHint"></div>
     <div class="prog"><i id="prog"></i></div>
-    <div class="row"><button class="ghost" id="cancel">إلغاء</button></div>
+    <div class="row"><button class="ghost" id="cancel">Cancel</button></div>
   </div>
 </div>
 
-<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<details><summary>How does it know, and what are the limits?</summary>
 <ul>
-<li>كل ٢.٥ ثانية، الصفحة بتحسب ٢٤ رقم من الحساسات: زاوية مسكتك للتليفون، ورعشة إيدك الصغيرة في ترددات مختلفة، وإيقاع مشيتك، وسرعة لفّك للتليفون.</li>
-<li>بتقارن الأرقام دي باللي اتسجل لكل واحد، وتختار الأقرب. ولو الحركة بعيدة عن كل اللي اتسجلوا، بتقول «حد مش معروف».</li>
-<li>الدقة اللي بتظهر تحت الناس متفائلة، لأن الاختبار والتسجيل من نفس اليوم ونفس المزاج. سجّل كل واحد مرتين في يومين مختلفين، والصفحة هتبقى أثبت.</li>
-<li>لما التليفون يبقى محطوط على حاجة، مفيش بصمة، فالصفحة بتقول إنه محطوط وما بتخمّنش.</li>
-<li>البيانات متخزنة على التليفون ده بس.</li>
+<li>Every 2.5 seconds the page computes 24 numbers from the sensors: the angle you hold the phone at, your hand’s tiny tremor at different frequencies, your walking rhythm, and how fast you rotate the phone.</li>
+<li>It compares these numbers with each enrolled person and picks the closest. If the motion is far from everyone enrolled, it says “Unknown person”.</li>
+<li>The accuracy shown under the people list is optimistic, because testing and enrolment are from the same day and mood. Enrol each person twice on different days for more stable results.</li>
+<li>When the phone is resting on something there’s no fingerprint, so the page says it’s resting and doesn’t guess.</li>
+<li>Data is stored on this phone only.</li>
 </ul></details>
 </div>
 
@@ -173,7 +175,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const now = () => performance.now() / 1000;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let people = {}; try { people = JSON.parse(localStorage.getItem('whoPeople') || '{}'); } catch (e) {}
-const save = () => { try { localStorage.setItem('whoPeople', JSON.stringify(people)); } catch (e) { say('التخزين اترفض، البيانات هتضيع لو قفلت الصفحة.', true); } };
+const save = () => { try { localStorage.setItem('whoPeople', JSON.stringify(people)); } catch (e) { say('Storage was refused; data will be lost if you close the page.', true); } };
 const say = (t, err) => { $('msg').textContent = t; $('msg').className = 'msg' + (err ? ' err' : ''); };
 let model = null, buf = [], listening = false, mode = null, cancel = false;
 
@@ -185,34 +187,34 @@ function onMotion(e) {
 }
 async function sensors() {
   if (listening) return;
-  if (window.DeviceMotionEvent && DeviceMotionEvent.requestPermission) { if (await DeviceMotionEvent.requestPermission() !== 'granted') throw new Error('محتاج إذن الحركة: الإعدادات ← Chrome ← الحركة واللياقة، وبعدين اسمح للموقع.'); }
+  if (window.DeviceMotionEvent && DeviceMotionEvent.requestPermission) { if (await DeviceMotionEvent.requestPermission() !== 'granted') throw new Error('Motion permission needed: allow motion sensors for this site in your browser settings.'); }
   addEventListener('devicemotion', onMotion); listening = true;
   await wait(600);
-  if (!buf.length) throw new Error('حساسات الحركة مش بتبعت بيانات. اتأكد إن الصفحة مفتوحة من لينك https وإن إذن الحركة شغال.');
+  if (!buf.length) throw new Error('Motion sensors aren’t sending data. Make sure the page is opened over https and motion permission is on.');
 }
 
 function retrain() {
   model = trainModel(people);
   const names = Object.keys(people);
-  $('ppl').innerHTML = names.length ? names.map(n => `<li><span>${esc(n)} · ${people[n].length} لقطة</span><button class="ghost" data-del="${esc(n)}">امسح</button></li>`).join('') : '<li>لسه مفيش حد متسجّل.</li>';
-  $('acc').textContent = model && model.acc != null ? `دقة متوقعة: ${Math.round(model.acc * 100)}% (الصدفة ${Math.round(100 / model.names.length)}%). الرقم ده متفائل، لأن الاختبار والتسجيل من نفس الجلسة.` : '';
+  $('ppl').innerHTML = names.length ? names.map(n => `<li><span>${esc(n)} · ${people[n].length} samples</span><button class="ghost" data-del="${esc(n)}">Delete</button></li>`).join('') : '<li>Nobody enrolled yet.</li>';
+  $('acc').textContent = model && model.acc != null ? `Expected accuracy: ${Math.round(model.acc * 100)}% (chance ${Math.round(100 / model.names.length)}%). This is optimistic, because testing and enrolment are from the same session.` : '';
   $('live').disabled = !(model && model.names.length >= 2);
 }
 $('ppl').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (!b) return; delete people[b.dataset.del]; save(); retrain(); });
 
 const STEPS = [
-  { act: 'hold', t: 'امسكه عادي كأنك بتقرا', h: 'واقف أو قاعد، وبتبص في الشاشة زي ما بتعمل كل يوم.' },
-  { act: 'walk', t: 'امشي بيه في الأوضة', h: 'رايح جاي، وانت ماسكه وبتبص فيه.' },
-  { act: 'pick', t: 'ارفعه وحطه', h: 'حطه على ترابيزة، وارفعه وبص فيه ثانيتين، وحطه تاني. كرر لحد ما الوقت يخلص.' }
+  { act: 'hold', t: 'Hold it normally as if reading', h: 'Standing or sitting, looking at the screen as you do every day.' },
+  { act: 'walk', t: 'Walk around the room with it', h: 'Back and forth, holding it and looking at it.' },
+  { act: 'pick', t: 'Pick it up and put it down', h: 'Put it on a table, pick it up and look at it for 2 seconds, put it down again. Repeat until time runs out.' }
 ];
 $('rec').addEventListener('click', async () => {
   const name = $('name').value.trim();
-  if (!name) { say('اكتب الاسم الأول.', true); $('name').focus(); return; }
+  if (!name) { say('Enter a name first.', true); $('name').focus(); return; }
   try { await sensors(); } catch (e) { say(e.message, true); return; }
   stopLive(); mode = 'rec'; cancel = false; $('rec').disabled = true; $('recUi').hidden = false; say('');
   const got = [];
   for (const s of STEPS) {
-    $('step').textContent = s.t; $('stepHint').textContent = s.h + ' (بيبدأ بعد ٣ ثواني)';
+    $('step').textContent = s.t; $('stepHint').textContent = s.h + ' (starts in 3 seconds)';
     $('prog').style.width = '0%'; await wait(3000); if (cancel) break;
     $('stepHint').textContent = s.h;
     const t0 = now();
@@ -221,34 +223,34 @@ $('rec').addEventListener('click', async () => {
     windows(buf.filter(x => x.t >= t0 && x.t <= t0 + 20)).forEach(w => got.push({ f: w.f, t: Date.now() / 1000 + w.t - t0, act: s.act }));
   }
   $('recUi').hidden = true; $('rec').disabled = false; mode = null;
-  if (cancel) { say('اتلغى.'); return; }
+  if (cancel) { say('Cancelled.'); return; }
   const useful = got.filter(w => !resting(w.f)).length;
-  if (useful < 15) { say('اللقطات المفيدة قليلة. يمكن التليفون كان محطوط أغلب الوقت. جرّب تاني.', true); return; }
+  if (useful < 15) { say('Too few useful samples. Maybe the phone was resting most of the time. Try again.', true); return; }
   people[name] = (people[name] || []).concat(got); save(); retrain();
-  $('name').value = ''; say(`اتسجّل ${name}: ${useful} لقطة مفيدة.`);
+  $('name').value = ''; say(`Enrolled ${name}: ${useful} useful samples.`);
 });
 $('cancel').addEventListener('click', () => { cancel = true; });
 
 let liveTimer = null, hist = [];
-function stopLive() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } $('live').textContent = 'ابدأ التعرّف'; }
+function stopLive() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } $('live').textContent = 'Start recognising'; }
 $('live').addEventListener('click', async () => {
   if (liveTimer) { stopLive(); return; }
   try { await sensors(); } catch (e) { say(e.message, true); return; }
-  hist = []; $('live').textContent = 'وقّف'; $('whoNote').textContent = 'بيسمع للحركة…';
+  hist = []; $('live').textContent = 'Stop'; $('whoNote').textContent = 'Listening for motion…';
   liveTimer = setInterval(tick, 1250);
 });
 function tick() {
   const t = now(), f = features(buf.filter(x => x.t > t - 2.5));
   if (!f || !model) return;
-  if (resting(f)) { $('who').textContent = 'محطوط'; $('whoNote').textContent = 'التليفون مش في إيد حد. ارفعه.'; $('bars').innerHTML = ''; hist = []; return; }
+  if (resting(f)) { $('who').textContent = 'Resting'; $('whoNote').textContent = 'The phone isn’t in anyone’s hand. Pick it up.'; $('bars').innerHTML = ''; hist = []; return; }
   const r = model.predict(f); hist.push(r); if (hist.length > 4) hist.shift();
   const v = {}; for (const n of model.names) v[n] = hist.reduce((s, h) => s + h.votes[n], 0) / hist.length;
   const unk = hist.filter(h => h.unknown).length > hist.length / 2;
   const order = model.names.slice().sort((a, b) => v[b] - v[a]), top = order[0], conf = v[top];
-  if (hist.length < 2) { $('who').textContent = '…'; $('whoNote').textContent = 'بيجمّع حركة.'; }
-  else if (unk) { $('who').textContent = 'حد مش معروف'; $('whoNote').textContent = 'الحركة بعيدة عن كل اللي اتسجلوا.'; }
-  else if (conf < 0.55) { $('who').textContent = 'مش متأكد'; $('whoNote').textContent = `أقرب اتنين: ${order.slice(0, 2).join(' أو ')}`; }
-  else { $('who').textContent = top; $('whoNote').textContent = conf > 0.8 ? 'ثقة عالية' : 'ثقة متوسطة'; }
+  if (hist.length < 2) { $('who').textContent = '…'; $('whoNote').textContent = 'Collecting motion.'; }
+  else if (unk) { $('who').textContent = 'Unknown person'; $('whoNote').textContent = 'The motion is far from everyone enrolled.'; }
+  else if (conf < 0.55) { $('who').textContent = 'Not sure'; $('whoNote').textContent = `Closest two: ${order.slice(0, 2).join(' or ')}`; }
+  else { $('who').textContent = top; $('whoNote').textContent = conf > 0.8 ? 'high confidence' : 'medium confidence'; }
   $('bars').innerHTML = order.map(n => `<div class="bar ${n === top && !unk && conf >= 0.55 ? 'top' : ''}"><span>${esc(n)}</span><div class="tr"><i style="width:${Math.round(100 * v[n])}%"></i></div><span>${Math.round(100 * v[n])}%</span></div>`).join('');
 }
 retrain();

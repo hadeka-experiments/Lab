@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تلاتي الأبعاد من الضل</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>3D from Shadows</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -40,33 +41,34 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .view3{width:100%;aspect-ratio:1;background:#000;border-radius:14px;margin-top:10px;display:block;touch-action:none}
 .thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.thumbs canvas{width:100%;aspect-ratio:1;border-radius:8px;background:#000}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="pat" id="pat"><i class="l"></i><i class="r"></i><i class="t"></i><i class="b"></i><span id="patT"></span></div>
 <div class="wrap">
-<h1>تلاتي الأبعاد من الضل</h1>
-<p class="sub">من غير LiDAR: الشاشة تنوّر من الشمال، وبعدين اليمين، وبعدين فوق وتحت. الكاميرا الأمامية تصوّر الضل والنور على وشك أو إيدك أو أي حاجة قدامها، ومن الفرق بينهم الصفحة تحسب اتجاه كل نقطة على السطح، وتبني شكلها <b>تلاتي الأبعاد</b>.</p>
+<h1>3D from Shadows</h1>
+<p class="sub">No LiDAR needed: the screen lights up from the left, then the right, then the top and bottom. The front camera captures the light and shade on your face, hand or any object in front of it, and from the differences the page computes which way each point of the surface faces, then builds its <b>3D shape</b>.</p>
 <div class="card">
   <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li>أوضة <b>ضلمة</b> قد ما تقدر، وسطوع الشاشة على الآخر.</li>
-    <li>امسك التليفون قدام وشك (أو قدام الحاجة) على المسافة اللي تحت، والكاميرا الأمامية في النص.</li>
-    <li>اضغط «صوّر» وماتتحركش ٤ ثواني والشاشة بتنوّر.</li>
+    <li>Make the room <b>dark</b> as you can, with screen brightness at maximum.</li>
+    <li>Hold the phone in front of your face (or the object) at the distance below, with the front camera centred.</li>
+    <li>Tap “Capture” and stay still for 4 seconds while the screen flashes.</li>
   </ol>
-  <label>المسافة بين الشاشة والحاجة <b id="dV"></b><input type="range" id="dist" min="12" max="45" step="1" value="25"></label>
-  <div class="row"><button id="b-go">صوّر</button></div>
+  <label>Distance between screen and object <b id="dV"></b><input type="range" id="dist" min="12" max="45" step="1" value="25"></label>
+  <div class="row"><button id="b-go">Capture</button></div>
   <div class="msg" id="st"></div>
 </div>
 <canvas class="view3" id="view" width="720" height="720"></canvas>
-<p class="lbl">اسحب بصباعك عشان تلف الشكل.</p>
-<div class="row"><button class="ghost" id="b-mode">لون الأعماق</button></div>
+<p class="lbl">Drag with your finger to rotate the shape.</p>
+<div class="row"><button class="ghost" id="b-mode">Depth colours</button></div>
 <div class="thumbs" id="thumbs"></div>
-<p class="lbl">الصور الأربعة: نور من الشمال، اليمين، فوق، تحت.</p>
-<details style="margin-top:14px"><summary>إزاي بيشتغل؟ وإيه حدوده؟</summary>
+<p class="lbl">The four images: light from left, right, top, bottom.</p>
+<details style="margin-top:14px"><summary>How does it work, and what are the limits?</summary>
 <ul>
-<li>اسمها <b>Photometric Stereo</b>: السطح اللي باصص ناحية النور بيبان أنور. لما النور ييجي من الشمال واليمين، الفرق بين الصورتين بيقول كل نقطة مايلة شمال ولا يمين وقد إيه. ونفس الكلام بين فوق وتحت.</li>
-<li>من الميل في كل نقطة، الصفحة بتجمّع السطح كله بطريقة رياضية اسمها Frankot–Chellappa (عن طريق تحويل فورييه).</li>
-<li>بتصوّر كمان صورة والشاشة سودا، وبتطرحها، عشان تشيل أي نور تاني في الأوضة.</li>
-<li><b>الحدود:</b> مصادر النور قريبة من بعض (الشاشة صغيرة)، فالشكل بيطلع ناعم وأقل عمق من الحقيقة، والتفاصيل الصغيرة بتضيع. الكاميرا بتظبط الإضاءة لوحدها، والصفحة بتعدّل ده تقريبياً. الحاجات اللي بتلمع (زي النضارة أو العرق) بتبوّظ النقط اللي هي فيها.</li>
+<li>It’s called <b>Photometric Stereo</b>: a surface facing the light looks brighter. With light from the left and then the right, the difference between the two images tells how much each point tilts left or right. Same for top and bottom.</li>
+<li>From the tilt at every point, the page integrates the whole surface with a mathematical method called Frankot–Chellappa (via the Fourier transform).</li>
+<li>It also captures a frame with the screen black and subtracts it, to remove any other light in the room.</li>
+<li><b>Limits:</b> The light sources are close together (the screen is small), so the shape comes out smooth and shallower than reality, and small details are lost. The camera adjusts its exposure automatically, which the page compensates only approximately. Shiny things (glasses, sweat) spoil the points they’re on.</li>
 </ul></details>
 </div>
 <video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
@@ -77,16 +79,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -133,28 +135,28 @@ function integrate(p, q, N) { // Frankot-Chellappa
 }
 
 const N = 128; let res = null, rot = { a: 0.5, b: 0.25 }, mode = 0;
-$('dist').oninput = () => $('dV').textContent = ar($('dist').value) + ' سم'; $('dist').oninput();
+$('dist').oninput = () => $('dV').textContent = ar($('dist').value) + ' cm'; $('dist').oninput();
 const cv = document.createElement('canvas'); cv.width = N; cv.height = N; const cg = cv.getContext('2d', { willReadFrequently: true });
 function grab(v, acc) { const vw = v.videoWidth, vh = v.videoHeight, m = Math.min(vw, vh) * 0.8; cg.drawImage(v, (vw - m) / 2, (vh - m) / 2, m, m, 0, 0, N, N); const d = cg.getImageData(0, 0, N, N).data; for (let i = 0; i < N * N; i++) acc[i] += 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2]; }
 $('b-go').onclick = async () => {
   let stream;
   try {
     stream = await camera('user', 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
-    if (!v.requestVideoFrameCallback) throw new Error('المتصفح ده مش بيدعم قراءة كل فريم. حدّث iOS.');
-    const pat = $('pat'); pat.className = 'pat on'; $('patT').textContent = 'ماتتحركش…'; await sleepMs(1500); $('patT').textContent = '';
+    if (!v.requestVideoFrameCallback) throw new Error('This browser can’t read individual video frames. Update your browser.');
+    const pat = $('pat'); pat.className = 'pat on'; $('patT').textContent = 'Hold still…'; await sleepMs(1500); $('patT').textContent = '';
     const acc = {}, cnt = {}; for (const k of 'DLRTB') { acc[k] = new Float32Array(N * N); cnt[k] = 0; }
     let curK = 'D', since = performance.now();
     const onF = now => { if (!pat.classList.contains('on')) return; v.requestVideoFrameCallback(onF); if (now - since > 110) { grab(v, acc[curK]); cnt[curK]++; } };
     v.requestVideoFrameCallback(onF);
     for (let cyc = 0; cyc < 4; cyc++) for (const k of 'DLRTB') { curK = k; pat.className = 'pat on ' + (k === 'D' ? '' : k); since = performance.now(); await sleepMs(260); }
     pat.className = 'pat'; stream.getTracks().forEach(t => t.stop());
-    if (Object.values(cnt).some(c => c < 2)) throw new Error('الكاميرا ماصورتش فريمات كفاية. جرّب تاني.');
+    if (Object.values(cnt).some(c => c < 2)) throw new Error('The camera didn’t capture enough frames. Try again.');
     const imgs = {}; for (const k of 'DLRTB') { imgs[k] = acc[k].map(x => x / cnt[k]); }
     const d = +$('dist').value, sw = 7.0, sh = 14.6, camY = 0.8; // screen size (cm), camera ~0.8 cm below the top edge
     res = psDepth(imgs, N, { d, xL: -sw / 3, xR: sw / 3, yT: -(camY + sh / 6), yB: -(camY + sh * 5 / 6) });
     res.imgs = imgs; thumbs(imgs); render();
     const lit = imgs.L.reduce((a, b) => a + b) + imgs.R.reduce((a, b) => a + b), dk = imgs.D.reduce((a, b) => a + b) * 2;
-    $('st').innerHTML = lit < dk * 1.3 ? '<span class="bad">نور الشاشة كان ضعيف جنب نور الأوضة. طفّي النور أو قرّب.</span>' : '<span class="ok">اتبنى.</span> لف الشكل بصباعك.';
+    $('st').innerHTML = lit < dk * 1.3 ? '<span class="bad">Screen light was weak compared with room light. Turn off the lights or move closer.</span>' : '<span class="ok">Built.</span> Rotate the shape with your finger.';
   } catch (e) { $('pat').className = 'pat'; $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; try { stream && stream.getTracks().forEach(t => t.stop()); } catch (_) {} }
 };
 function thumbs(imgs) { $('thumbs').innerHTML = ''; for (const k of 'LRTB') { const c = document.createElement('canvas'); c.width = N; c.height = N; const g = c.getContext('2d'), id = g.createImageData(N, N), a = imgs[k], mx = Math.max(...a); for (let i = 0; i < N * N; i++) { const v = a[i] / mx * 255; id.data[4 * i] = id.data[4 * i + 1] = id.data[4 * i + 2] = v; id.data[4 * i + 3] = 255; } g.putImageData(id, 0, 0); $('thumbs').appendChild(c); } }
@@ -171,7 +173,7 @@ function render() {
   for (const p of pts) { const s = W * 0.85, px = W / 2 + p[0] * s, py = W / 2 + p[1] * s; const v = Math.max(0, Math.min(1, p[3]));
     c.fillStyle = mode ? `hsl(${(1 - v) * 240},80%,${30 + v * 30}%)` : `rgb(${v * 255 | 0},${v * 235 | 0},${v * 220 | 0})`; c.fillRect(px - 3, py - 3, 6.5, 6.5); }
 }
-$('b-mode').onclick = () => { mode = 1 - mode; $('b-mode').textContent = mode ? 'لون الصورة' : 'لون الأعماق'; render(); };
+$('b-mode').onclick = () => { mode = 1 - mode; $('b-mode').textContent = mode ? 'Photo colours' : 'Depth colours'; render(); };
 let drag = null; const vw = $('view');
 vw.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY, rot.a, rot.b]; vw.setPointerCapture(e.pointerId); });
 vw.addEventListener('pointermove', e => { if (!drag) return; rot.a = drag[2] + (e.clientX - drag[0]) / 120; rot.b = Math.max(-1.3, Math.min(1.3, drag[3] + (e.clientY - drag[1]) / 120)); render(); });

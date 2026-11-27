@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نبض الكوبري</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Bridge Pulse</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
@@ -31,34 +32,35 @@ ul.list button{min-height:40px;padding:0 12px}
 details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
 @media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>نبض الكوبري</h1>
-<p class="sub">كل كوبري وكل عمارة عالية بيتهز ببطء على «نغمة» طبيعية خاصة بيه، زي وتر الجيتار بس أبطأ بكتير. حساس الحركة في التليفون يقدر يلقطها، والصفحة تفصلها عن اهتزاز العربية والشارع.</p>
+<h1>Bridge Pulse</h1>
+<p class="sub">Every bridge and tall building sways slowly at its own natural “note”, like a guitar string but much slower. The phone’s motion sensor can pick it up, and the page separates it from car and road vibration.</p>
 <div class="card">
-  <b>الطريقة</b>
+  <b>Method</b>
   <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li><b>سجّل مرجع:</b> نفس الظروف بس برة الكوبري. نفس العربية على طريق عادي، أو واقف على الأرض جنب الكوبري. ده بيعلّم الصفحة الاهتزاز «العادي».</li>
-    <li><b>سجّل على الكوبري:</b> ٣٠ ثانية على الأقل. أحسن حاجة إنك تكون <b>واقف على كوبري مشاة</b>، أو قاعد في عربية واقفة في زحمة فوق الكوبري.</li>
-    <li>التليفون يكون <b>على الأرض أو على الكرسي</b>، مش في إيدك.</li>
+    <li><b>Record a reference:</b> Same conditions but off the bridge: the same car on an ordinary road, or standing on the ground next to the bridge. This teaches the page what “normal” vibration looks like.</li>
+    <li><b>Record on the bridge:</b> At least 30 seconds. Best is to be <b>standing on a footbridge</b>, or sitting in a car stuck in traffic on the bridge.</li>
+    <li>Keep the phone <b>on the floor or the seat</b>, not in your hand.</li>
   </ol>
-  <label>اسم الكوبري أو العمارة<input type="text" id="name" placeholder="مثلاً: كوبري قصر النيل"></label>
-  <div class="row"><button id="b-ref">سجّل مرجع</button><button id="b-br">سجّل على الكوبري</button></div>
+  <label>Bridge or building name<input type="text" id="name" placeholder="e.g. Golden Gate Bridge"></label>
+  <div class="row"><button id="b-ref">Record reference</button><button id="b-br">Record on bridge</button></div>
   <div class="msg" id="st"></div>
 </div>
 <div class="fig"><canvas id="live"></canvas></div>
-<p class="lbl" id="liveL">الاهتزاز الرأسي دلوقتي.</p>
+<p class="lbl" id="liveL">Vertical vibration right now.</p>
 <div id="res"></div>
-<h2>التسجيلات</h2>
+<h2>Recordings</h2>
 <ul class="list" id="recs"></ul>
-<details style="margin-top:14px"><summary>إزاي بتشتغل؟ وإيه حدودها؟</summary>
+<details style="margin-top:14px"><summary>How does it work, and what are the limits?</summary>
 <ul>
-<li>الصفحة بتحلل الاهتزاز لترددات (كام هزة في الثانية) من ٠.٣ لحد ٢٥ هرتز. الكباري الكبيرة بتتهز عادةً أبطأ من ١٠ هرتز، والعمارات العالية أبطأ من ٢ هرتز.</li>
-<li>بتقارن تسجيل الكوبري بالمرجع. التردد اللي <b>قوته أعلى بكتير على الكوبري</b> هو المرشح إنه نغمة الكوبري نفسه.</li>
-<li><b>العربية ليها اهتزازها:</b> المساعدين بتوعها بيهتزوا حوالي ١–٢ هرتز، والموتور أسرع. عشان كده المرجع لازم يكون بنفس العربية. وعشان كده كوبري المشاة أنضف.</li>
-<li><b>التأكيد الحقيقي هو التكرار:</b> لو نفس التردد ظهر في كذا تسجيل على نفس الكوبري في أيام مختلفة، يبقى غالباً نغمة الكوبري فعلاً. الصفحة بتجمعلك ده تحت.</li>
-<li>الآيفون بيقرا الحساس على الويب حوالي ٦٠ مرة في الثانية، فأعلى تردد ينفع يتقاس حوالي ٢٥–٣٠ هرتز.</li>
+<li>The page splits the vibration into frequencies (shakes per second) from 0.3 to 25 Hz. Large bridges usually sway below 10 Hz, and tall buildings below 2 Hz.</li>
+<li>It compares the bridge recording with the reference. The frequency that is <b>much stronger on the bridge</b> is the candidate for the bridge’s own note.</li>
+<li><b>Cars vibrate too:</b> A car’s suspension bounces around 1–2 Hz and the engine faster, so the reference must use the same car. That’s also why a footbridge gives cleaner results.</li>
+<li><b>Real confirmation is repetition:</b> If the same frequency shows up in several recordings of the same bridge on different days, it is most likely the bridge’s note. The page collects this below.</li>
+<li>Browsers read the motion sensor about 60 times per second, so the highest measurable frequency is about 25–30 Hz.</li>
 </ul></details>
 </div>
 <script>
@@ -68,16 +70,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -104,15 +106,15 @@ function spectrum(s) {
 }
 async function rec(kind) {
   if (cur) return;
-  const name = $('name').value.trim() || 'بدون اسم';
+  const name = $('name').value.trim() || 'Unnamed';
   try { await motionPerm(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; return; }
   cur = { kind, name, ts: Date.now(), s: [] }; const D = 40;
   $('b-ref').disabled = $('b-br').disabled = true;
-  for (let i = D; i > 0; i--) { $('st').textContent = `بيسجّل ${kind === 'ref' ? 'المرجع' : 'الكوبري'}… ${ar(i)} ثانية. ماتلمسش التليفون.`; await sleepMs(1000); }
+  for (let i = D; i > 0; i--) { $('st').textContent = `Recording ${kind === 'ref' ? 'reference' : 'bridge'}… ${ar(i)} s. Don’t touch the phone.`; await sleepMs(1000); }
   const r = cur; cur = null; $('b-ref').disabled = $('b-br').disabled = false;
-  if (r.s.length < 600) { $('st').innerHTML = '<span class="bad">الحساس ماوصلش منه قراءات كفاية.</span>'; return; }
+  if (r.s.length < 600) { $('st').innerHTML = '<span class="bad">The sensor didn’t deliver enough readings.</span>'; return; }
   const sp = spectrum(r.s); recs.unshift({ kind, name, ts: r.ts, ...sp }); recs = recs.slice(0, 40); LS.set('recs', recs);
-  $('st').innerHTML = `<span class="ok">اتسجل.</span> (${sp.fs} قراءة في الثانية)`; analyse();
+  $('st').innerHTML = `<span class="ok">Saved.</span> (${sp.fs} readings per second)`; analyse();
 }
 $('b-ref').onclick = () => rec('ref'); $('b-br').onclick = () => rec('br');
 function peaksOf(br, ref) { // frequencies where the bridge is clearly stronger than the reference
@@ -131,9 +133,9 @@ function analyse() {
   const same = recs.filter(r => r.kind === 'br' && r.name === br.name), hits = {};
   for (const r of same) { const rf = recs.find(x => x.kind === 'ref' && Math.abs(x.ts - r.ts) < 6 * 3600e3) || ref; for (const p of peaksOf(r, rf)) { const key = (Math.round(p.f / 0.1) * 0.1).toFixed(1); hits[key] = (hits[key] || 0) + 1; } }
   const rep = Object.entries(hits).filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]);
-  $('res').innerHTML = `<div class="fig"><canvas id="spec"></canvas></div><p class="lbl">الأحمر: على الكوبري · الرمادي: المرجع${ref ? '' : ' (لسه مفيش مرجع، فالمقارنة بالمتوسط بس)'}.</p>
-  <div class="card"><b>${esc(br.name)}</b><p>${pk.length ? 'ترددات أقوى بوضوح على الكوبري: ' + pk.map(p => `<b>${p.f.toFixed(2)} هرتز</b> (+${Math.round(p.db)} ديسيبل)`).join('، ') + '.' : 'مفيش تردد واضح زيادة عن المرجع في التسجيل ده.'}</p>
-  ${same.length > 1 ? `<p>${rep.length ? `اتكرر في أكتر من تسجيل: ${rep.map(([f, n]) => `<b>${f} هرتز</b> (${ar(n)} من ${ar(same.length)})`).join('، ')}. ده المرشح الأقوى إنه نغمة الكوبري.` : `في ${ar(same.length)} تسجيلات على نفس الاسم، ومفيش تردد اتكرر لسه.`}</p>` : '<p class="lbl">سجّل على نفس الكوبري مرة أو اتنين كمان، في يوم تاني لو تقدر، عشان نتأكد إن التردد ده بيتكرر.</p>'}</div>`;
+  $('res').innerHTML = `<div class="fig"><canvas id="spec"></canvas></div><p class="lbl">Red: on the bridge · Grey: reference${ref ? '' : ' (no reference yet, so compared with the average only)'}.</p>
+  <div class="card"><b>${esc(br.name)}</b><p>${pk.length ? 'Frequencies clearly stronger on the bridge: ' + pk.map(p => `<b>${p.f.toFixed(2)} Hz</b> (+${Math.round(p.db)} dB)`).join(', ') + '.' : 'No frequency clearly above the reference in this recording.'}</p>
+  ${same.length > 1 ? `<p>${rep.length ? `Repeated across recordings: ${rep.map(([f, n]) => `<b>${f} Hz</b> (${ar(n)} of ${ar(same.length)})`).join(', ')}. That’s the strongest candidate for the bridge’s note.` : `${ar(same.length)} recordings under this name, and no frequency has repeated yet.`}</p>` : '<p class="lbl">Record the same bridge once or twice more, ideally on another day, to confirm the frequency repeats.</p>'}</div>`;
   requestAnimationFrame(() => drawSpec(br, ref, pk));
 }
 function drawSpec(br, ref, pk) {
@@ -144,13 +146,13 @@ function drawSpec(br, ref, pk) {
   if (ref) line(ref, '#7c8790'); line(br, '#e8251a');
   c.fillStyle = '#e8251a'; pk.forEach(p => { const x = fx(p.f); c.fillRect(x - 1, 8, 2, h - 26); });
 }
-function drawRecs() { $('recs').innerHTML = recs.length ? recs.map((r, i) => `<li><span>${r.kind === 'ref' ? 'مرجع' : esc(r.name)}</span><span>${new Date(r.ts).toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} <button class="ghost" data-i="${i}">امسح</button></span></li>`).join('') : '<li>لسه مفيش.</li>'; }
+function drawRecs() { $('recs').innerHTML = recs.length ? recs.map((r, i) => `<li><span>${r.kind === 'ref' ? 'Reference' : esc(r.name)}</span><span>${new Date(r.ts).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} <button class="ghost" data-i="${i}">Delete</button></span></li>`).join('') : '<li>Nothing yet.</li>'; }
 $('recs').onclick = e => { const b = e.target.closest('button'); if (!b) return; recs.splice(+b.dataset.i, 1); LS.set('recs', recs); analyse(); };
 function liveDraw() {
   requestAnimationFrame(liveDraw); const [c, w, h] = fitCanvas($('live')); c.clearRect(0, 0, w, h); if (buf.length < 2) return;
   const now = buf[buf.length - 1].t, pts = buf.filter(p => p.t > now - 10); const m = pts.reduce((s, p) => s + p.v, 0) / pts.length; let a = 0.05; for (const p of pts) a = Math.max(a, Math.abs(p.v - m));
   c.strokeStyle = cur ? '#e8251a' : '#7c8790'; c.lineWidth = 1.2; c.beginPath(); pts.forEach((p, i) => { const x = w - (now - p.t) / 10 * w, y = h / 2 - (p.v - m) / a * h * 0.42; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke();
-  $('liveL').textContent = `الاهتزاز الرأسي دلوقتي (أعلى ${a.toFixed(3)} م/ث²).`;
+  $('liveL').textContent = `Vertical vibration right now (peak ${a.toFixed(3)} m/s²).`;
 }
 analyse(); liveDraw();
 </script>

@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>قارئ الأرقام بالأزرار</title>
+<script src="shell.js"></script>
+<title>Number Reader (buttons)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: معمل هادي ودقيق
-   IDEA: اختبار المعلومة المخفية؛ الشاشة البيضا هي مصدر النور
-   PICTURE: الرقم الكبير في النص، وبعدين أعمدة ردود الفعل لكل رقم
-   COLOUR and TYPE: أبيض ناصع عشان ينوّر الوش، حبر أسود، أحمر للحكم؛ IBM Plex Sans Arabic
-   LAYOUT: عمود واحد، الأزرار تحت في متناول الإبهام */
+/* VOICE: a calm, precise lab
+   IDEA: concealed information test; the white screen is the light source
+   PICTURE: the big number in the middle, then reaction bars for each number
+   COLOUR and TYPE: bright white to light the face, black ink, red for the verdict
+   LAYOUT: one column, buttons at the bottom within thumb reach */
 :root{--bg:#fff;--ink:#0d0f11;--mute:#5a6470;--line:#d9dee3;--red:#d6201a;--soft:#f3f5f7}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
@@ -52,74 +53,75 @@ tr.top td{background:#fff1f0}tr.top .bar i{background:var(--red)}
 .fb{min-height:1.6em;text-align:center;font-weight:600}
 details{margin-top:16px;background:var(--soft);border-radius:12px;padding:10px 14px}summary{font-weight:600;cursor:pointer}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
 
 <section class="scr on" id="s-intro">
-  <h1>قارئ الأرقام</h1>
-  <p>اختار رقم في سرك. الكاميرا هتتابع وشك والشاشة بتعرض الأرقام، وفي الآخر التليفون يخمّن رقمك من ردود فعل جسمك اللي ما بتتحكمش فيها.</p>
-  <p class="mute">الأوضة ممكن تكون ضلمة: الشاشة البيضا هي اللي هتنوّر وشك. علّي سطوع الشاشة على الآخر، واقفل دوران الشاشة على الوضع الطولي، وامسك التليفون قدام وشك على بعد حوالي ٣٠ سم.</p>
+  <h1>Number Reader</h1>
+  <p>Pick a number in secret. The camera watches your face while the screen shows numbers, and at the end the phone guesses your number from body reactions you don’t control.</p>
+  <p class="mute">The room can be dark: the white screen lights your face. Set screen brightness to maximum, lock rotation to portrait, and hold the phone about 30 cm from your face.</p>
   <div class="cam"><video id="vid" playsinline muted autoplay></video></div>
   <ul class="stat">
-    <li><span>الكاميرا</span><span id="st-cam">لسه</span></li>
-    <li><span>وشك متشاف</span><span id="st-face">—</span></li>
-    <li><span>النور على وشك</span><span id="st-light">—</span></li>
-    <li><span>نبضك من وشك</span><span id="st-hr">—</span></li>
+    <li><span>Camera</span><span id="st-cam">Not yet</span></li>
+    <li><span>Face detected</span><span id="st-face">—</span></li>
+    <li><span>Light on your face</span><span id="st-light">—</span></li>
+    <li><span>Pulse from Face</span><span id="st-hr">—</span></li>
   </ul>
   <p class="mute" id="st-msg"></p>
-  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button id="b-go" disabled>ابدأ</button></div>
-  <details><summary>بيعرف إزاي؟</summary>
-  <p>الفكرة من اختبار علمي اسمه Concealed Information Test. لما الرقم اللي في دماغك يظهر وانت بتنكره، جسمك بيتفاعل معاه غصب عنك:</p>
+  <div class="row"><button id="b-cam">Start camera</button><button id="b-go" disabled>Start</button></div>
+  <details><summary>How does it know?</summary>
+  <p>The idea comes from a scientific test called the Concealed Information Test. When the number in your head appears while you deny it, your body reacts in spite of you:</p>
   <ul>
-  <li><b>سرعة ردك:</b> بتتأخر شوية صغيرين لما تنكر الرقم اللي انت عارفه. ده أقوى مؤشر علمياً.</li>
-  <li><b>نبضك:</b> بيبطأ لحظة بعد ما تشوف حاجة مهمة ليك. الكاميرا بتشوفه من تغيّر لون وشك مع كل نبضة.</li>
-  <li><b>رمشك:</b> بيتسجل ويتعرض، بس مش داخل في الحكم لأن اتجاه تأثيره مش ثابت علمياً.</li>
+  <li><b>Your response time:</b> slows by a tiny amount when you deny the number you know. This is the strongest indicator scientifically.</li>
+  <li><b>Your pulse:</b> slows for a moment after you see something meaningful to you. The camera sees it from colour changes in your face with each beat.</li>
+  <li><b>Your blinking:</b> is recorded and shown, but not used in the verdict because the direction of its effect isn’t scientifically consistent.</li>
   </ul>
-  <p>الحكم مش هيطلع صح كل مرة. لو مفيش رقم باين بفرق كافي، الصفحة هتقول إنها مش قادرة تحدد بدل ما تخمّن عشوائي.</p></details>
+  <p>The verdict won’t be right every time. If no number stands out clearly enough, the page says it can’t tell rather than guessing at random.</p></details>
 </section>
 
 <section class="scr" id="s-target">
-  <h2>الرقم المطلوب</h2>
+  <h2>Required number</h2>
   <div class="stage"><div class="big" id="tgt"></div></div>
-  <p>لما الرقم ده يظهر، دوس <b>أيوه</b>. وأي رقم تاني دوس <b>لأ</b>.</p>
-  <p>دلوقتي اختار في سرك <b>رقم واحد</b> من دول، وما تقولوش ولا تكتبه:</p>
+  <p>When this number appears, tap <b>Yes</b>. For any other number tap <b>No</b>.</p>
+  <p>Now secretly choose <b>one number</b> from these. Don’t say it or write it down:</p>
   <div class="nums" id="rest"></div>
-  <div class="row"><button id="b-chosen">اخترت</button></div>
+  <div class="row"><button id="b-chosen">I’ve chosen</button></div>
 </section>
 
 <section class="scr" id="s-brief">
-  <h2>أهم قاعدة</h2>
-  <p>لما رقمك السري يظهر، دوس <b>لأ</b> عادي، <b>كأنك بتنكر إنه رقمك</b>.</p>
-  <p>رد بسرعة ومن غير غلط، وخلي عينك على الرقم ووشك قدام الكاميرا.</p>
-  <p class="mute">الأول جولة تدريب قصيرة مش محسوبة، وبعدها الاختبار، حوالي دقيقتين.</p>
-  <div class="row"><button id="b-practice">ابدأ التدريب</button></div>
+  <h2>Most important rule</h2>
+  <p>When your secret number appears, tap <b>No</b> as usual, <b>as if denying it’s your number</b>.</p>
+  <p>Answer quickly and accurately, keep your eyes on the number and your face in front of the camera.</p>
+  <p class="mute">First a short practice round that doesn’t count, then the test, about two minutes.</p>
+  <div class="row"><button id="b-practice">Start practice</button></div>
 </section>
 
 <section class="scr" id="s-run">
   <div class="prog"><i id="prog"></i></div>
-  <p class="mute" id="run-lbl">تدريب</p>
+  <p class="mute" id="run-lbl">Practice</p>
   <div class="stage"><div id="stim" class="big"></div></div>
   <div class="fb" id="fb"></div>
-  <div class="ans"><button class="no" id="b-no">لأ</button><button class="yes" id="b-yes">أيوه</button></div>
+  <div class="ans"><button class="no" id="b-no">No</button><button class="yes" id="b-yes">Yes</button></div>
 </section>
 
 <section class="scr" id="s-mid">
-  <h2>التدريب خلص</h2>
+  <h2>Practice finished</h2>
   <p id="mid-msg"></p>
-  <p>دلوقتي الاختبار الحقيقي. نفس القواعد: <b>لأ</b> لكل الأرقام حتى رقمك السري، و<b>أيوه</b> للرقم <b id="tgt2"></b> بس.</p>
-  <div class="row"><button id="b-test">ابدأ الاختبار</button></div>
+  <p>Now the real test. Same rules: <b>No</b> for every number, including your secret one, and<b>Yes</b> for the number <b id="tgt2"></b> only.</p>
+  <div class="row"><button id="b-test">Start test</button></div>
 </section>
 
 <section class="scr" id="s-res">
   <div class="verdict" id="verdict"></div>
   <table id="tbl"></table>
   <p class="mute" id="res-note"></p>
-  <h2>كان رقمك كام؟</h2>
-  <p class="mute">قولّي عشان الصفحة تحسب هي بتصيب قد إيه فعلاً.</p>
+  <h2>What was your number?</h2>
+  <p class="mute">Tell the page so it can calculate how often it’s actually right.</p>
   <div class="pick" id="truth"></div>
   <p id="hist"></p>
-  <div class="row"><button id="b-again">جرّب تاني</button></div>
+  <div class="row"><button id="b-again">Try again</button></div>
 </section>
 
 </div>
@@ -308,7 +310,7 @@ let lm = null, video = $('vid'), samples = [], blinks = [], faceOk = false, last
 const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
 
 async function loadModel() {
-  $('st-msg').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  $('st-msg').textContent = 'Loading the face‑tracking model (about 4 MB)…';
   const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
   const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true });
@@ -354,28 +356,28 @@ function frame() {
 }
 
 function liveStatus() {
-  $('st-face').innerHTML = faceOk ? '<span class="ok">أيوه</span>' : '<span class="bad">لأ، قرّب وبص للشاشة</span>';
-  $('st-light').innerHTML = !faceOk ? '—' : lightOk ? '<span class="ok">كفاية</span>' : '<span class="bad">ضعيف، علّي السطوع</span>';
+  $('st-face').innerHTML = faceOk ? '<span class="ok">Yes</span>' : '<span class="bad">No, come closer and look at the screen</span>';
+  $('st-light').innerHTML = !faceOk ? '—' : lightOk ? '<span class="ok">Good</span>' : '<span class="bad">Weak, raise the brightness</span>';
   const t = now(), recent = samples.filter(s => s.t > t - 12);
   let p = null;
   if (recent.length > 150 && recent[recent.length - 1].t - recent[0].t > 9) p = pulseFrom(recent);
-  $('st-hr').innerHTML = p ? (p.q > 0.3 ? `<span class="ok">${Math.round(p.bpm)} نبضة/دقيقة</span>` : '<span class="bad">مش واضح، اثبت أكتر</span>') : 'استنى ١٠ ثواني ثابت';
+  $('st-hr').innerHTML = p ? (p.q > 0.3 ? `<span class="ok">${Math.round(p.bpm)} bpm</span>` : '<span class="bad">Unclear, hold steadier</span>') : 'Hold still for 10 seconds';
   $('b-go').disabled = !(faceOk && lightOk);
 }
 
 $('b-cam').addEventListener('click', async () => {
   const b = $('b-cam'); b.disabled = true;
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } }, audio: false });
     video.srcObject = st; await video.play();
-    $('st-cam').innerHTML = '<span class="ok">شغالة</span>';
+    $('st-cam').innerHTML = '<span class="ok">Working</span>';
     await loadModel();
-    $('st-msg').textContent = 'اثبت وبص للشاشة. لما «نبضك من وشك» يظهر، يبقى كله تمام.';
+    $('st-msg').textContent = 'Hold still and look at the screen. When “Pulse from face” appears, everything’s ready.';
     frame(); setInterval(liveStatus, 1000); b.style.display = 'none';
   } catch (e) {
     b.disabled = false;
-    $('st-msg').textContent = e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e);
+    $('st-msg').textContent = e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e);
   }
 });
 
@@ -393,7 +395,7 @@ $('b-no').addEventListener('pointerdown', e => { e.preventDefault(); answer('no'
 $('b-yes').addEventListener('pointerdown', e => { e.preventDefault(); answer('yes'); });
 
 async function run(seq, practice) {
-  show('s-run'); $('run-lbl').textContent = practice ? 'تدريب' : 'الاختبار'; $('fb').textContent = '';
+  show('s-run'); $('run-lbl').textContent = practice ? 'Practice' : 'Test'; $('fb').textContent = '';
   const trials = [];
   await wait(1200);
   for (let i = 0; i < seq.length; i++) {
@@ -409,7 +411,7 @@ async function run(seq, practice) {
     stim.className = 'fix'; stim.textContent = '+';
     if (practice) {
       const right = n === target ? ans === 'yes' : ans === 'no';
-      $('fb').textContent = !ans ? 'أسرع شوية' : !right ? 'غلط' : rt > 800 ? 'صح، بس أسرع' : 'صح';
+      $('fb').textContent = !ans ? 'A bit faster' : !right ? 'Wrong' : rt > 800 ? 'Correct, but faster' : 'Correct';
     }
     await wait(800 + Math.random() * 400);
     if (practice) $('fb').textContent = '';
@@ -421,7 +423,7 @@ async function run(seq, practice) {
 $('b-practice').addEventListener('click', async () => {
   const tr = await run(shuffle(ITEMS), true);
   const wrong = tr.filter(x => (x.n === target ? x.ans !== 'yes' : x.ans !== 'no')).length;
-  $('mid-msg').textContent = wrong ? `غلطت في ${wrong} من ٩. ركّز: أيوه للرقم ${target} بس.` : 'تمام، ولا غلطة.';
+  $('mid-msg').textContent = wrong ? `You made ${wrong} mistakes out of 9. Focus: “Yes” only for the number ${target}.` : 'Great, no mistakes.';
   show('s-mid');
 });
 
@@ -443,18 +445,18 @@ $('b-test').addEventListener('click', async () => {
 function render({ res, errs, pulse, trials }) {
   const errRate = errs / trials.length;
   let v;
-  if (errRate > 0.25) v = `<h2>مش هقدر أحكم</h2><p>غلطت في ${errs} من ${trials.length} مرة، والحكم بيعتمد على إنك ترد صح وبسرعة. جرّب تاني بتركيز.</p>`;
-  else if (res.margin >= 1) v = `<p class="mute">الرقم اللي في دماغك</p><div class="big">${res.top}</div><p>ثقة ${res.margin >= 1.8 ? 'عالية' : 'متوسطة'}</p>`;
-  else if (res.margin >= 0.6) v = `<p class="mute">أغلب ظني</p><div class="big">${res.top}</div><p>بس ثقتي ضعيفة. التاني في الترتيب: ${res.second}</p>`;
-  else v = `<h2>مش قادر أحدد</h2><p>مفيش رقم باين بفرق كافي عن الباقي. أقرب احتمالات: ${res.ranked.slice(0, 3).join(' أو ')}.</p>`;
+  if (errRate > 0.25) v = `<h2>Can’t judge</h2><p>You made ${errs} mistakes in ${trials.length} trials, and the verdict depends on answering correctly and quickly. Try again with focus.</p>`;
+  else if (res.margin >= 1) v = `<p class="mute">The number in your head</p><div class="big">${res.top}</div><p>Confidence ${res.margin >= 1.8 ? 'high' : 'medium'}</p>`;
+  else if (res.margin >= 0.6) v = `<p class="mute">My best guess</p><div class="big">${res.top}</div><p>but my confidence is low. Runner‑up: ${res.second}</p>`;
+  else v = `<h2>Can’t determine</h2><p>No number stands out enough from the rest. Closest candidates: ${res.ranked.slice(0, 3).join(' or ')}.</p>`;
   $('verdict').innerHTML = v;
   const mx = Math.max(...res.rt.filter(x => !isNaN(x))), mn = Math.min(...res.rt.filter(x => !isNaN(x)));
-  $('tbl').innerHTML = '<tr><th>الرقم</th><th>متوسط سرعة ردك</th><th></th><th>تغيّر النبض</th><th>رمشات</th></tr>' +
+  $('tbl').innerHTML = '<tr><th>Number</th><th>Avg. response time</th><th></th><th>Pulse change</th><th>Blinks</th></tr>' +
     res.ranked.map(n => { const i = res.cand.indexOf(n), rt = res.rt[i], w = isNaN(rt) ? 0 : 15 + 85 * (rt - mn) / ((mx - mn) || 1);
       return `<tr class="${n === res.top && res.margin >= 0.6 && errRate <= 0.25 ? 'top' : ''}"><td class="n">${n}</td><td>${isNaN(rt) ? '—' : Math.round(rt) + ' ms'}</td><td><div class="bar"><i style="width:${w}%"></i></div></td><td>${isNaN(res.dh[i]) ? '—' : (res.dh[i] > 0 ? '+' : '') + res.dh[i].toFixed(1)}</td><td>${isNaN(res.bl[i]) ? '—' : res.bl[i].toFixed(1)}</td></tr>`; }).join('');
-  $('res-note').textContent = (pulse ? `نبضك أثناء الاختبار حوالي ${Math.round(pulse.bpm)} نبضة/دقيقة. ` : '') +
-    (res.useHR ? 'الحكم مبني على سرعة ردك، والنبض داخل بنص وزن.' : 'إشارة النبض ما كانتش واضحة كفاية، فالحكم مبني على سرعة ردك بس.') +
-    ' الرقم اللي بتتأخر عليه أكتر، ونبضك بيبطأ معاه، بيطلع فوق.';
+  $('res-note').textContent = (pulse ? `Your pulse during the test was about ${Math.round(pulse.bpm)} bpm. ` : '') +
+    (res.useHR ? 'The verdict is based on your response time, with pulse at half weight.' : 'The pulse signal wasn’t clear enough, so the verdict uses response time only.') +
+    ' The number you hesitate on most, and your pulse slows with, rises to the top.';
   $('truth').innerHTML = ITEMS.filter(n => n !== target).map(n => `<button data-n="${n}">${n}</button>`).join('');
   $('hist').textContent = histText();
 }
@@ -463,14 +465,14 @@ function getHist() { try { return JSON.parse(localStorage.getItem('mindHist') ||
 function histText() {
   const h = getHist().filter(x => x.called); if (!h.length) return '';
   const hit = h.filter(x => x.hit).length;
-  return `الصفحة حكمت ${h.length} مرة، وصابت ${hit} منهم. التخمين العشوائي بيصيب حوالي مرة من ٨.`;
+  return `The page has judged ${h.length} times and was right ${hit} times. Random guessing is right about 1 in 8.`;
 }
 $('truth').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !lastRes) return;
   const n = +b.dataset.n, called = lastRes.errs / lastRes.trials.length <= 0.25 && lastRes.res.margin >= 0.6;
   const h = getHist(); h.push({ t: Date.now(), truth: n, guess: lastRes.res.top, called, hit: called && n === lastRes.res.top, margin: lastRes.res.margin });
   try { localStorage.setItem('mindHist', JSON.stringify(h.slice(-200))); } catch (e) {}
-  $('truth').innerHTML = `<p>${called ? (n === lastRes.res.top ? '<span class="ok">صابت.</span>' : '<span class="bad">غلطت.</span>') : 'الصفحة ما حكمتش المرة دي، فمش محسوبة.'} رقمك كان ${n}.</p>`;
+  $('truth').innerHTML = `<p>${called ? (n === lastRes.res.top ? '<span class="ok">Correct.</span>' : '<span class="bad">Wrong.</span>') : 'The page didn’t give a verdict this time, so it doesn’t count.'} Your number was ${n}.</p>`;
   $('hist').textContent = histText();
 });
 $('b-again').addEventListener('click', () => show('s-intro'));

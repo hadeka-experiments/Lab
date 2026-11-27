@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GPS من الشمس</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.view{position:relative;aspect-ratio:3/4;max-height:60vh;margin:10px auto 0;background:#000;border-radius:14px;overflow:hidden}
+.view video{width:100%;height:100%;object-fit:cover}
+.view .ring{position:absolute;left:50%;top:50%;width:14%;aspect-ratio:1;transform:translate(-50%,-50%);border:2px solid #fff8;border-radius:50%}
+.view .ring.ok{border-color:var(--ok);box-shadow:0 0 0 4px #1d9e7555}
+.view .dot{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--red);display:none}
+.view .hud{position:absolute;inset:auto 0 0 0;padding:8px 10px;background:#0009;color:#fff;font-size:14px;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;width:0;background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>GPS من الشمس</h1>
+<p class="sub">من غير GPS ولا إنترنت ولا شبكة: التليفون يعرف انت فين على الكرة الأرضية من زاوية الشمس والساعة بس، بنفس طريقة البحارة من ٢٠٠ سنة.</p>
+<div class="card">
+  <b>إزاي</b>
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>اقف في مكان مكشوف والشمس ظاهرة.</li>
+    <li>وجّه <b>ضهر التليفون</b> ناحية الشمس، و<b>بُص على الشاشة مش على الشمس</b>.</li>
+    <li>حرّك التليفون لحد ما الشمس تدخل الدايرة اللي في النص وتفضل ثابتة ٣ ثواني. هيتسجل لوحده.</li>
+    <li>قياس واحد بيدّي مكان تقريبي (مئات الكيلومترات). <b>قياسين بينهم ساعة على الأقل</b> بيدّوا دقة أحسن بكتير، لأن الشمس بتكون اتحركت.</li>
+  </ol>
+  <div class="row"><button id="b-go">افتح الكاميرا</button><button class="ghost" id="b-clear">امسح القياسات</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<div class="view" id="view" hidden><video id="v" playsinline muted></video><div class="ring" id="ring"></div><div class="dot" id="dot"></div><div class="hud" id="hud"></div></div>
+<div class="bar" id="barW" hidden><i id="bar"></i></div>
+
+<h2>القياسات</h2>
+<ul class="list" id="obs"></ul>
+<div id="res"></div>
+<div class="row"><button class="ghost" id="b-gps" hidden>قارن بالـGPS الحقيقي</button></div>
+<div class="msg" id="gpsSt"></div>
+
+<details style="margin-top:14px"><summary>إزاي بيحسبها؟ وليه مش دقيقة زي الـGPS؟</summary>
+<ul>
+<li><b>حساس الميل</b> بيقيس الشمس على ارتفاع كام درجة فوق الأفق، و<b>البوصلة</b> بتقيس هي في أنهي اتجاه تقريباً.</li>
+<li><b>من الساعة</b> الصفحة بتحسب الشمس واقفة فوق أنهي نقطة على الأرض بالظبط في اللحظة دي (معادلات NOAA).</li>
+<li>كل قياس ارتفاع بيقول إنك على <b>دايرة</b> حوالين النقطة دي. قياسين في وقتين مختلفين = دايرتين، وانت عند تقاطعهم. والبوصلة بتختار أنهي تقاطع.</li>
+<li><b>درجة غلط واحدة في الميل = حوالي ١١٠ كيلو.</b> حساس التليفون دقته حوالي درجة، فعشان كده الدقة بالعشرات أو المئات من الكيلومترات، مش أمتار. الصفحة بتحسب وبتوريك نص قطر المنطقة اللي انت غالباً فيها.</li>
+<li>الصفحة بتصحّح انكسار الضوء في الجو قرب الأفق. ومحتاجة ساعة التليفون تكون مظبوطة (أوتوماتيك).</li>
+</ul></details>
+</div>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+// ==SUN== solar position (NOAA) + celestial fix from sun altitudes (and rough azimuths)
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+function sunGeo(ms) { // returns {dec, gha} in degrees for UTC time in ms
+  const jd = ms / 86400000 + 2440587.5, T = (jd - 2451545) / 36525;
+  const L0 = (280.46646 + T * (36000.76983 + 0.0003032 * T)) % 360, M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+  const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+  const C = Math.sin(M * D2R) * (1.914602 - T * (0.004817 + 0.000014 * T)) + Math.sin(2 * M * D2R) * (0.019993 - 0.000101 * T) + Math.sin(3 * M * D2R) * 0.000289;
+  const om = 125.04 - 1934.136 * T, lam = L0 + C - 0.00569 - 0.00478 * Math.sin(om * D2R);
+  const eps0 = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60, eps = eps0 + 0.00256 * Math.cos(om * D2R);
+  const dec = Math.asin(Math.sin(eps * D2R) * Math.sin(lam * D2R)) * R2D;
+  const y = Math.tan(eps * D2R / 2) ** 2;
+  const eqt = 4 * R2D * (y * Math.sin(2 * L0 * D2R) - 2 * e * Math.sin(M * D2R) + 4 * e * y * Math.sin(M * D2R) * Math.cos(2 * L0 * D2R) - 0.5 * y * y * Math.sin(4 * L0 * D2R) - 1.25 * e * e * Math.sin(2 * M * D2R)); // minutes
+  const utcMin = ((ms / 60000) % 1440 + 1440) % 1440;
+  const gha = ((utcMin + eqt) / 4 - 180 + 720) % 360; // hour angle at Greenwich, degrees, westward
+  return { dec, gha };
+}
+function sunAltAz(ms, lat, lon) { // lon east positive
+  const { dec, gha } = sunGeo(ms), H = (gha + lon) * D2R, la = lat * D2R, d = dec * D2R;
+  const alt = Math.asin(Math.sin(la) * Math.sin(d) + Math.cos(la) * Math.cos(d) * Math.cos(H));
+  const az = Math.atan2(-Math.sin(H) * Math.cos(d), Math.cos(la) * Math.sin(d) - Math.sin(la) * Math.cos(d) * Math.cos(H));
+  return { alt: alt * R2D, az: (az * R2D + 360) % 360 };
+}
+const refraction = h => h < -1 ? 0 : 1.02 / Math.tan((h + 10.3 / (h + 5.11)) * D2R) / 60; // degrees (Bennett), apparent -> true
+const angDiff = (a, b) => ((a - b + 540) % 360) - 180;
+// obs: [{ms, alt (observed, apparent), az (compass, may be rough)}]; sigma in degrees
+function fixPosition(obs, sAlt = 0.8, sAz = 12) {
+  const cost = (lat, lon) => { let c = 0; for (const o of obs) { const p = sunAltAz(o.ms, lat, lon), h = o.alt - refraction(o.alt); c += ((p.alt - h) / sAlt) ** 2; if (o.az != null) c += (angDiff(p.az, o.az) / sAz) ** 2; } return c; };
+  let best = { c: Infinity };
+  for (let lat = -88; lat <= 88; lat += 2) for (let lon = -180; lon < 180; lon += 2) { const c = cost(lat, lon); if (c < best.c) best = { c, lat, lon }; }
+  for (const step of [0.5, 0.1, 0.02]) { const b0 = best; for (let i = -6; i <= 6; i++) for (let j = -6; j <= 6; j++) { const lat = b0.lat + i * step, lon = ((b0.lon + j * step + 540) % 360) - 180; const c = cost(lat, lon); if (c < best.c) best = { c, lat, lon }; } }
+  // uncertainty: spread of points within cost+1 (approx 1-sigma region)
+  let n = 0, sl = 0, so = 0, mx = 0;
+  for (let i = -40; i <= 40; i++) for (let j = -40; j <= 40; j++) { const lat = best.lat + i * 0.1, lon = best.lon + j * 0.1; if (cost(lat, lon) <= best.c + 1) { n++; const dkm = Math.hypot(i * 11.1, j * 11.1 * Math.cos(best.lat * D2R)); mx = Math.max(mx, dkm); } }
+  return { lat: best.lat, lon: best.lon, cost: best.c, radiusKm: n ? mx : null };
+}
+function km(a, b, c, d) { const p = D2R, x = Math.sin((c - a) * p / 2) ** 2 + Math.cos(a * p) * Math.cos(c * p) * Math.sin((d - b) * p / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); }
+
+const CITIES = [['القاهرة', 30.04, 31.24], ['الجيزة', 30.01, 31.21], ['الإسكندرية', 31.2, 29.92], ['بورسعيد', 31.26, 32.3], ['السويس', 29.97, 32.53], ['الإسماعيلية', 30.6, 32.27], ['المنصورة', 31.04, 31.38], ['طنطا', 30.79, 31.0], ['الزقازيق', 30.59, 31.5], ['دمياط', 31.42, 31.81], ['الفيوم', 29.31, 30.84], ['بني سويف', 29.07, 31.1], ['المنيا', 28.11, 30.74], ['أسيوط', 27.18, 31.18], ['سوهاج', 26.56, 31.69], ['قنا', 26.16, 32.72], ['الأقصر', 25.69, 32.64], ['أسوان', 24.09, 32.9], ['الغردقة', 27.26, 33.81], ['شرم الشيخ', 27.92, 34.33], ['العريش', 31.13, 33.8], ['مرسى مطروح', 31.35, 27.24], ['سيوة', 29.2, 25.52], ['الواحات الخارجة', 25.44, 30.55], ['الرياض', 24.71, 46.68], ['جدة', 21.49, 39.19], ['مكة', 21.39, 39.86], ['عمّان', 31.95, 35.93], ['بيروت', 33.89, 35.5], ['القدس', 31.77, 35.21], ['دمشق', 33.51, 36.29], ['بغداد', 33.31, 44.37], ['الكويت', 29.38, 47.98], ['الدوحة', 25.29, 51.53], ['دبي', 25.2, 55.27], ['الخرطوم', 15.5, 32.56], ['طرابلس', 32.89, 13.19], ['تونس', 36.81, 10.18], ['الجزائر', 36.75, 3.06], ['الرباط', 34.02, -6.84], ['إسطنبول', 41.01, 28.98], ['أثينا', 37.98, 23.73], ['روما', 41.9, 12.5], ['باريس', 48.86, 2.35], ['لندن', 51.51, -0.13], ['برلين', 52.52, 13.4], ['نيروبي', -1.29, 36.82], ['أديس أبابا', 9.03, 38.74], ['موسكو', 55.76, 37.62], ['نيويورك', 40.71, -74.01]];
+let obs = LS.get('obs', []).filter(o => Date.now() - o.ms < 36 * 3600e3);
+let ori = null, stream = null, raf = 0, hold = [];
+const dirName = a => ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'][Math.round(((a % 360) + 360) % 360 / 45) % 8];
+// camera axis (back camera = -Z) from W3C deviceorientation angles
+function camDir(e) {
+  const a = (e.webkitCompassHeading != null ? (360 - e.webkitCompassHeading) : e.alpha) * D2R, b = e.beta * D2R, g = e.gamma * D2R;
+  const zx = Math.sin(g) * Math.cos(a) + Math.cos(g) * Math.sin(b) * Math.sin(a), zy = Math.sin(g) * Math.sin(a) - Math.cos(g) * Math.sin(b) * Math.cos(a), zz = Math.cos(b) * Math.cos(g);
+  const vx = -zx, vy = -zy, vz = -zz; // east, north, up
+  return { alt: Math.asin(Math.max(-1, Math.min(1, vz))) * R2D, az: (Math.atan2(vx, vy) * R2D + 360) % 360, absolute: e.webkitCompassHeading != null || e.absolute === true, acc: e.webkitCompassAccuracy };
+}
+addEventListener('deviceorientation', e => { if (e.beta != null) ori = e; });
+$('b-go').onclick = async () => {
+  try {
+    await motionPerm();
+    stream = await camera('environment');
+    $('v').srcObject = stream; await $('v').play(); $('view').hidden = false; $('barW').hidden = false; $('b-go').hidden = true;
+    $('st').textContent = 'دوّر على الشمس بضهر التليفون… ماتبصش عليها.';
+    loop();
+  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; }
+};
+const cv = document.createElement('canvas'), W = 120, H = 160; cv.width = W; cv.height = H; const cg = cv.getContext('2d', { willReadFrequently: true });
+function findSun() { // brightest blob, relative to the visible (cover-cropped) frame
+  const v = $('v'), vw = v.videoWidth, vh = v.videoHeight; if (!vw) return null;
+  const box = $('view').getBoundingClientRect(), s = Math.max(box.width / vw, box.height / vh), cw = box.width / s, ch = box.height / s;
+  cg.drawImage(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, W, H);
+  const d = cg.getImageData(0, 0, W, H).data; let mx = 0; for (let i = 0; i < d.length; i += 4) mx = Math.max(mx, d[i] + d[i + 1] + d[i + 2]);
+  if (mx < 700) return null; let sx = 0, sy = 0, n = 0; const th = mx - 25;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (d[i] + d[i + 1] + d[i + 2] >= th) { sx += x; sy += y; n++; } }
+  if (n > W * H * 0.08) return { big: true }; // a whole bright sky / wall, not a disc
+  return { x: sx / n / W, y: sy / n / H, n };
+}
+function loop() {
+  raf = requestAnimationFrame(loop);
+  const s = findSun(), dot = $('dot'), ring = $('ring');
+  let txt = '';
+  if (ori) { const c = camDir(ori); txt = `الكاميرا: ارتفاع ${c.alt.toFixed(1)}° · اتجاه ${dirName(c.az)} (${Math.round(c.az)}°)`; }
+  if (s && !s.big) {
+    dot.style.display = 'block'; dot.style.left = s.x * 100 + '%'; dot.style.top = s.y * 100 + '%';
+    const ok = Math.abs(s.x - 0.5) < 0.04 && Math.abs(s.y - 0.5) < 0.03 && ori;
+    ring.classList.toggle('ok', !!ok);
+    if (ok) { const c = camDir(ori); hold.push({ t: performance.now(), ...c }); } else hold = [];
+  } else { dot.style.display = 'none'; ring.classList.remove('ok'); hold = []; if (s && s.big) txt += ' · الصورة كلها منورة: دوّر على قرص الشمس'; }
+  hold = hold.filter(h => performance.now() - h.t < 3000);
+  const prog = hold.length ? Math.min(1, (performance.now() - hold[0].t) / 3000) : 0; $('bar').style.width = prog * 100 + '%';
+  $('hud').textContent = txt;
+  if (prog >= 1 && hold.length >= 30) record();
+}
+function record() {
+  const alts = hold.map(h => h.alt).sort((a, b) => a - b), med = alts[alts.length >> 1];
+  const sx = hold.reduce((t, h) => t + Math.sin(h.az * D2R), 0), sy = hold.reduce((t, h) => t + Math.cos(h.az * D2R), 0);
+  const spread = alts[Math.floor(alts.length * 0.9)] - alts[Math.floor(alts.length * 0.1)];
+  obs.push({ ms: Date.now(), alt: +med.toFixed(2), az: +((Math.atan2(sx, sy) * R2D + 360) % 360).toFixed(1), spread: +spread.toFixed(2), absolute: hold[0].absolute });
+  LS.set('obs', obs); hold = [];
+  try { navigator.vibrate && navigator.vibrate(80); } catch (e) {}
+  cancelAnimationFrame(raf); stream.getTracks().forEach(t => t.stop()); $('view').hidden = true; $('barW').hidden = true; $('b-go').hidden = false; $('b-go').textContent = 'قياس كمان';
+  $('st').innerHTML = `<span class="ok">اتسجل.</span> ${obs.length < 2 ? 'ارجع بعد ساعة على الأقل واعمل قياس تاني عشان الدقة تتحسن.' : ''}`;
+  render();
+}
+function render() {
+  $('obs').innerHTML = obs.length ? obs.map((o, i) => `<li><span>${new Date(o.ms).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span><span>ارتفاع ${ar(o.alt.toFixed(1))}° · ${dirName(o.az)}${o.spread > 1.5 ? ' · <span class="bad">إيدك كانت بتتهز</span>' : ''}</span></li>`).join('') : '<li>لسه مفيش.</li>';
+  $('b-gps').hidden = !obs.length;
+  if (!obs.length) { $('res').innerHTML = ''; return; }
+  const span = (obs[obs.length - 1].ms - obs[0].ms) / 60000;
+  const f = fixPosition(obs, 0.9, obs.length >= 2 && span >= 45 ? 25 : 10);
+  const near = CITIES.map(c => [c[0], km(f.lat, f.lon, c[1], c[2])]).sort((a, b) => a[1] - b[1])[0];
+  const r = f.radiusKm;
+  $('res').innerHTML = `<div class="card" style="margin-top:10px"><b>انت غالباً هنا</b>
+  <div class="big" style="font-size:30px">${f.lat.toFixed(2)}° ${f.lat >= 0 ? 'شمال' : 'جنوب'} · ${Math.abs(f.lon).toFixed(2)}° ${f.lon >= 0 ? 'شرق' : 'غرب'}</div>
+  <p>أقرب مدينة: <b>${near[0]}</b> (على بعد حوالي ${Math.round(near[1])} كم من النقطة المحسوبة).</p>
+  <p class="lbl">${r ? `المنطقة اللي انت غالباً فيها نص قطرها حوالي <b>${Math.round(r)} كم</b>.` : ''} ${obs.length < 2 ? 'ده من قياس واحد، يعني الاتجاه جاي من البوصلة وبس، وده أضعف جزء. القياس التاني بعد ساعة هيحسّنها جداً.' : span < 45 ? 'القياسين قريبين من بعض في الوقت. استنى ساعة واعمل قياس تالت.' : ''}</p></div>`;
+  window.__fix = f;
+}
+$('b-clear').onclick = () => { obs = []; LS.set('obs', obs); render(); $('gpsSt').textContent = ''; };
+$('b-gps').onclick = () => {
+  if (!navigator.geolocation) { $('gpsSt').textContent = 'الـGPS مش متاح هنا.'; return; }
+  $('gpsSt').textContent = 'بيسأل الـGPS…';
+  navigator.geolocation.getCurrentPosition(p => { const f = window.__fix; const d = km(f.lat, f.lon, p.coords.latitude, p.coords.longitude); $('gpsSt').innerHTML = `الـGPS بيقول: ${p.coords.latitude.toFixed(2)}°، ${p.coords.longitude.toFixed(2)}°. يعني الشمس غلطت بحوالي <b>${Math.round(d)} كم</b>.`; }, e => { $('gpsSt').textContent = 'الـGPS ماردش أو الإذن اترفض.'; }, { enableHighAccuracy: true, timeout: 15000 });
+};
+render();
+</script>
+</body>
+</html>

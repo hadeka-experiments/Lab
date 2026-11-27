@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نبضك من وشك</title>
+<script src="shell.js"></script>
+<title>Pulse from Face</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -35,28 +36,29 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 
 :root{--bg:#fff;--panel:#f3f5f7;--ink:#0d0f11;--mute:#5a6470;--line:#d9dee3}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>نبضك من وشك</h1>
-<p class="sub">مع كل نبضة، الدم بيملا عروق وشك فلونه بيتغير تغيير صغير جداً، العين ما تشوفهوش بس الكاميرا تلقطه. الصفحة بتقرا التغيير ده من جبهتك وخدودك وتحسب نبضك، من غير ما تلمس حاجة.</p>
+<h1>Pulse from Face</h1>
+<p class="sub">With every heartbeat, blood fills the vessels in your face and its colour changes very slightly. Your eyes can’t see it, but the camera can. The page reads that change from your forehead and cheeks and calculates your pulse, without touching anything.</p>
 <div class="grid2">
-  <div class="card"><div class="lbl">النبض</div><div class="big" id="bpm">—<small> نبضة/د</small></div><div class="lbl" id="q">—</div></div>
-  <div class="card"><div class="lbl">الحالة</div><ul class="list" style="margin:4px 0"><li><span>وشك متشاف</span><span id="st-face">—</span></li><li><span>النور</span><span id="st-light">—</span></li></ul></div>
+  <div class="card"><div class="lbl">Heart rate</div><div class="big" id="bpm">—<small> bpm</small></div><div class="lbl" id="q">—</div></div>
+  <div class="card"><div class="lbl">Status</div><ul class="list" style="margin:4px 0"><li><span>Face detected</span><span id="st-face">—</span></li><li><span>Light</span><span id="st-light">—</span></li></ul></div>
 </div>
 <div class="fig"><canvas id="cvW"></canvas></div>
 <div class="fig"><canvas id="cvT"></canvas></div>
 <div class="cam" style="width:160px;height:120px"><video id="vid" playsinline muted autoplay style="width:100%;height:100%;object-fit:cover"></video></div>
-<div class="msg" id="msg">الشاشة البيضا بتنوّر وشك، فعلّي السطوع على الآخر. امسك التليفون ثابت قدام وشك على بعد حوالي ٣٠ سم، أو سنّده على حاجة.</div>
-<div class="row"><button id="go">شغّل الكاميرا</button><button class="ghost" id="flip" disabled>الكاميرا الخلفية</button><button class="ghost" id="torch" hidden>نوّر الفلاش</button></div>
-<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<div class="msg" id="msg">The white screen lights your face, so set brightness to maximum. Hold the phone steady about 30 cm from your face, or rest it on something.</div>
+<div class="row"><button id="go">Start camera</button><button class="ghost" id="flip" disabled>Rear camera</button><button class="ghost" id="torch" hidden>Turn on flash</button></div>
+<details><summary>How does it know, and what are the limits?</summary>
 <ul>
-<li>موديل تتبع الوش بيحدد جبهتك وخدودك ٣٠ مرة في الثانية، والصفحة بتاخد متوسط لون الجلد فيهم.</li>
-<li>بتستخدم طريقة اسمها POS، بتفصل تغيّر اللون اللي جاي من الدم عن تغيّر النور والحركة.</li>
-<li>أول رقم بيظهر بعد حوالي ١٠ ثواني، وبيتحدّث كل ثانية من آخر ١٢ ثانية.</li>
-<li>«وضوح الإشارة» بيقول قد إيه النبض باين وسط الضوضاء. ولو ضعيف، الرقم ما يتاخدش بجد.</li>
-<li>الحركة والكلام والنور اللي بيتغير بيبوّظوا القراية. ودي تجربة، مش جهاز طبي.</li>
-<li><b>الكاميرا الخلفية:</b> بتقيس نبض حد قدامك. الشاشة هنا مش بتنوّر وشه، فلازم نور الأوضة يبقى كويس، أو تشغّل الفلاش لو التليفون سمح بيه. والشخص يكون على بعد متر أو أقل، وثابت، ووشه ناحية الكاميرا. ويُفضّل يكون عارف إنك بتقيس نبضه.</li>
+<li>A face‑tracking model locates your forehead and cheeks 30 times per second, and the page averages the skin colour in them.</li>
+<li>It uses a method called POS, which separates colour changes caused by blood from changes in light and movement.</li>
+<li>The first number appears after about 10 seconds and updates every second from the last 12 seconds.</li>
+<li>“Signal clarity” says how visible the pulse is above the noise. If it’s weak, don’t trust the number.</li>
+<li>Movement, talking and changing light spoil the reading. This is an experiment, not a medical device.</li>
+<li><b>Rear camera:</b> measures the pulse of someone in front of you. The screen doesn’t light their face, so the room light must be good, or turn on the flash if your phone allows it. The person should be within 1 m, still, and facing the camera, and ideally know you’re measuring their pulse.</li>
 </ul></details>
 </div>
 <script>
@@ -275,17 +277,17 @@ function frame() {
 }
 function tick() {
   const t = now(), face = t - lastFace < 0.6;
-  $('st-face').innerHTML = face ? '<span class="ok">أيوه</span>' : '<span class="bad">لأ</span>';
-  $('st-light').innerHTML = !face ? '—' : light > 40 ? '<span class="ok">كفاية</span>' : '<span class="bad">ضعيف</span>';
+  $('st-face').innerHTML = face ? '<span class="ok">Yes</span>' : '<span class="bad">No</span>';
+  $('st-light').innerHTML = !face ? '—' : light > 40 ? '<span class="ok">Good</span>' : '<span class="bad">Weak</span>';
   const rec = samples.filter(s => s.t > t - 12);
-  if (!face || rec.length < 150 || rec[rec.length - 1].t - rec[0].t < 9) { $('q').textContent = face ? 'بيجمّع… اثبت.' : 'بص للشاشة.'; return; }
+  if (!face || rec.length < 150 || rec[rec.length - 1].t - rec[0].t < 9) { $('q').textContent = face ? 'Collecting… hold still.' : 'Look at the screen.'; return; }
   const p = pulseFrom(rec); if (!p) return;
   const good = p.q > 0.3;
-  $('bpm').innerHTML = (good ? Math.round(p.bpm) : '—') + '<small> نبضة/د</small>';
-  $('q').innerHTML = p.q > 0.5 ? '<span class="ok">وضوح الإشارة عالي</span>' : good ? 'وضوح الإشارة متوسط' : '<span class="bad">الإشارة ضعيفة، اثبت أكتر ونوّر وشك</span>';
+  $('bpm').innerHTML = (good ? Math.round(p.bpm) : '—') + '<small> bpm</small>';
+  $('q').innerHTML = p.q > 0.5 ? '<span class="ok">Signal clarity: high</span>' : good ? 'Signal clarity: medium' : '<span class="bad">Weak signal; hold steadier and light your face</span>';
   if (good) { hist.push(p.bpm); if (hist.length > 120) hist.shift(); }
-  drawWave($('cvW'), Array.from(p.h.slice(-p.fs * 8)), 'نبضك من لون وشك (آخر ٨ ثواني)');
-  drawWave($('cvT'), hist.length > 1 ? hist : null, 'النبض مع الوقت');
+  drawWave($('cvW'), Array.from(p.h.slice(-p.fs * 8)), 'Pulse from your face colour (last 8 seconds)');
+  drawWave($('cvT'), hist.length > 1 ? hist : null, 'Pulse over time');
 }
 async function openCam() {
   if (stream) stream.getTracks().forEach(t => t.stop());
@@ -293,36 +295,36 @@ async function openCam() {
   video.srcObject = stream; video.style.transform = facing === 'user' ? 'scaleX(-1)' : 'none'; await video.play();
   samples = []; hist = []; torchOn = false;
   const tr = stream.getVideoTracks()[0], caps = tr.getCapabilities ? tr.getCapabilities() : {};
-  $('torch').hidden = !(facing !== 'user' && caps.torch); $('torch').textContent = 'نوّر الفلاش';
-  $('flip').textContent = facing === 'user' ? 'الكاميرا الخلفية' : 'الكاميرا الأمامية';
+  $('torch').hidden = !(facing !== 'user' && caps.torch); $('torch').textContent = 'Turn on flash';
+  $('flip').textContent = facing === 'user' ? 'Rear camera' : 'Front camera';
   document.body.style.background = facing === 'user' ? '#fff' : '';
-  $('msg').textContent = facing === 'user' ? 'اثبت وما تتكلمش. أول قراية بعد حوالي ١٠ ثواني.' : 'وجّه الكاميرا لوش الشخص اللي قدامك على بعد متر أو أقل، وخليه ثابت وما يتكلمش. النور لازم يبقى كويس على وشه.';
+  $('msg').textContent = facing === 'user' ? 'Hold still and don’t talk. First reading in about 10 seconds.' : 'Point the camera at the person’s face within 1 m, and keep them still and silent. Their face needs good light.';
 }
 $('go').addEventListener('click', async () => {
   const b = $('go'); b.disabled = true;
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     await openCam();
-    $('msg').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+    $('msg').textContent = 'Loading the face‑tracking model (about 4 MB)…';
     const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
     const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
     const o = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1 });
     try { lm = await V.FaceLandmarker.createFromOptions(files, o('GPU')); } catch (e) { lm = await V.FaceLandmarker.createFromOptions(files, o('CPU')); }
     frame(); setInterval(tick, 1000); b.style.display = 'none'; $('flip').disabled = false; started = true;
-    $('msg').textContent = 'اثبت وما تتكلمش. أول قراية بعد حوالي ١٠ ثواني.';
+    $('msg').textContent = 'Hold still and don’t talk. First reading in about 10 seconds.';
     try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {}
-  } catch (e) { b.disabled = false; $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e)) + '</span>'; }
+  } catch (e) { b.disabled = false; $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e)) + '</span>'; }
 });
 $('flip').addEventListener('click', async () => {
   $('flip').disabled = true; facing = facing === 'user' ? 'environment' : 'user';
-  try { await openCam(); } catch (e) { $('msg').innerHTML = '<span class="bad">مقدرتش أفتح الكاميرا التانية.</span>'; }
-  $('flip').disabled = false; $('bpm').innerHTML = '—<small> نبضة/د</small>';
+  try { await openCam(); } catch (e) { $('msg').innerHTML = '<span class="bad">Couldn’t open the other camera.</span>'; }
+  $('flip').disabled = false; $('bpm').innerHTML = '—<small> bpm</small>';
 });
 $('torch').addEventListener('click', async () => {
-  try { torchOn = !torchOn; await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: torchOn }] }); $('torch').textContent = torchOn ? 'اطفي الفلاش' : 'نوّر الفلاش'; samples = []; }
+  try { torchOn = !torchOn; await stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: torchOn }] }); $('torch').textContent = torchOn ? 'Turn off flash' : 'Turn on flash'; samples = []; }
   catch (e) { torchOn = false; $('torch').hidden = true; }
 });
-drawWave($('cvW'), null, 'نبضك من لون وشك'); drawWave($('cvT'), null, 'النبض مع الوقت');
+drawWave($('cvW'), null, 'Pulse from your face colour'); drawWave($('cvT'), null, 'Pulse over time');
 }
 </script>
 </body>

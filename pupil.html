@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>رد فعل الحدقة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.flash{position:fixed;inset:0;background:#000;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:40px;color:#333;font-size:15px}.flash.on{display:flex}.flash.white{background:#fff}
+.eyes{display:flex;gap:8px;justify-content:center;margin-top:10px}.eyes canvas{width:120px;height:120px;border-radius:12px;background:#000;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"><span id="fl"></span></div>
+<div class="wrap">
+<h1>رد فعل الحدقة</h1>
+<p class="sub">الشاشة تنوّر فجأة، والكاميرا الأمامية تقيس حدقة عينك بتضيق بعد كام مللي ثانية وبتضيق قد إيه. ده انعكاس عصبي حقيقي ومش بتتحكم فيه، وبيتغير مع التعب والإضاءة والسن.</p>
+<div class="card">
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>اقعد في <b>أوضة شبه ضلمة</b>، وعلّي سطوع الشاشة للآخر من مركز التحكم.</li>
+    <li>امسك التليفون قدام وشك على بعد ٢٠–٢٥ سم، وبُص على الكاميرا اللي فوق.</li>
+    <li>الشاشة هتسود ٨ ثواني، وبعدين تنوّر أبيض ثانيتين. ده هيتكرر ٤ مرات. <b>ماترمشش</b> لو تقدر لما تنوّر.</li>
+  </ol>
+  <label>الملاحظة (اختياري)<input type="text" id="note" placeholder="مثلاً: الصبح قبل القهوة"></label>
+  <div class="row"><button id="b-go">ابدأ</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<div class="eyes"><canvas id="eL" width="120" height="120"></canvas><canvas id="eR" width="120" height="120"></canvas></div>
+<div class="fig"><canvas id="cv"></canvas></div>
+<p class="lbl">حجم الحدقة بالنسبة للقزحية مع الوقت. الخطوط الصفرا: لحظة ما النور وصل لوشك.</p>
+<div id="res"></div>
+<h2>القياسات</h2>
+<ul class="list" id="hist"></ul>
+<details style="margin-top:14px"><summary>إزاي بيقيس؟ وإيه حدوده؟</summary>
+<ul>
+<li>موديل MediaPipe من جوجل بيلاقي القزحية في كل فريم. القزحية حجمها ثابت تقريباً عند كل الناس، فالصفحة بتقيس الحدقة <b>كنسبة من القزحية</b>، ومش مهم انت قريب ولا بعيد.</li>
+<li>الحدقة هي أغمق دايرة جوه القزحية. الصفحة بتدوّر على المكان اللي اللون بيفتح فيه فجأة وانت ماشي من النص لبرة، من الجنبين بس عشان الجفون.</li>
+<li><b>لحظة النور</b> بتتحدد من الكاميرا نفسها (أول فريم وشك نوّر فيه)، فالتأخير بيتقاس بنفس الساعة.</li>
+<li><b>العيون الغامقة صعبة:</b> الأجهزة الطبية بتستخدم أشعة تحت الحمراء عشان الحدقة تبان. بكاميرا عادية، لو عينك بني غامق، الفرق بين الحدقة والقزحية ممكن يبقى صغير، والصفحة هتقولك لو القياس مش موثوق.</li>
+<li>الكاميرا بتصوّر ٣٠ فريم في الثانية، يعني كل فريم ٣٣ مللي ثانية. التكرار ٤ مرات ومتوسطهم بيقلل الغلط.</li>
+<li>ده قياس للتجربة والمقارنة بنفسك، مش تشخيص طبي.</li>
+</ul></details>
+</div>
+<video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+// ==PUPIL== pupil/iris ratio from a grey image patch around the iris centre
+// img: Float32Array lum (w*h), cx,cy iris centre (px), ri iris radius (px). Returns {ratio, contrast} or null
+function pupilRatio(img, w, h, cx, cy, ri) {
+  const nR = 40, prof = new Float64Array(nR), cnt = new Float64Array(nR);
+  for (let a = -50; a <= 50; a += 4) for (const side of [0, 180]) { // left/right sectors only: lids cover top & bottom
+    const th = (a + side) * Math.PI / 180, c = Math.cos(th), s = Math.sin(th);
+    for (let k = 0; k < nR; k++) { const r = (k + 0.5) / nR * ri * 0.95, x = cx + r * c, y = cy + r * s, xi = Math.floor(x), yi = Math.floor(y); if (xi < 0 || yi < 0 || xi >= w - 1 || yi >= h - 1) continue;
+      const fx = x - xi, fy = y - yi, i = yi * w + xi, v = img[i] * (1 - fx) * (1 - fy) + img[i + 1] * fx * (1 - fy) + img[i + w] * (1 - fx) * fy + img[i + w + 1] * fx * fy; prof[k] += v; cnt[k]++; } }
+  for (let k = 0; k < nR; k++) prof[k] = cnt[k] ? prof[k] / cnt[k] : NaN;
+  const sm = Array.from(prof, (_, k) => { let s = 0, n = 0; for (let j = k - 1; j <= k + 1; j++) if (j >= 0 && j < nR && !isNaN(prof[j])) { s += prof[j]; n++; } return n ? s / n : NaN; });
+  // pupil edge = strongest brightening going outward, between 15% and 75% of the iris radius
+  let best = -Infinity, bk = -1;
+  for (let k = Math.round(nR * 0.15); k < Math.round(nR * 0.75); k++) { const g = sm[k + 1] - sm[k - 1]; if (g > best) { best = g; bk = k; } }
+  if (bk < 0 || !(best > 0)) return null;
+  const inner = sm.slice(1, bk - 1).filter(v => !isNaN(v)), outer = sm.slice(bk + 2, Math.round(nR * 0.85)).filter(v => !isNaN(v));
+  if (!inner.length || !outer.length) return null;
+  const mi = inner.reduce((a, b) => a + b) / inner.length, mo = outer.reduce((a, b) => a + b) / outer.length;
+  return { ratio: (bk + 0.5) / nR * 0.95, contrast: (mo - mi) / (mo + mi + 1e-6) };
+}
+// latency & amplitude from a ratio time series around one flash; t in ms, onset in ms (light reached the face)
+function pupilResponse(series, onset) {
+  const base = series.filter(p => p.t > onset - 1200 && p.t <= onset).map(p => p.r); if (base.length < 8) return null;
+  const mb = base.reduce((a, b) => a + b) / base.length, sd = Math.sqrt(base.reduce((a, b) => a + (b - mb) ** 2, 0) / base.length) + 0.004;
+  const after = series.filter(p => p.t > onset && p.t < onset + 2000); if (after.length < 15) return null;
+  // smooth 3
+  const s = after.map((p, i) => ({ t: p.t, r: (after[Math.max(0, i - 1)].r + p.r + after[Math.min(after.length - 1, i + 1)].r) / 3 }));
+  const mn = Math.min(...s.map(p => p.r)), amp = (mb - mn) / mb;
+  if (mb - mn < 3 * sd) return { amp, latency: null, base: mb };
+  const thr = mb - 0.2 * (mb - mn); let lat = null;
+  for (let i = 0; i < s.length - 2; i++) if (s[i].r < thr && s[i + 1].r < thr && s[i + 2].r < thr) { lat = s[i].t - onset; break; }
+  // time to reach the minimum
+  const tmin = s.find(p => p.r === mn).t - onset;
+  return { amp, latency: lat, tmin, base: mb };
+}
+
+</script>
+<script type="module">
+let lm = null, stream = null, series = [], onsets = [], faceLum = [], running = false;
+const hist = LS.get('hist', []);
+async function loadLM() {
+  $('st').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
+  const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
+  const o = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1 });
+  try { lm = await V.FaceLandmarker.createFromOptions(files, o('GPU')); } catch (e) { lm = await V.FaceLandmarker.createFromOptions(files, o('CPU')); }
+}
+const cv = document.createElement('canvas'), cg = cv.getContext('2d', { willReadFrequently: true });
+function eyePatch(v, L, ci, ring, out) {
+  const W = v.videoWidth, H = v.videoHeight, c = L[ci], rs = ring.map(i => Math.hypot((L[i].x - c.x) * W, (L[i].y - c.y) * H)), ri = rs.reduce((a, b) => a + b) / rs.length;
+  const S = Math.ceil(ri * 2.6), x0 = Math.round(c.x * W - S / 2), y0 = Math.round(c.y * H - S / 2);
+  cv.width = S; cv.height = S; cg.drawImage(v, x0, y0, S, S, 0, 0, S, S); const d = cg.getImageData(0, 0, S, S).data, img = new Float32Array(S * S);
+  for (let i = 0; i < S * S; i++) img[i] = 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2];
+  const r = pupilRatio(img, S, S, S / 2, S / 2, ri);
+  const oc = out.getContext('2d'); oc.drawImage(cv, 0, 0, 120, 120);
+  if (r) { oc.strokeStyle = '#1d9e75'; oc.lineWidth = 2; oc.beginPath(); oc.arc(60, 60, ri / S * 120, 0, 7); oc.stroke(); oc.strokeStyle = '#e8251a'; oc.beginPath(); oc.arc(60, 60, r.ratio * ri / S * 120, 0, 7); oc.stroke(); }
+  return r && { ...r, ri };
+}
+let lastVT = -1;
+function frame(now, meta) {
+  if (!running) return; const v = $('v'); v.requestVideoFrameCallback(frame);
+  const t = meta && meta.mediaTime != null ? meta.mediaTime * 1000 : now; if (t === lastVT) return; lastVT = t;
+  const R = lm.detectForVideo(v, performance.now()); const L = R.faceLandmarks && R.faceLandmarks[0]; if (!L) return;
+  // face brightness (cheek/forehead box) to find when the light really hit
+  const W = v.videoWidth, H = v.videoHeight, fx = L[10], cx2 = L[152]; cv.width = 16; cv.height = 16;
+  cg.drawImage(v, (L[234].x * W), fx.y * H, (L[454].x - L[234].x) * W, (cx2.y - fx.y) * H, 0, 0, 16, 16); const d = cg.getImageData(0, 0, 16, 16).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2];
+  faceLum.push({ t, l: s / 768 });
+  const a = eyePatch(v, L, 468, [469, 470, 471, 472], $('eL')), b = eyePatch(v, L, 473, [474, 475, 476, 477], $('eR'));
+  const ok = [a, b].filter(x => x && x.contrast > 0.04);
+  if (ok.length) series.push({ t, r: ok.reduce((m, x) => m + x.ratio, 0) / ok.length, c: ok.reduce((m, x) => m + x.contrast, 0) / ok.length, n: ok.length });
+}
+const flash = (on, white, txt) => { $('flash').classList.toggle('on', on); $('flash').classList.toggle('white', white); $('fl').textContent = txt || ''; };
+$('b-go').onclick = async () => {
+  if (running) return;
+  try {
+    stream = await camera('user', 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
+    if (!lm) await loadLM();
+    if (!v.requestVideoFrameCallback) throw new Error('المتصفح ده مش بيدعم قراءة كل فريم. حدّث iOS.');
+    series = []; faceLum = []; onsets = []; running = true; v.requestVideoFrameCallback(frame);
+    $('st').textContent = ''; flash(true, false, 'بُص على الكاميرا…');
+    for (let k = 0; k < 4; k++) {
+      for (let i = 8; i > 0; i--) { flash(true, false, `${ar(k + 1)} من ٤ · ${ar(i)}`); await sleepMs(1000); }
+      const tSet = performance.now(); flash(true, true, ''); onsets.push({ set: tSet }); await sleepMs(2000); flash(true, false, '');
+    }
+    await sleepMs(1500); running = false; flash(false, false); stream.getTracks().forEach(t => t.stop());
+    analyse();
+  } catch (e) { running = false; flash(false, false); $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; try { stream && stream.getTracks().forEach(t => t.stop()); } catch (_) {} }
+};
+function lightOnsets() { // camera-time of each flash: first frame whose face brightness jumps
+  const out = []; let i = 0;
+  for (let k = 0; k < faceLum.length; k++) {
+    const prev = faceLum.slice(Math.max(0, k - 15), k).map(p => p.l); if (prev.length < 10) continue;
+    const m = prev.reduce((a, b) => a + b) / prev.length;
+    if (faceLum[k].l > m * 1.25 + 4 && (!out.length || faceLum[k].t - out[out.length - 1] > 5000)) out.push(faceLum[k].t);
+  }
+  return out;
+}
+function analyse() {
+  const ons = lightOnsets(), resp = ons.map(o => pupilResponse(series, o)).filter(Boolean);
+  const good = resp.filter(r => r.latency != null), med = a => { const s = a.slice().sort((x, y) => x - y); return s.length ? s[s.length >> 1] : null; };
+  const con = series.length ? series.reduce((a, b) => a + b.c, 0) / series.length : 0;
+  draw(ons);
+  if (series.length < 60) { $('res').innerHTML = '<div class="card bad">الكاميرا مالقتش عينك كفاية. قرّب التليفون، وخلي وشك في النص.</div>'; return; }
+  const lat = med(good.map(r => r.latency)), amp = med(resp.map(r => r.amp)), base = med(resp.map(r => r.base)), tmin = med(good.map(r => r.tmin));
+  const rel = con < 0.06 ? '<span class="bad">الفرق بين الحدقة والقزحية ضعيف (غالباً عينك غامقة أو النور قليل)، فالأرقام دي مش موثوقة.</span>' : good.length < 2 ? '<span class="bad">الانقباض ماكانش واضح في معظم المحاولات.</span>' : '<span class="ok">القياس واضح.</span>';
+  $('res').innerHTML = `<div class="kpi"><div><b>${lat != null ? ar(Math.round(lat)) + ' م.ث' : '—'}</b><span>التأخير لحد ما الحدقة تبدأ تضيق بوضوح</span></div><div><b>${amp != null ? ar(Math.round(amp * 100)) + '%' : '—'}</b><span>ضاقت قد إيه</span></div><div><b>${tmin != null ? ar(Math.round(tmin)) + ' م.ث' : '—'}</b><span>وصلت لأصغر حجم بعد</span></div><div><b>${base != null ? ar(Math.round(base * 100)) + '%' : '—'}</b><span>حجمها في الضلمة (من القزحية)</span></div></div>
+  <div class="card" style="margin-top:8px">${rel} ${ar(good.length)} من ${ar(ons.length)} محاولات اتحسبت.</div>`;
+  if (lat != null) { hist.unshift({ ts: Date.now(), note: $('note').value.trim(), lat: Math.round(lat), amp: +amp.toFixed(3), base: +base.toFixed(3), n: good.length, con: +con.toFixed(3) }); LS.set('hist', hist.slice(0, 60)); }
+  drawHist();
+}
+function draw(ons) {
+  const [c, w, h] = fitCanvas($('cv')); c.clearRect(0, 0, w, h); if (series.length < 2) return;
+  const t0 = series[0].t, t1 = series[series.length - 1].t, rs = series.map(p => p.r), lo = Math.min(...rs), hi = Math.max(...rs);
+  const X = t => (t1 - t) / (t1 - t0) * w, Y = r => h - 8 - (r - lo) / (hi - lo + 1e-6) * (h - 16);
+  c.fillStyle = '#e8a33a'; ons.forEach(o => c.fillRect(X(o), 0, 2, h));
+  c.strokeStyle = '#e8251a'; c.lineWidth = 1.5; c.beginPath(); series.forEach((p, i) => i ? c.lineTo(X(p.t), Y(p.r)) : c.moveTo(X(p.t), Y(p.r))); c.stroke();
+}
+function drawHist() { $('hist').innerHTML = hist.length ? hist.map(x => `<li><div style="display:flex;flex-direction:column"><b>${ar(x.lat)} م.ث · ضاقت ${ar(Math.round(x.amp * 100))}%</b><span class="lbl">${new Date(x.ts).toLocaleString('ar-EG', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}${x.note ? ' · ' + esc(x.note) : ''}</span></div></li>`).join('') : '<li>لسه مفيش.</li>'; }
+drawHist();
+</script>
+</body>
+</html>

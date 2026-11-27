@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>اختبار البلوتوث</title>
+<script src="shell.js"></script>
+<title>Bluetooth Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -38,33 +40,34 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .dev.sel{outline:2px solid var(--red)}
 pre{white-space:pre-wrap;font-size:13px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>اختبار البلوتوث</h1>
-<p class="sub">الصفحة دي بتختبر حاجة واحدة: هل Bluefy بيدّينا قوة إشارة أجهزة البلوتوث اللي حواليك بشكل مستمر؟ لو أيوه، نقدر نبني فوقه sensing. لو لأ، يبقى الطريق ده مقفول.</p>
+<h1>Bluetooth Test</h1>
+<p class="sub">This page tests one thing: can your browser give a continuous stream of signal strength from nearby Bluetooth devices? If yes, sensing can be built on top of it. If not, that route is closed. (Android: use Chrome. iPhone: use the Bluefy browser.)</p>
 
-<h2>١. اللي المتصفح بيدعمه</h2>
-<pre id="caps">بيفحص…</pre>
+<h2>1. What your browser supports</h2>
+<pre id="caps">Checking…</pre>
 
-<h2>٢. دوّر على الأجهزة</h2>
-<p class="lbl">طريقتين، جرّب الأولى، ولو ما اشتغلتش جرّب التانية.</p>
-<div class="row"><button id="b-scan">دوّر على كل الأجهزة</button><button class="ghost" id="b-one">اختار جهاز وراقبه</button><button class="ghost" id="b-stop">وقّف</button></div>
+<h2>2. Find devices</h2>
+<p class="lbl">Two methods. Try the first; if it doesn’t work, try the second.</p>
+<div class="row"><button id="b-scan">Scan for all devices</button><button class="ghost" id="b-one">Pick one device and watch it</button><button class="ghost" id="b-stop">Stop</button></div>
 <div class="msg" id="msg"></div>
 <ul class="list" id="devs"></ul>
 
-<h2>٣. اختبار الجسم</h2>
+<h2>3. Body test</h2>
 <div class="card">
-  <p>دوس على جهاز من القايمة عشان تختاره. وبعدين:</p>
+  <p>Tap a device in the list to select it. Then:</p>
   <ol>
-  <li>حط التليفون والجهاز على بعد ٢–٣ متر من بعض، ومفيش حاجة بينهم.</li>
-  <li>دوس «ابدأ الاختبار». أول ١٠ ثواني ابعد عن الخط اللي بينهم. وتاني ١٠ ثواني اقف في النص بينهم بالظبط.</li>
+  <li>Place the phone and the device 2–3 m apart with nothing between them.</li>
+  <li>Tap “Start test”. For the first 10 seconds stay out of the line between them; for the next 10 seconds stand exactly between them.</li>
   </ol>
-  <div class="row"><button id="b-test" disabled>ابدأ الاختبار</button></div>
+  <div class="row"><button id="b-test" disabled>Start test</button></div>
   <div class="cue" id="cue" style="font-size:20px;font-weight:600;min-height:1.6em"></div>
   <pre id="testRes" hidden></pre>
 </div>
-<p class="lbl" style="margin-top:14px">ابعتلي سكرين شوت لـ «اللي المتصفح بيدعمه» وللقايمة ولنتيجة الاختبار.</p>
+<p class="lbl" style="margin-top:14px">Compare the two averages below: if your body changes the signal clearly, Bluetooth sensing is possible on this phone.</p>
 </div>
 <script>
 {
@@ -76,18 +79,18 @@ const B = navigator.bluetooth;
 const caps = [
   ['navigator.bluetooth', !!B],
   ['requestDevice', !!(B && B.requestDevice)],
-  ['requestLEScan (مسح مستمر)', !!(B && B.requestLEScan)],
+  ['requestLEScan (continuous scan)', !!(B && B.requestLEScan)],
   ['getAvailability', !!(B && B.getAvailability)],
   ['watchAdvertisements', !!(window.BluetoothDevice && BluetoothDevice.prototype && BluetoothDevice.prototype.watchAdvertisements)],
-  ['الصفحة على https', window.isSecureContext]
+  ['Page served over https', window.isSecureContext]
 ];
 $('caps').textContent = caps.map(([k, v]) => `${v ? '✓' : '✗'} ${k}`).join('\n') + `\n\n${navigator.userAgent}`;
-if (!B) $('msg').innerHTML = '<span class="bad">المتصفح ده مافيهوش بلوتوث. افتح الصفحة من Bluefy.</span>';
+if (!B) $('msg').innerHTML = '<span class="bad">This browser has no Web Bluetooth. On Android use Chrome; on iPhone open the page in Bluefy.</span>';
 
 const devs = new Map(); let sel = null, scan = null, watched = [], log = [];
 function onAdv(e) {
-  const d = e.device, id = d.id || d.name || 'غير معروف', t = now();
-  let x = devs.get(id); if (!x) { x = { name: d.name || e.name || '(من غير اسم)', id, pts: [] }; devs.set(id, x); }
+  const d = e.device, id = d.id || d.name || 'Unknown', t = now();
+  let x = devs.get(id); if (!x) { x = { name: d.name || e.name || '(no name)', id, pts: [] }; devs.set(id, x); }
   if (e.rssi != null) { x.pts.push({ t, r: e.rssi }); if (x.pts.length > 400) x.pts.shift(); log.push({ t, id, r: e.rssi }); }
 }
 function render() {
@@ -95,7 +98,7 @@ function render() {
   if (!list.length) return;
   $('devs').innerHTML = list.map(x => {
     const rate = x.pts.filter(p => p.t > t - 5).length / 5, last = x.pts[x.pts.length - 1];
-    return `<li class="dev ${sel === x.id ? 'sel' : ''}" data-id="${esc(x.id)}"><span class="nm">${esc(x.name)}</span><span class="rs">${last.r} dBm</span><span class="lbl">${rate.toFixed(1)} قراية/ثانية · آخر قراية من ${Math.round(t - last.t)} ث</span><span></span><canvas></canvas></li>`;
+    return `<li class="dev ${sel === x.id ? 'sel' : ''}" data-id="${esc(x.id)}"><span class="nm">${esc(x.name)}</span><span class="rs">${last.r} dBm</span><span class="lbl">${rate.toFixed(1)} readings/s · last reading ${Math.round(t - last.t)} s ago</span><span></span><canvas></canvas></li>`;
   }).join('');
   [...$('devs').querySelectorAll('li')].forEach((li, i) => draw(li.querySelector('canvas'), list[i].pts.filter(p => p.t > t - 30), t));
 }
@@ -111,36 +114,36 @@ $('devs').addEventListener('click', e => { const li = e.target.closest('li[data-
 
 $('b-scan').addEventListener('click', async () => {
   try {
-    if (!B || !B.requestLEScan) throw new Error('المتصفح ما بيدعمش المسح المستمر (requestLEScan). جرّب «اختار جهاز وراقبه».');
+    if (!B || !B.requestLEScan) throw new Error('This browser doesn’t support continuous scanning (requestLEScan). Try “Pick one device and watch it”.');
     B.addEventListener('advertisementreceived', onAdv);
     scan = await B.requestLEScan({ acceptAllAdvertisements: true, keepRepeatedDevices: true });
-    $('msg').textContent = 'بيدوّر… استنى كام ثانية.';
-    setTimeout(() => { if (!devs.size) $('msg').innerHTML = '<span class="bad">المسح اشتغل بس ما وصلش ولا جهاز في ١٠ ثواني.</span>'; }, 10000);
+    $('msg').textContent = 'Scanning… wait a few seconds.';
+    setTimeout(() => { if (!devs.size) $('msg').innerHTML = '<span class="bad">The scan started but no device was heard in 10 seconds.</span>'; }, 10000);
   } catch (e) { $('msg').innerHTML = `<span class="bad">${esc(e.message || e)}</span>`; }
 });
 $('b-one').addEventListener('click', async () => {
   try {
-    if (!B || !B.requestDevice) throw new Error('المتصفح ما بيدعمش اختيار جهاز.');
+    if (!B || !B.requestDevice) throw new Error('This browser doesn’t support picking a device.');
     const d = await B.requestDevice({ acceptAllDevices: true });
-    if (!d.watchAdvertisements) throw new Error(`اخترت «${d.name || 'جهاز'}»، بس المتصفح ما بيدعمش watchAdvertisements، فمش هنقدر نقرا قوة الإشارة باستمرار.`);
+    if (!d.watchAdvertisements) throw new Error(`You picked “${d.name || 'device'}”, but this browser doesn’t support watchAdvertisements, so signal strength can’t be read continuously.`);
     d.addEventListener('advertisementreceived', onAdv); await d.watchAdvertisements(); watched.push(d);
-    $('msg').textContent = `بيراقب «${d.name || 'جهاز'}». لو مفيش قرايات بتوصل، يبقى الجهاز ده مش بيبعت إشارات باستمرار.`;
+    $('msg').textContent = `Watching “${d.name || 'device'}”. If no readings arrive, this device doesn’t broadcast continuously.`;
   } catch (e) { $('msg').innerHTML = `<span class="bad">${esc(e.message || e)}</span>`; }
 });
-$('b-stop').addEventListener('click', () => { try { scan && scan.stop(); } catch (e) {} watched.forEach(d => { try { d.unwatchAdvertisements && d.unwatchAdvertisements(); } catch (e) {} }); $('msg').textContent = 'اتوقف.'; });
+$('b-stop').addEventListener('click', () => { try { scan && scan.stop(); } catch (e) {} watched.forEach(d => { try { d.unwatchAdvertisements && d.unwatchAdvertisements(); } catch (e) {} }); $('msg').textContent = 'Stopped.'; });
 
 $('b-test').addEventListener('click', async () => {
   const x = devs.get(sel); if (!x) return; $('b-test').disabled = true; $('testRes').hidden = true;
   const phase = async (txt, sec) => { const t0 = now(); while (now() - t0 < sec) { $('cue').textContent = `${txt} (${Math.ceil(sec - (now() - t0))})`; await wait(250); } return [t0, now()]; };
-  await phase('استعد', 3);
-  const [a0, a1] = await phase('ابعد عن الخط اللي بينهم', 10);
-  const [b0, b1] = await phase('اقف في النص بينهم', 10);
-  $('cue').textContent = 'خلص';
+  await phase('Get ready', 3);
+  const [a0, a1] = await phase('Stay out of the line between them', 10);
+  const [b0, b1] = await phase('Stand between them', 10);
+  $('cue').textContent = 'Done';
   const A = x.pts.filter(p => p.t >= a0 && p.t <= a1).map(p => p.r), Bv = x.pts.filter(p => p.t >= b0 && p.t <= b1).map(p => p.r);
   const m = v => v.reduce((s, y) => s + y, 0) / (v.length || 1), s = v => Math.sqrt(m(v.map(y => (y - m(v)) ** 2)));
-  let out = `الجهاز: ${x.name}\nمن غير حد في النص: ${A.length} قراية، متوسط ${m(A).toFixed(1)} dBm، تذبذب ±${s(A).toFixed(1)}\nوانت في النص: ${Bv.length} قراية، متوسط ${m(Bv).toFixed(1)} dBm، تذبذب ±${s(Bv).toFixed(1)}\n`;
-  if (A.length < 8 || Bv.length < 8) out += '\nالقرايات قليلة جداً، فمش هنقدر نحكم. الجهاز ده بيبعت إشارات نادراً.';
-  else { const diff = m(A) - m(Bv), noise = Math.sqrt((s(A) ** 2 + s(Bv) ** 2) / 2) || 1; out += `\nالفرق: ${diff.toFixed(1)} dB، يعني ${(diff / noise).toFixed(1)} أضعاف التذبذب العادي.\n` + (diff / noise > 1.5 ? '✓ جسمك أثّر على الإشارة بوضوح، والـ sensing ممكن.' : diff / noise > 0.7 ? '~ فيه أثر بس ضعيف. ممكن مع موديل يتعلم، بس هيبقى خشن.' : '✗ مفيش أثر واضح لجسمك على الإشارة.'); }
+  let out = `Device: ${x.name}\nNobody between: ${A.length} readings, mean ${m(A).toFixed(1)} dBm, jitter ±${s(A).toFixed(1)}\nYou between: ${Bv.length} readings, mean ${m(Bv).toFixed(1)} dBm, jitter ±${s(Bv).toFixed(1)}\n`;
+  if (A.length < 8 || Bv.length < 8) out += '\nToo few readings to judge. This device rarely broadcasts.';
+  else { const diff = m(A) - m(Bv), noise = Math.sqrt((s(A) ** 2 + s(Bv) ** 2) / 2) || 1; out += `\nDifference: ${diff.toFixed(1)} dB, i.e. ${(diff / noise).toFixed(1)}× the normal jitter.\n` + (diff / noise > 1.5 ? '✓ Your body clearly affected the signal. Sensing is possible.' : diff / noise > 0.7 ? '~ There’s an effect, but it’s weak. A learning model might work, roughly.' : '✗ No clear effect of your body on the signal.'); }
   $('testRes').textContent = out; $('testRes').hidden = false; $('b-test').disabled = false;
 });
 }

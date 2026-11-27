@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>رد فعل الحدقة</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Pupil Reflex</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -35,36 +36,37 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .flash{position:fixed;inset:0;background:#000;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:40px;color:#333;font-size:15px}.flash.on{display:flex}.flash.white{background:#fff}
 .eyes{display:flex;gap:8px;justify-content:center;margin-top:10px}.eyes canvas{width:120px;height:120px;border-radius:12px;background:#000;border:1px solid var(--line)}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="flash" id="flash"><span id="fl"></span></div>
 <div class="wrap">
-<h1>رد فعل الحدقة</h1>
-<p class="sub">الشاشة تنوّر فجأة، والكاميرا الأمامية تقيس حدقة عينك بتضيق بعد كام مللي ثانية وبتضيق قد إيه. ده انعكاس عصبي حقيقي ومش بتتحكم فيه، وبيتغير مع التعب والإضاءة والسن.</p>
+<h1>Pupil Reflex</h1>
+<p class="sub">The screen flashes suddenly and the front camera measures how many milliseconds your pupil takes to constrict, and by how much. It’s a real nerve reflex you can’t control, and it changes with fatigue, lighting and age.</p>
 <div class="card">
   <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li>اقعد في <b>أوضة شبه ضلمة</b>، وعلّي سطوع الشاشة للآخر من مركز التحكم.</li>
-    <li>امسك التليفون قدام وشك على بعد ٢٠–٢٥ سم، وبُص على الكاميرا اللي فوق.</li>
-    <li>الشاشة هتسود ٨ ثواني، وبعدين تنوّر أبيض ثانيتين. ده هيتكرر ٤ مرات. <b>ماترمشش</b> لو تقدر لما تنوّر.</li>
+    <li>Sit in a <b>dim room</b>, and set screen brightness to maximum.</li>
+    <li>Hold the phone 20–25 cm from your face and look at the front camera.</li>
+    <li>The screen goes black for 8 seconds, then flashes white for 2 seconds. This repeats 4 times. <b>Try not to blink</b> when it flashes.</li>
   </ol>
-  <label>الملاحظة (اختياري)<input type="text" id="note" placeholder="مثلاً: الصبح قبل القهوة"></label>
-  <div class="row"><button id="b-go">ابدأ</button></div>
+  <label>Note (optional)<input type="text" id="note" placeholder="e.g. morning, before coffee"></label>
+  <div class="row"><button id="b-go">Start</button></div>
   <div class="msg" id="st"></div>
 </div>
 <div class="eyes"><canvas id="eL" width="120" height="120"></canvas><canvas id="eR" width="120" height="120"></canvas></div>
 <div class="fig"><canvas id="cv"></canvas></div>
-<p class="lbl">حجم الحدقة بالنسبة للقزحية مع الوقت. الخطوط الصفرا: لحظة ما النور وصل لوشك.</p>
+<p class="lbl">Pupil size relative to the iris over time. Yellow lines: the moment the light reached your face.</p>
 <div id="res"></div>
-<h2>القياسات</h2>
+<h2>Measurements</h2>
 <ul class="list" id="hist"></ul>
-<details style="margin-top:14px"><summary>إزاي بيقيس؟ وإيه حدوده؟</summary>
+<details style="margin-top:14px"><summary>How does it measure, and what are the limits?</summary>
 <ul>
-<li>موديل MediaPipe من جوجل بيلاقي القزحية في كل فريم. القزحية حجمها ثابت تقريباً عند كل الناس، فالصفحة بتقيس الحدقة <b>كنسبة من القزحية</b>، ومش مهم انت قريب ولا بعيد.</li>
-<li>الحدقة هي أغمق دايرة جوه القزحية. الصفحة بتدوّر على المكان اللي اللون بيفتح فيه فجأة وانت ماشي من النص لبرة، من الجنبين بس عشان الجفون.</li>
-<li><b>لحظة النور</b> بتتحدد من الكاميرا نفسها (أول فريم وشك نوّر فيه)، فالتأخير بيتقاس بنفس الساعة.</li>
-<li><b>العيون الغامقة صعبة:</b> الأجهزة الطبية بتستخدم أشعة تحت الحمراء عشان الحدقة تبان. بكاميرا عادية، لو عينك بني غامق، الفرق بين الحدقة والقزحية ممكن يبقى صغير، والصفحة هتقولك لو القياس مش موثوق.</li>
-<li>الكاميرا بتصوّر ٣٠ فريم في الثانية، يعني كل فريم ٣٣ مللي ثانية. التكرار ٤ مرات ومتوسطهم بيقلل الغلط.</li>
-<li>ده قياس للتجربة والمقارنة بنفسك، مش تشخيص طبي.</li>
+<li>Google’s MediaPipe model finds the iris in every frame. Iris size is nearly the same in all adults, so the page measures the pupil <b>as a fraction of the iris</b>, regardless of your distance.</li>
+<li>The pupil is the darkest circle inside the iris. The page finds where brightness jumps going outward from the centre, using the sides only because eyelids cover the top and bottom.</li>
+<li><b>The moment of light</b> is found by the camera itself (the first frame your face brightened), so the delay is measured on the same clock.</li>
+<li><b>Dark eyes are hard:</b> medical devices use infrared so the pupil shows up. With an ordinary camera and dark brown eyes, the pupil‑iris contrast can be small, and the page will tell you if the measurement isn’t reliable.</li>
+<li>The camera records 30 frames per second, i.e. 33 ms per frame. Repeating 4 times and taking the median reduces error.</li>
+<li>This is for experimenting and comparing with yourself, not a medical diagnosis.</li>
 </ul></details>
 </div>
 <video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
@@ -75,16 +77,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -135,7 +137,7 @@ function pupilResponse(series, onset) {
 let lm = null, stream = null, series = [], onsets = [], faceLum = [], running = false;
 const hist = LS.get('hist', []);
 async function loadLM() {
-  $('st').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  $('st').textContent = 'Loading the face‑tracking model (about 4 MB)…';
   const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
   const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const o = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1 });
@@ -171,11 +173,11 @@ $('b-go').onclick = async () => {
   try {
     stream = await camera('user', 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
     if (!lm) await loadLM();
-    if (!v.requestVideoFrameCallback) throw new Error('المتصفح ده مش بيدعم قراءة كل فريم. حدّث iOS.');
+    if (!v.requestVideoFrameCallback) throw new Error('This browser can’t read individual video frames. Update your browser.');
     series = []; faceLum = []; onsets = []; running = true; v.requestVideoFrameCallback(frame);
-    $('st').textContent = ''; flash(true, false, 'بُص على الكاميرا…');
+    $('st').textContent = ''; flash(true, false, 'Look at the camera…');
     for (let k = 0; k < 4; k++) {
-      for (let i = 8; i > 0; i--) { flash(true, false, `${ar(k + 1)} من ٤ · ${ar(i)}`); await sleepMs(1000); }
+      for (let i = 8; i > 0; i--) { flash(true, false, `${ar(k + 1)} of 4 · ${ar(i)}`); await sleepMs(1000); }
       const tSet = performance.now(); flash(true, true, ''); onsets.push({ set: tSet }); await sleepMs(2000); flash(true, false, '');
     }
     await sleepMs(1500); running = false; flash(false, false); stream.getTracks().forEach(t => t.stop());
@@ -196,11 +198,11 @@ function analyse() {
   const good = resp.filter(r => r.latency != null), med = a => { const s = a.slice().sort((x, y) => x - y); return s.length ? s[s.length >> 1] : null; };
   const con = series.length ? series.reduce((a, b) => a + b.c, 0) / series.length : 0;
   draw(ons);
-  if (series.length < 60) { $('res').innerHTML = '<div class="card bad">الكاميرا مالقتش عينك كفاية. قرّب التليفون، وخلي وشك في النص.</div>'; return; }
+  if (series.length < 60) { $('res').innerHTML = '<div class="card bad">The camera didn’t see your eyes enough. Move closer and keep your face centred.</div>'; return; }
   const lat = med(good.map(r => r.latency)), amp = med(resp.map(r => r.amp)), base = med(resp.map(r => r.base)), tmin = med(good.map(r => r.tmin));
-  const rel = con < 0.06 ? '<span class="bad">الفرق بين الحدقة والقزحية ضعيف (غالباً عينك غامقة أو النور قليل)، فالأرقام دي مش موثوقة.</span>' : good.length < 2 ? '<span class="bad">الانقباض ماكانش واضح في معظم المحاولات.</span>' : '<span class="ok">القياس واضح.</span>';
-  $('res').innerHTML = `<div class="kpi"><div><b>${lat != null ? ar(Math.round(lat)) + ' م.ث' : '—'}</b><span>التأخير لحد ما الحدقة تبدأ تضيق بوضوح</span></div><div><b>${amp != null ? ar(Math.round(amp * 100)) + '%' : '—'}</b><span>ضاقت قد إيه</span></div><div><b>${tmin != null ? ar(Math.round(tmin)) + ' م.ث' : '—'}</b><span>وصلت لأصغر حجم بعد</span></div><div><b>${base != null ? ar(Math.round(base * 100)) + '%' : '—'}</b><span>حجمها في الضلمة (من القزحية)</span></div></div>
-  <div class="card" style="margin-top:8px">${rel} ${ar(good.length)} من ${ar(ons.length)} محاولات اتحسبت.</div>`;
+  const rel = con < 0.06 ? '<span class="bad">Pupil‑iris contrast is weak (probably dark eyes or low light), so these numbers aren’t reliable.</span>' : good.length < 2 ? '<span class="bad">Constriction wasn’t clear in most attempts.</span>' : '<span class="ok">Clear measurement.</span>';
+  $('res').innerHTML = `<div class="kpi"><div><b>${lat != null ? ar(Math.round(lat)) + ' ms' : '—'}</b><span>Delay until the pupil clearly starts constricting</span></div><div><b>${amp != null ? ar(Math.round(amp * 100)) + '%' : '—'}</b><span>How much it constricted</span></div><div><b>${tmin != null ? ar(Math.round(tmin)) + ' ms' : '—'}</b><span>Reached its smallest size after</span></div><div><b>${base != null ? ar(Math.round(base * 100)) + '%' : '—'}</b><span>Size in the dark (of the iris)</span></div></div>
+  <div class="card" style="margin-top:8px">${rel} ${ar(good.length)} of ${ar(ons.length)} attempts counted.</div>`;
   if (lat != null) { hist.unshift({ ts: Date.now(), note: $('note').value.trim(), lat: Math.round(lat), amp: +amp.toFixed(3), base: +base.toFixed(3), n: good.length, con: +con.toFixed(3) }); LS.set('hist', hist.slice(0, 60)); }
   drawHist();
 }
@@ -211,7 +213,7 @@ function draw(ons) {
   c.fillStyle = '#e8a33a'; ons.forEach(o => c.fillRect(X(o), 0, 2, h));
   c.strokeStyle = '#e8251a'; c.lineWidth = 1.5; c.beginPath(); series.forEach((p, i) => i ? c.lineTo(X(p.t), Y(p.r)) : c.moveTo(X(p.t), Y(p.r))); c.stroke();
 }
-function drawHist() { $('hist').innerHTML = hist.length ? hist.map(x => `<li><div style="display:flex;flex-direction:column"><b>${ar(x.lat)} م.ث · ضاقت ${ar(Math.round(x.amp * 100))}%</b><span class="lbl">${new Date(x.ts).toLocaleString('ar-EG', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}${x.note ? ' · ' + esc(x.note) : ''}</span></div></li>`).join('') : '<li>لسه مفيش.</li>'; }
+function drawHist() { $('hist').innerHTML = hist.length ? hist.map(x => `<li><div style="display:flex;flex-direction:column"><b>${ar(x.lat)} ms · constricted ${ar(Math.round(x.amp * 100))}%</b><span class="lbl">${new Date(x.ts).toLocaleString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}${x.note ? ' · ' + esc(x.note) : ''}</span></div></li>`).join('') : '<li>Nothing yet.</li>'; }
 drawHist();
 </script>
 </body>

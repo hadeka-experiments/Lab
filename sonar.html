@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>سونار الأوضة</title>
+<script src="shell.js"></script>
+<title>Room Sonar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: أداة قياس هادية ودقيقة
-   IDEA: شاشة سونار في غرفة تحكم
-   PICTURE: منحنى الصدى بالمسافة + خريطة قطبية للقياسات
-   COLOUR and TYPE: معدن فاتح/ليلي، أسود، أحمر إنذار؛ IBM Plex Sans Arabic
-   LAYOUT: قراءة كبيرة لأقرب سطح، المنحنى تحتها، ثم الإعدادات والخريطة */
+/* VOICE: a calm, precise measuring tool
+   IDEA: a sonar screen in a control room
+   PICTURE: echo curve by distance + polar map of measurements
+   COLOUR and TYPE: light/night metal, black, alarm red
+   LAYOUT: big reading for the nearest surface, curve below, then settings and map */
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
@@ -46,62 +47,63 @@ details{margin-top:24px;background:var(--panel);border:1px solid var(--line);bor
 summary{cursor:pointer;font-weight:600}
 @media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>سونار الأوضة</h1>
-<p class="sub">التليفون بيطلع صوت صفير قصير من السماعة ويسمع الصدى بالمايك، ويحسب المسافة لكل سطح بيرجّع الصوت.</p>
+<h1>Room Sonar</h1>
+<p class="sub">The phone plays a short chirp from its speaker, listens for the echo with its microphone, and calculates the distance to every surface that reflects the sound.</p>
 
 <div class="read">
   <div>
-    <div class="lbl">أقوى صدى (أغلب الوقت الحيطة اللي قدامك)</div>
-    <div class="big" id="near">—<small> متر</small></div>
-    <div class="lbl" id="meta">لسه مفيش قياس</div>
+    <div class="lbl">Strongest echo (usually the wall in front of you)</div>
+    <div class="big" id="near">—<small> metres</small></div>
+    <div class="lbl" id="meta">No measurement yet</div>
   </div>
-  <button id="go">قيس</button>
+  <button id="go">Measure</button>
 </div>
 <div class="msg" id="msg"></div>
 <div class="fig"><canvas id="cv"></canvas></div>
 <ul class="ech" id="list"></ul>
 
-<h2>الإعدادات</h2>
-<p class="sub">الأرقام الأصلية مناسبة لأغلب الأوض. التغيير في الحساسية وأقل مسافة بيتطبق على القياسات اللي اتعملت قبل كده، من غير ما تعيد المسح.</p>
-<div class="row"><button class="ghost" id="rst">رجّع الإعدادات الأصلية</button></div>
+<h2>Settings</h2>
+<p class="sub">The defaults suit most rooms. Changes to sensitivity and minimum distance apply to previous measurements too, without rescanning.</p>
+<div class="row"><button class="ghost" id="rst">Restore defaults</button></div>
 <div class="grid">
-  <label>الحرارة في المكان <b id="vT"></b><input type="range" id="T" min="0" max="45" step="1" value="24"></label>
-  <label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.6"></label>
-  <label>عدد الصفارات (كل ما يزيد، النتيجة أنضف) <b id="vN"></b><input type="range" id="N" min="4" max="40" step="1" value="16"></label>
-  <label>أقصى مسافة <b id="vR"></b><input type="range" id="R" min="2" max="10" step="0.5" value="6"></label>
-  <label>تجاهل أي حاجة أقرب من <b id="vM"></b><input type="range" id="M" min="0.1" max="0.6" step="0.05" value="0.25"></label>
-  <label>السماعة اللي بتطلّع الصفارة
+  <label>Room temperature <b id="vT"></b><input type="range" id="T" min="0" max="45" step="1" value="24"></label>
+  <label>Volume <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.6"></label>
+  <label>Number of chirps (more = cleaner result) <b id="vN"></b><input type="range" id="N" min="4" max="40" step="1" value="16"></label>
+  <label>Maximum distance <b id="vR"></b><input type="range" id="R" min="2" max="10" step="0.5" value="6"></label>
+  <label>Ignore anything closer than <b id="vM"></b><input type="range" id="M" min="0.1" max="0.6" step="0.05" value="0.25"></label>
+  <label>Speaker playing the chirp
   <select id="spk" style="width:100%;min-height:44px;font:inherit;font-size:16px;margin-top:6px;border-radius:10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:0 10px">
-    <option value="B">الاتنين (فوق وتحت)</option><option value="L">القناة الشمال بس</option><option value="R">القناة اليمين بس</option></select></label>
-  <label>الحساسية (كل ما تزيد، بيلقط أصداء أضعف) <b id="vS"></b><input type="range" id="S" min="15" max="60" step="1" value="40"></label>
+    <option value="B">Both (top and bottom)</option><option value="L">Left channel only</option><option value="R">Right channel only</option></select></label>
+  <label>Sensitivity (higher catches weaker echoes) <b id="vS"></b><input type="range" id="S" min="15" max="60" step="1" value="40"></label>
 </div>
 
-<h2>رسم الأوضة</h2>
-<p class="sub">اقف في نص الأوضة، وامسك التليفون قدام صدرك وطرفه اللي تحت لقدام. دوس «ابدأ المسح» ولف حوالين نفسك ببطء، تقف كل شوية لحد ما الحلقة تكمل ١٢ اتجاه. جسمك بيحجب جزء من الصدى اللي جاي من وراك، ومن الفرق ده الصفحة بتعرف كل سطح في أنهي اتجاه.</p>
-<div class="row"><button id="scan">ابدأ المسح</button><button class="ghost" id="clr">امسح القياسات</button><button class="ghost" id="cp">انسخ القياسات CSV</button></div>
+<h2>Room map</h2>
+<p class="sub">Stand in the middle of the room and hold the phone in front of your chest with its bottom edge pointing forward. Tap “Start scan” and turn slowly on the spot, pausing every so often until the ring completes 12 directions. Your body blocks part of the echo from behind you, and from that difference the page works out which direction each surface is in.</p>
+<div class="row"><button id="scan">Start scan</button><button class="ghost" id="clr">Clear measurements</button><button class="ghost" id="cp">Copy measurements as CSV</button></div>
 <div class="grid">
-  <label>ارتفاع التليفون عن الأرض <b id="vH"></b><input type="range" id="H" min="0" max="2" step="0.05" value="1.2"></label>
-  <label class="chk"><input type="checkbox" id="rect" checked> افترض إن الأوضة مستطيلة (الحيطان متعامدة)</label>
+  <label>Phone height above the floor <b id="vH"></b><input type="range" id="H" min="0" max="2" step="0.05" value="1.2"></label>
+  <label class="chk"><input type="checkbox" id="rect" checked> Assume a rectangular room (perpendicular walls)</label>
 </div>
 <div class="msg" id="hd"></div>
 <div class="ring" id="ring"></div>
 <div class="fig polar"><canvas id="rc"></canvas></div>
-<p class="lbl"><span style="color:var(--red)">●</span> صلب (حيطة، خشب، إزاز) · <span style="color:#1D9E75">●</span> طري (كنبة، ستارة، سرير) · <span style="color:var(--mute)">●</span> مش واضح. مكان الحاجات اتجاهه تقريبي.</p>
+<p class="lbl"><span style="color:var(--red)">●</span> Hard (wall, wood, glass) · <span style="color:#1D9E75">●</span> Soft (sofa, curtain, bed) · <span style="color:var(--mute)">●</span> Unclear. Object directions are approximate.</p>
 <div id="sum"></div>
-<h2>البيانات الخام</h2>
-<p class="sub">كل نقطة هي صدى، مترسومة في الاتجاه اللي كنت باصص له وقت القياس.</p>
+<h2>Raw data</h2>
+<p class="sub">Each dot is an echo, drawn in the direction you were facing when it was measured.</p>
 <div class="fig polar"><canvas id="pc"></canvas></div>
-<details><summary>إزاي تاخد قياس كويس</summary>
+<details><summary>How to get a good measurement</summary>
 <ul>
-<li>افتح الصفحة من لينك https، لأن الآيفون مش بيدي المايك لملف مفتوح من تطبيق Files.</li>
-<li>شيل الآيفون من الوضع الصامت، وإلا الصفارة مش هتطلع.</li>
-<li>المكان يكون هادي، والتليفون يبقى في إيدك بعيد عن جسمك، وطرفه اللي تحت (السماعة والمايك) ناحية السطح اللي عايز تقيسه.</li>
-<li>لو مفيش ولا صدى ظهر، زوّد الحساسية. ولو ظهرت نقط كتير مالهاش معنى، قللها.</li>
-<li>السماعة والمايك بتوع التليفون بيسمعوا من كل الاتجاهات. يعني الصدى ممكن ييجي من الأرض أو السقف أو الحيطة اللي وراك. جسمك بيحجب اللي وراك جزئياً بس.</li>
-<li>«صلب» و«طري» جايين من مقارنة الصدى في الترددات العالية (٨–١٢ كيلوهرتز) والواطية (٢–٥ كيلوهرتز). الحاجات الطرية بتمتص العالي أكتر. ده بيفرّق بين صلب وطري بس، ومش بيعرف نوع المادة. والحاجة الصلبة الصغيرة ممكن تبان «مش واضح».</li>
+<li>Open the page from an https link; browsers won’t give microphone access to a file opened from local storage.</li>
+<li>Turn off silent mode, otherwise the chirp won’t play (on iPhone).</li>
+<li>Keep the room quiet and the phone in your hand away from your body, with its bottom edge (speaker and mic) toward the surface you want to measure.</li>
+<li>If no echo appears, raise the sensitivity. If many meaningless dots appear, lower it.</li>
+<li>Phone speakers and mics hear in all directions, so an echo may come from the floor, ceiling or the wall behind you. Your body only partly blocks what’s behind you.</li>
+<li>“Hard” and “soft” come from comparing the echo at high (8–12 kHz) and low (2–5 kHz) frequencies. Soft things absorb highs more. It only separates hard from soft and doesn’t identify the material. A small hard object may appear “unclear”.</li>
 </ul></details>
 </div>
 
@@ -331,10 +333,10 @@ function intersect(p, q) {
 
 {
 const $ = id => document.getElementById(id);
-const P = {T:'°',V:'',N:'',R:' م',M:' م',S:' dB',H:' م'};
+const P = {T:'°',V:'',N:'',R:' m',M:' m',S:' dB',H:' m'};
 const DEF = {};for (const k in P) DEF[k] = document.getElementById(k).value;
 const val = k => +$(k).value;
-for (const k in P) { const f = () => $('v'+k).textContent = k === 'H' && +$(k).value === 0 ? 'على الأرض' : $(k).value + P[k]; $(k).addEventListener('input', f); f(); }
+for (const k in P) { const f = () => $('v'+k).textContent = k === 'H' && +$(k).value === 0 ? 'On the floor' : $(k).value + P[k]; $(k).addEventListener('input', f); f(); }
 try { const s = JSON.parse(localStorage.getItem('sonar2') || '{}'); for (const k in s) if ($(k)) { $(k).value = s[k]; $(k).dispatchEvent(new Event('input')); } } catch (e) {}
 const save = () => { try { const s = { spk: $('spk').value }; for (const k in P) s[k] = $(k).value; localStorage.setItem('sonar2', JSON.stringify(s)); } catch (e) {} };
 
@@ -347,20 +349,20 @@ const fmt = d => d.toFixed(2);
 const toDb = a => Array.from(a, v => Math.round(20 * Math.log10(v + 1e-9) * 10) / 10), fromDb = a => Float32Array.from(a, v => Math.pow(10, v / 20));
 const toMark = (r, h) => ({ h, t: new Date().toISOString(), sr: r.sr, c: r.c, noise: r.noise, p: toDb(r.prof), pl: toDb(r.profL), ph: toDb(r.profH) });
 const MAT = t => t == null || !isFinite(t) ? null : t >= -4 ? 'hard' : t <= -8 ? 'soft' : 'mid';
-const MATN = { hard: 'صلب', soft: 'طري', mid: 'مش واضح' };
+const MATN = { hard: 'Hard', soft: 'Soft', mid: 'Unclear' };
 const matCol = m => m === 'soft' ? '#1D9E75' : m === 'mid' ? css('--mute') : css('--red');
 const markPeaks = m => { if (!m._prof) { m._prof = fromDb(m.p); m._l = m.pl && fromDb(m.pl); m._h = m.ph && fromDb(m.ph); } return findPeaks(m._prof, m.noise, m.sr, m.c, val('M'), -val('S'), m._l, m._h).peaks; };
 const peaked = () => marks.map(m => ({ h: m.h, t: m.t, peaks: markPeaks(m) }));
 const wait = ms => new Promise(r => setTimeout(r, ms));
-const DIRS = ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'];
+const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 const dirName = a => DIRS[Math.round(a / 45) % 8];
 
 function ensureCtx() { if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); try { ctx.resume(); } catch (e) {} }
 async function setup() {
   ensureCtx();
   if (stream) return;
-  if (!window.isSecureContext) throw new Error('الصفحة مفتوحة من ملف مش من لينك https، فالمتصفح مش هيدي إذن المايك. ارفعها على استضافة https وافتحها من اللينك.');
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('المتصفح ده مش بيدي الصفحة إذن المايك. افتحها في Safari من لينك https.');
+  if (!window.isSecureContext) throw new Error('The page was opened from a file, not an https link, so the browser won’t allow the microphone. Host it over https and open the link.');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('This browser won’t give the page microphone access. Open it from an https link in Safari or Chrome.');
   stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
 }
 
@@ -385,11 +387,11 @@ async function capture(maxCount) {
   const n = chunks.reduce((a, b) => a + b.length, 0), x = new Float32Array(n);
   let o = 0, peak = 0; for (const b of chunks) { x.set(b, o); o += b.length; }
   for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(x[i]));
-  if (peak < 0.003) throw new Error('المايك مش سامع حاجة تقريباً. شيل الآيفون من الوضع الصامت وعلّي الصوت.');
+  if (peak < 0.003) throw new Error('The microphone hears almost nothing. Turn off silent mode and raise the volume.');
   const r = analyse(x, chirp, { sr, period, count, c, maxRange: val('R'), minRange: val('M'), relDb: -val('S'), band: { f0: 2000, f1: Math.min(12000, sr / 2 - 2000), dur: 0.01 } });
-  if (!r) throw new Error('مقدرتش ألاقي صوت الصفارة في التسجيل. جرّب صوت أعلى.');
+  if (!r) throw new Error('Couldn’t find the chirp in the recording. Try a higher volume.');
   r.sr = sr; r.c = c; r.clip = peak > 0.98;
-  if (r.dsnr < 15) throw new Error(`المايك مش سامع الصفارة نفسها (${r.dsnr.toFixed(0)} dB بس فوق الضوضاء). اتأكد إن الآيفون مش على الصامت (زرار الجنب)، وإن صوت الميديا عالي من زراير الصوت.`);
+  if (r.dsnr < 15) throw new Error(`The microphone can’t hear the chirp itself (only ${r.dsnr.toFixed(0)} dB above noise). Make sure the phone isn’t on silent and media volume is up.`);
   let h = null, moved = false;
   if (h0 != null && h1 != null) { moved = angDiff(h0, h1) > 20; const a = h0 * Math.PI / 180, b = h1 * Math.PI / 180; h = (Math.atan2(Math.sin(a) + Math.sin(b), Math.cos(a) + Math.cos(b)) * 180 / Math.PI + 360) % 360; }
   return { r, h, moved };
@@ -398,31 +400,31 @@ async function capture(maxCount) {
 function show(r) {
   last = r;
   const strong = r.peaks.slice().sort((a, b) => b.db - a.db)[0];
-  $('near').innerHTML = (strong ? fmt(strong.d) : '—') + '<small> متر</small>';
-  $('meta').textContent = `${r.used} صفارة اتسمعت · الصفارة فوق الضوضاء بـ ${r.dsnr.toFixed(0)} dB` + (r.clip ? ' · الصوت مشبّع، وطّيه شوية' : '');
-  $('list').innerHTML = r.peaks.length ? r.peaks.map(p => `<li><span>${fmt(p.d)} م · ${MATN[MAT(p.tilt)] || ''}</span><span>${p.db.toFixed(1)} dB · فرق الترددات ${p.tilt == null ? '—' : p.tilt.toFixed(0) + ' dB'}</span></li>`).join('') : '<li>مفيش صدى واضح فوق الحساسية دي</li>';
+  $('near').innerHTML = (strong ? fmt(strong.d) : '—') + '<small> metres</small>';
+  $('meta').textContent = `${r.used} chirps heard · chirp ${r.dsnr.toFixed(0)} dB above noise` + (r.clip ? ' · sound is clipping; lower it a little' : '');
+  $('list').innerHTML = r.peaks.length ? r.peaks.map(p => `<li><span>${fmt(p.d)} m · ${MATN[MAT(p.tilt)] || ''}</span><span>${p.db.toFixed(1)} dB · frequency tilt ${p.tilt == null ? '—' : p.tilt.toFixed(0) + ' dB'}</span></li>`).join('') : '<li>No clear echo above this sensitivity</li>';
   draw();
 }
 
-function errMsg(e) { return e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك. اسمح بيه من إعدادات Safari للموقع ده وجرّب تاني.' : (e && e.message) || String(e); }
+function errMsg(e) { return e && e.name === 'NotAllowedError' ? 'Microphone permission needed. Allow it in your browser’s settings for this site and try again.' : (e && e.message) || String(e); }
 
 async function measure() {
   if (busy) return; ensureCtx(); busy = true; const btn = $('go'); btn.disabled = true; btn.classList.add('pulse'); save();
   try {
-    say('بيقيس… خلّي التليفون ثابت.');
+    say('Measuring… keep the phone still.');
     const { r, h, moved } = await capture(); show(r);
     if (h != null && !moved) { marks.push(toMark(r, h)); keep(); }
-    say(moved ? 'التليفون اتحرك أثناء القياس، فالقياس ما اتضافش للخريطة.' : h == null ? 'تم. القياس ما اتضافش للخريطة لأن البوصلة مش شغالة.' : `تم. القياس اتسجل على اتجاه ${Math.round(h)}°.`);
+    say(moved ? 'The phone moved during the measurement, so it wasn’t added to the map.' : h == null ? 'Done. Not added to the map because the compass isn’t working.' : `Done. Recorded at heading ${Math.round(h)}°.`);
     room(); drawPolar();
   } catch (e) { say(errMsg(e), true); }
   finally { busy = false; btn.disabled = false; btn.classList.remove('pulse'); }
 }
 
 async function compass() {
-  if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) { if (await DeviceOrientationEvent.requestPermission() !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه عشان البوصلة.'); }
+  if (window.DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) { if (await DeviceOrientationEvent.requestPermission() !== 'granted') throw new Error('Motion & orientation permission is needed for the compass.'); }
   addEventListener('deviceorientationabsolute', onOri); addEventListener('deviceorientation', onOri);
   for (let i = 0; i < 20 && heading == null; i++) await wait(100);
-  if (heading == null) throw new Error('البوصلة مش بتدي قراءة على الجهاز ده.');
+  if (heading == null) throw new Error('The compass gives no reading on this device.');
 }
 function onOri(e) {
   const h = e.webkitCompassHeading != null ? e.webkitCompassHeading : (e.absolute || e.type === 'deviceorientationabsolute') && e.alpha != null ? (360 - e.alpha) % 360 : null;
@@ -442,25 +444,25 @@ async function scan() {
     ensureCtx();                       // must happen inside the tap, before any waiting
     if (heading == null) await compass(); // needs the tap too, so it comes before the mic prompt
     await setup();
-    scanning = true; btn.textContent = 'وقّف المسح'; save();
+    scanning = true; btn.textContent = 'Stop scan'; save();
     let lastBin = -1;
     while (scanning) {
       const b = binsDone(), cur = Math.round(heading / 30) % 12;
-      if (b.every(n => n > 0)) { $('hd').textContent = 'المسح خلص. الرسم تحت.'; break; }
-      if (b[cur] > 0) { $('hd').innerHTML = `<b>لف ببطء</b> لحد مربع فاضي (فاضل ${b.filter(n => !n).length}). اللي عليه إطار هو اتجاهك دلوقتي.`; ring(); lastBin = -1; await wait(250); continue; }
-      if (lastBin !== cur) { lastBin = cur; $('hd').innerHTML = '<b>اقف مكانك!</b> هيبدأ يقيس…'; ring(); await wait(1200); continue; }
-      $('hd').innerHTML = '<b>اثبت…</b> بيقيس (حوالي ٢ ثانية).';
+      if (b.every(n => n > 0)) { $('hd').textContent = 'Scan complete. The map is below.'; break; }
+      if (b[cur] > 0) { $('hd').innerHTML = `<b>Turn slowly</b> to an empty segment (${b.filter(n => !n).length} left). The outlined one is where you’re facing now.`; ring(); lastBin = -1; await wait(250); continue; }
+      if (lastBin !== cur) { lastBin = cur; $('hd').innerHTML = '<b>Stop where you are!</b> About to measure…'; ring(); await wait(1200); continue; }
+      $('hd').innerHTML = '<b>Hold still…</b> Measuring (about 2 s).';
       busy = true;
       try {
         const { r, h, moved } = await capture(12); show(r);
-        if (!moved && h != null) { marks.push(toMark(r, h)); keep(); $('hd').innerHTML = '<b>تمام.</b> لف للمربع الفاضي اللي بعده.'; }
-        else { $('hd').innerHTML = '<b>اتحركت</b> أثناء القياس. اثبت وهيعيد.'; }
+        if (!moved && h != null) { marks.push(toMark(r, h)); keep(); $('hd').innerHTML = '<b>Good.</b> Turn to the next empty segment.'; }
+        else { $('hd').innerHTML = '<b>You moved</b> during the measurement. Hold still and it will retry.'; }
       } finally { busy = false; }
       ring(); room(); drawPolar();
       await wait(900);
     }
   } catch (e) { $('hd').innerHTML = `<span class="bad">${errMsg(e)}</span>`; }
-  scanning = false; btn.textContent = 'ابدأ المسح'; ring();
+  scanning = false; btn.textContent = 'Start scan'; ring();
 }
 
 function fit(cv) { const d = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight; cv.width = W * d; cv.height = H * d; const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, W, H]; }
@@ -473,9 +475,9 @@ function draw() {
   const X = d => W - pr - (d / maxR) * (W - pl - pr), lo = -70, Y = db => pt + (0 - db) / (0 - lo) * (H - pt - pb);
   g.strokeStyle = line; g.lineWidth = 1;
   const step = maxR > 8 ? 2 : 1;
-  for (let d = 0; d <= maxR + 1e-9; d += step) { g.beginPath(); g.moveTo(X(d), pt); g.lineTo(X(d), H - pb); g.stroke(); g.textAlign = 'center'; g.fillText(d + ' م', X(d), H - 6); }
+  for (let d = 0; d <= maxR + 1e-9; d += step) { g.beginPath(); g.moveTo(X(d), pt); g.lineTo(X(d), H - pb); g.stroke(); g.textAlign = 'center'; g.fillText(d + ' m', X(d), H - 6); }
   for (let db = 0; db >= lo; db -= 20) { g.beginPath(); g.moveTo(pl, Y(db)); g.lineTo(W - pr, Y(db)); g.stroke(); if (W > 360) { g.textAlign = 'left'; g.fillText(db, 2, Y(db) + 4); } }
-  if (!last) { g.textAlign = 'center'; g.fillText('اضغط «قيس» عشان يظهر منحنى الصدى', W / 2, H / 2); return; }
+  if (!last) { g.textAlign = 'center'; g.fillText('Tap “Measure” to see the echo curve', W / 2, H / 2); return; }
   const { prof, sr, c } = last;
   g.strokeStyle = ink; g.lineWidth = 1.4; g.beginPath();
   for (let i = 0; i < prof.length; i += 2) { const d = i / sr * c / 2, v = Math.max(lo, 20 * Math.log10(prof[i] + 1e-9)); i ? g.lineTo(X(d), Y(v)) : g.moveTo(X(d), Y(v)); }
@@ -488,8 +490,8 @@ function draw() {
 function polarBase(g, W, H, maxR) {
   const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 - 22, s = R / maxR;
   g.strokeStyle = css('--line'); g.fillStyle = css('--mute'); g.font = '12px system-ui'; g.textAlign = 'center'; g.lineWidth = 1;
-  for (let d = 1; d <= maxR; d++) { g.beginPath(); g.arc(cx, cy, d * s, 0, 7); g.stroke(); if (d % (maxR > 8 ? 2 : 1) === 0) g.fillText(d + ' م', cx + 4, cy - d * s - 3); }
-  [['ش', 0], ['ق', 90], ['ج', 180], ['غ', 270]].forEach(([t, a]) => { const r = (a - 90) * Math.PI / 180; g.fillText(t, cx + (R + 12) * Math.cos(r), cy + (R + 12) * Math.sin(r) + 4); });
+  for (let d = 1; d <= maxR; d++) { g.beginPath(); g.arc(cx, cy, d * s, 0, 7); g.stroke(); if (d % (maxR > 8 ? 2 : 1) === 0) g.fillText(d + ' m', cx + 4, cy - d * s - 3); }
+  [['N', 0], ['E', 90], ['S', 180], ['W', 270]].forEach(([t, a]) => { const r = (a - 90) * Math.PI / 180; g.fillText(t, cx + (R + 12) * Math.cos(r), cy + (R + 12) * Math.sin(r) + 4); });
   return { cx, cy, R, s };
 }
 
@@ -497,7 +499,7 @@ function drawPolar() {
   const [g, W, H] = fit($('pc')), red = css('--red'), maxR = val('R');
   g.clearRect(0, 0, W, H);
   const { cx, cy, R, s } = polarBase(g, W, H, maxR);
-  if (!marks.length) { g.fillText('مفيش قياسات بالاتجاه لسه', cx, cy + 4); return; }
+  if (!marks.length) { g.fillText('No directional measurements yet', cx, cy + 4); return; }
   for (const m of peaked()) {
     const r = (m.h - 90) * Math.PI / 180;
     g.strokeStyle = css('--line'); g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + R * Math.cos(r), cy + R * Math.sin(r)); g.stroke();
@@ -507,8 +509,8 @@ function drawPolar() {
   g.fillStyle = css('--ink'); g.beginPath(); g.arc(cx, cy, 4, 0, 7); g.fill();
 }
 
-const conf = c => c >= 12 ? 'ثقة عالية' : c >= 8 ? 'ثقة متوسطة' : 'ثقة ضعيفة';
-const WHY = { double: 'صدى مكرر (الصوت رايح جاي مرتين على نفس الحيطة)', corner: 'ركنة بين حيطتين، مش حيطة لوحدها', edge: 'الخط اللي بين حيطة والأرض أو السقف', weak: 'مش باين له اتجاه واضح' };
+const conf = c => c >= 12 ? 'high confidence' : c >= 8 ? 'medium confidence' : 'low confidence';
+const WHY = { double: 'Repeated echo (sound bouncing twice off the same wall)', corner: 'A corner between two walls, not a single wall', edge: 'The edge between a wall and the floor or ceiling', weak: 'No clear direction' };
 
 function room() {
   ring();
@@ -520,8 +522,8 @@ function room() {
   const P = (x, y) => [cx + x * s, cy + y * s];
   let html = '';
   if (res.nMeas < 8) {
-    g.fillStyle = mute; g.fillText(`محتاج ٨ اتجاهات على الأقل (عندك ${res.nMeas})`, cx, cy + 24);
-    html = `<p>لسه بدري على الرسم. الصفحة محتاجة قياسات من ٨ اتجاهات على الأقل من الـ١٢ عشان تقارن الصدى بين الاتجاهات.</p>`;
+    g.fillStyle = mute; g.fillText(`At least 8 directions needed (you have ${res.nMeas})`, cx, cy + 24);
+    html = `<p>Too early to draw. The page needs measurements from at least 8 of the 12 directions to compare echoes between directions.</p>`;
   } else {
     g.lineWidth = 3; g.strokeStyle = ink;
     if (res.rect) {
@@ -538,9 +540,9 @@ function room() {
       });
       g.setLineDash([]);
       const dimA = side[0] != null && side[2] != null ? side[0] + side[2] : null, dimB = side[1] != null && side[3] != null ? side[1] + side[3] : null;
-      html += `<p><b>الأوضة تقريباً: ${dimA ? fmt(dimA) : '؟'} × ${dimB ? fmt(dimB) : '؟'} متر</b>` + (res.ceiling != null && (res.floor != null || val('H') === 0) ? `، والسقف على ارتفاع ${fmt((res.floor || val('H')) + res.ceiling)} متر تقريباً` : '') + '.</p>';
-      if (side.some(d => d == null)) html += '<p>الخط المتقطع معناه إن فيه حيطة ما ظهرلهاش صدى واضح، غالباً عشان عليها عفش أو ستارة أو فيها باب مفتوح.</p>';
-      if (res.rect.rms > 15) html += '<p>زوايا الحيطان المقاسة بعيدة عن إنها تكون متعامدة. ممكن الأوضة مش مستطيلة. جرّب تلغي افتراض المستطيل.</p>';
+      html += `<p><b>Room approximately: ${dimA ? fmt(dimA) : '?'} × ${dimB ? fmt(dimB) : '?'} m</b>` + (res.ceiling != null && (res.floor != null || val('H') === 0) ? `, ceiling about ${fmt((res.floor || val('H')) + res.ceiling)} m high` : '') + '.</p>';
+      if (side.some(d => d == null)) html += '<p>A dashed line means a wall with no clear echo, usually because of furniture, a curtain or an open door.</p>';
+      if (res.rect.rms > 15) html += '<p>The measured wall angles are far from perpendicular. The room may not be rectangular. Try turning off the rectangle assumption.</p>';
     } else {
       const Wl = res.walls;
       Wl.forEach((w, i) => {
@@ -551,20 +553,20 @@ function room() {
         g.setLineDash(dashed ? [6, 6] : []); g.beginPath(); g.moveTo(...P(...A)); g.lineTo(...P(...B2)); g.stroke();
       });
       g.setLineDash([]);
-      if (res.ceiling != null && (res.floor != null || val('H') === 0)) html += `<p>السقف على ارتفاع ${fmt((res.floor || val('H')) + res.ceiling)} متر تقريباً.</p>`;
+      if (res.ceiling != null && (res.floor != null || val('H') === 0)) html += `<p>Ceiling about ${fmt((res.floor || val('H')) + res.ceiling)} m high.</p>`;
     }
     for (const w of res.walls) { const n = nvec(w.a), [x, y] = P(n[0] * w.d, n[1] * w.d); g.fillStyle = matCol(MAT(w.tilt)); g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); }
-    for (const o of res.objects) { const n = nvec(o.a), [x, y] = P(n[0] * o.d, n[1] * o.d); g.fillStyle = matCol(MAT(o.tilt)); g.globalAlpha = .85; g.beginPath(); g.arc(x, y, 11, 0, 7); g.fill(); g.globalAlpha = 1; g.fillStyle = css('--ink'); g.fillText(MATN[MAT(o.tilt)] || '؟', x, y - 15); }
-    g.fillStyle = ink; g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.fill(); g.fillStyle = mute; g.fillText('إنت', cx, cy + 20);
+    for (const o of res.objects) { const n = nvec(o.a), [x, y] = P(n[0] * o.d, n[1] * o.d); g.fillStyle = matCol(MAT(o.tilt)); g.globalAlpha = .85; g.beginPath(); g.arc(x, y, 11, 0, 7); g.fill(); g.globalAlpha = 1; g.fillStyle = css('--ink'); g.fillText(MATN[MAT(o.tilt)] || '?', x, y - 15); }
+    g.fillStyle = ink; g.beginPath(); g.arc(cx, cy, 6, 0, 7); g.fill(); g.fillStyle = mute; g.fillText('You', cx, cy + 20);
     const mt = x => MATN[MAT(x.tilt)] ? ` · ${MATN[MAT(x.tilt)]}` : '';
-    if (res.objects.length) html += '<p>حاجات جوه الأوضة (الدواير الكبيرة):</p><ul>' + res.objects.map(o => `<li>حاجة ناحية ${dirName(o.a)} (${Math.round(o.a)}°) على بعد ${fmt(o.d)} م${mt(o)} · ${conf(o.contrast)}</li>`).join('') + '</ul>';
-    html += res.walls.length ? '<p>الحيطان اللي اتعرفت:</p><ul>' + res.walls.map(w => `<li>حيطة ناحية ${dirName(w.a)} (${Math.round(w.a)}°) على بعد ${fmt(w.d)} م${mt(w)} · ${conf(w.contrast)}</li>`).join('') + '</ul>' : '<p>ما ظهرش ولا صدى ليه اتجاه واضح. اتأكد إن جسمك ورا التليفون وإن الصوت عالي كفاية.</p>';
+    if (res.objects.length) html += '<p>Objects in the room (large circles):</p><ul>' + res.objects.map(o => `<li>Object toward ${dirName(o.a)} (${Math.round(o.a)}°) at ${fmt(o.d)} m${mt(o)} · ${conf(o.contrast)}</li>`).join('') + '</ul>';
+    html += res.walls.length ? '<p>Walls identified:</p><ul>' + res.walls.map(w => `<li>Wall toward ${dirName(w.a)} (${Math.round(w.a)}°) at ${fmt(w.d)} m${mt(w)} · ${conf(w.contrast)}</li>`).join('') + '</ul>' : '<p>No echo with a clear direction appeared. Make sure your body is behind the phone and the volume is high enough.</p>';
     const hz = [];
-    if (res.floor != null) hz.push(`الأرض: ${fmt(res.floor)} م تحت التليفون`);
-    if (res.ceiling != null) hz.push(`السقف: ${fmt(res.ceiling)} م فوق التليفون`);
-    if (val('H') === 0) html += '<p class="lbl">التليفون على الأرض: مفيش جسم وراه يحجب الصدى، فاتجاهات الحيطان بتطلع أضعف بكتير من وانت ماسكه. المسافات نفسها بتفضل مظبوطة.</p>';
-    if (hz.length) html += '<p>أسطح أفقية (صداها شبه ثابت في كل الاتجاهات):</p><ul>' + hz.map(t => `<li>${t}</li>`).join('') + '</ul>';
-    if (res.rejected.length) html += '<p>أصداء استبعدتها من الرسم:</p><ul>' + res.rejected.map(x => `<li>${fmt(x.d)} م${x.why === 'weak' && MAT(x.tilt) ? ` (${MATN[MAT(x.tilt)]})` : ''}: ${WHY[x.why]}</li>`).join('') + '</ul>';
+    if (res.floor != null) hz.push(`Floor: ${fmt(res.floor)} m below the phone`);
+    if (res.ceiling != null) hz.push(`Ceiling: ${fmt(res.ceiling)} m above the phone`);
+    if (val('H') === 0) html += '<p class="lbl">Phone on the floor: no body behind it to block echoes, so wall directions come out much weaker than when hand‑held. The distances themselves stay accurate.</p>';
+    if (hz.length) html += '<p>Horizontal surfaces (echo nearly the same in all directions):</p><ul>' + hz.map(t => `<li>${t}</li>`).join('') + '</ul>';
+    if (res.rejected.length) html += '<p>Echoes excluded from the map:</p><ul>' + res.rejected.map(x => `<li>${fmt(x.d)} m${x.why === 'weak' && MAT(x.tilt) ? ` (${MATN[MAT(x.tilt)]})` : ''}: ${WHY[x.why]}</li>`).join('') + '</ul>';
   }
   $('sum').innerHTML = html;
 }
@@ -577,7 +579,7 @@ $('H').addEventListener('input', room);
 $('cp').addEventListener('click', async () => {
   const rows = ['time,heading_deg,distance_m,level_db,snr_db,hi_minus_lo_db'];
   for (const m of peaked()) for (const p of m.peaks) rows.push([m.t, m.h.toFixed(0), p.d.toFixed(3), p.db.toFixed(1), (p.snr || 0).toFixed(1), p.tilt == null ? '' : p.tilt.toFixed(1)].join(','));
-  try { await navigator.clipboard.writeText(rows.join('\n')); $('hd').textContent = `اتنسخ ${rows.length - 1} صف.`; } catch (e) { $('hd').textContent = 'النسخ اترفض من المتصفح.'; }
+  try { await navigator.clipboard.writeText(rows.join('\n')); $('hd').textContent = `Copied ${rows.length - 1} rows.`; } catch (e) { $('hd').textContent = 'The browser refused to copy.'; }
 });
 const refresh = () => { if (last) Object.assign(last, findPeaks(last.prof, last.noise, last.sr, last.c, val('M'), -val('S'), last.profL, last.profH)), show(last); else draw(); drawPolar(); room(); save(); };
 for (const k of ['R', 'M', 'S']) $(k).addEventListener('input', refresh);

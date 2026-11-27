@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ظلمة السما</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.shot{width:100%;aspect-ratio:1;background:#000;border-radius:14px;margin-top:10px;display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>ظلمة السما</h1>
+<p class="sub">التليفون يبص للسما بالليل، يجمع عشرات الصور فوق بعض عشان النجوم الضعيفة تبان، ويعدّ النجوم اللي شايفها. كل ما أضواء المدينة أقل، النجوم أكتر. قارن سطح بيتك بالساحل أو الصحرا.</p>
+<div class="card">
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>اطلع مكان مكشوف، بعيد عن أي لمبة قريبة.</li>
+    <li>اكتب اسم المكان واضغط «ابدأ».</li>
+    <li>أول ٣ ثواني <b>غطّي الكاميرا بصباعك</b>: ده بيعلّم الصفحة النقط اللي بتنور غلط في حساس الكاميرا.</li>
+    <li>بعدين <b>حط التليفون على وشه</b> على الأرض أو على سور، عشان الكاميرا تبص لفوق على طول، و<b>ماتلمسوش</b> ١٥ ثانية.</li>
+  </ol>
+  <label>المكان<input type="text" id="place" placeholder="مثلاً: سطح البيت في المعادي"></label>
+  <div class="row"><button id="b-go">ابدأ</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<canvas class="shot" id="shot" width="720" height="720"></canvas>
+<div id="res"></div>
+<h2>المقارنة</h2>
+<ul class="list" id="hist"></ul>
+<details style="margin-top:14px"><summary>إزاي بيعدّ؟ وإيه اللي بيأثر على الرقم؟</summary>
+<ul>
+<li>الصفحة بتجمع حوالي ٩٠ فريم من الكاميرا فوق بعض. الدوشة العشوائية بتتلغي مع الجمع، والنجوم بتفضل في نفس المكان فبتقوى.</li>
+<li>بتشيل نور السما (اللي بيتغير ببطء من حتة لحتة)، وبتدوّر على نقط صغيرة أنور من اللي حواليها بـ٦ أضعاف الدوشة على الأقل. والنقط اللي كانت منورة وانت مغطّي الكاميرا بتتشال.</li>
+<li><b>الرقم نسبي:</b> صفحة الويب مش بتقدر تثبّت وقت تعريض الكاميرا، والكاميرا بتظبطه لوحدها. فالرقم بيتقارن صح بس بنفس التليفون، ووقت الليل كامل الضلمة (بعد ساعة ونص من المغرب).</li>
+<li><b>القمر والسحاب</b> بيقللوا النجوم جداً. سجّل لو القمر طالع عشان المقارنة تبقى عادلة.</li>
+<li>كاميرا التليفون في الفيديو مش زي وضع التصوير الليلي، فهتلقط النجوم الأنور بس. في القاهرة ممكن الرقم يكون صفر أو قليل جداً، وده في حد ذاته قياس لتلوث الضوء.</li>
+</ul></details>
+</div>
+<video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+// ==SKY== star detection on a stacked luminance image
+function detectStars(img, w, h, B = 24) {
+  const bw = Math.ceil(w / B), bh = Math.ceil(h / B), med = new Float32Array(bw * bh);
+  for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) { const v = []; for (let y = by * B; y < Math.min(h, (by + 1) * B); y += 2) for (let x = bx * B; x < Math.min(w, (bx + 1) * B); x += 2) v.push(img[y * w + x]); v.sort((a, b) => a - b); med[by * bw + bx] = v[v.length >> 1]; }
+  const bg = new Float32Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const fx = Math.min(bw - 1.001, Math.max(0, x / B - 0.5)), fy = Math.min(bh - 1.001, Math.max(0, y / B - 0.5)), x0 = Math.floor(fx), y0 = Math.floor(fy), ax = fx - x0, ay = fy - y0, x1 = Math.min(bw - 1, x0 + 1), y1 = Math.min(bh - 1, y0 + 1);
+    bg[y * w + x] = med[y0 * bw + x0] * (1 - ax) * (1 - ay) + med[y0 * bw + x1] * ax * (1 - ay) + med[y1 * bw + x0] * (1 - ax) * ay + med[y1 * bw + x1] * ax * ay; }
+  const res = new Float32Array(w * h); for (let i = 0; i < w * h; i++) res[i] = img[i] - bg[i];
+  const sample = []; for (let i = 0; i < w * h; i += 7) sample.push(Math.abs(res[i])); sample.sort((a, b) => a - b); const sigma = 1.4826 * sample[sample.length >> 1] + 1e-6;
+  const stars = [];
+  for (let y = 3; y < h - 3; y++) for (let x = 3; x < w - 3; x++) {
+    const i = y * w + x, v = res[i]; if (v < 6 * sigma) continue;
+    let isMax = true, sup = 0; for (let dy = -2; dy <= 2 && isMax; dy++) for (let dx = -2; dx <= 2; dx++) { if (!dx && !dy) continue; const u = res[i + dy * w + dx]; if (u > v) { isMax = false; break; } if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1 && u > 2 * sigma) sup++; }
+    if (isMax && sup >= 2) stars.push({ x, y, snr: v / sigma });
+  }
+  let mb = 0; for (let i = 0; i < w * h; i++) mb += bg[i]; mb /= w * h;
+  return { stars, sigma, bg: mb };
+}
+
+let hist = LS.get('hist', []), ori = null;
+addEventListener('deviceorientation', e => { if (e.beta != null) ori = e; });
+const camAlt = () => ori ? Math.asin(Math.max(-1, Math.min(1, -Math.cos(ori.beta * Math.PI / 180) * Math.cos(ori.gamma * Math.PI / 180)))) * 180 / Math.PI : null;
+const S = 360, cv = document.createElement('canvas'); cv.width = S; cv.height = S; const cg = cv.getContext('2d', { willReadFrequently: true });
+function grab(v, acc) { const vw = v.videoWidth, vh = v.videoHeight, m = Math.min(vw, vh), crop = Math.round(m * 0.7); cg.drawImage(v, (vw - crop) / 2, (vh - crop) / 2, crop, crop, 0, 0, S, S); const d = cg.getImageData(0, 0, S, S).data; for (let i = 0; i < S * S; i++) acc[i] += 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2]; }
+async function stackFrames(v, ms, acc) { let n = 0; const t0 = performance.now(); while (performance.now() - t0 < ms) { await new Promise(r => v.requestVideoFrameCallback ? v.requestVideoFrameCallback(r) : requestAnimationFrame(r)); grab(v, acc); n++; } return n; }
+$('b-go').onclick = async () => {
+  let stream;
+  try {
+    await motionPerm(); stream = await camera('environment', 1920, 1080); const v = $('v'); v.srcObject = stream; await v.play(); $('b-go').disabled = true;
+    $('st').textContent = 'غطّي الكاميرا بصباعك…'; await sleepMs(2500);
+    const dark = new Float32Array(S * S), nd = await stackFrames(v, 2000, dark); for (let i = 0; i < dark.length; i++) dark[i] /= nd;
+    $('st').textContent = 'شيل صباعك وحط التليفون على وشه. هيبدأ بعد ٥ ثواني…'; await sleepMs(5000);
+    $('st').textContent = 'بيستنى الكاميرا تظبط نفسها…'; await sleepMs(3000);
+    const alt = camAlt(); $('st').textContent = 'بيجمع الصور… ماتلمسش التليفون.';
+    const acc = new Float32Array(S * S), n = await stackFrames(v, 9000, acc); stream.getTracks().forEach(t => t.stop());
+    for (let i = 0; i < acc.length; i++) acc[i] = acc[i] / n - dark[i];
+    const r = detectStars(acc, S, S);
+    // reject anything also bright in the dark frame (hot pixels)
+    const darkMed = Array.from(dark).sort((a, b) => a - b)[S * S >> 1]; const stars = r.stars.filter(s => dark[s.y * S + s.x] < darkMed + 8);
+    show(acc, stars, r);
+    const moon = $('st').dataset.moon || '';
+    hist.unshift({ ts: Date.now(), place: $('place').value.trim() || 'بدون اسم', stars: stars.length, bg: +r.bg.toFixed(1), sigma: +r.sigma.toFixed(2), alt: alt == null ? null : Math.round(alt), frames: n }); LS.set('hist', hist.slice(0, 60));
+    const tilted = alt != null && alt < 70;
+    $('res').innerHTML = `<div class="kpi"><div><b>${ar(stars.length)}</b><span>نجمة لقطها التليفون</span></div><div><b>${ar(Math.round(r.bg))}</b><span>نور السما (نسبي)</span></div><div><b>${ar(n)}</b><span>فريم اتجمع</span></div></div>
+    <div class="card" style="margin-top:8px">${stars.length === 0 ? 'مفيش ولا نجمة واضحة: يا إما تلوث ضوء عالي، يا إما سحاب أو قمر.' : stars.length < 5 ? 'نجوم قليلة جداً: سما مدينة منورة.' : stars.length < 25 ? 'نجوم متوسطة.' : 'نجوم كتير: سما ضلمة نسبياً.'} ${tilted ? '<span class="bad">التليفون ماكانش باصص لفوق كويس، فالمقارنة ممكن تبقى غير عادلة.</span>' : ''}</div>`;
+    drawHist(); $('st').innerHTML = '<span class="ok">خلص.</span>';
+  } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; try { stream && stream.getTracks().forEach(t => t.stop()); } catch (_) {} }
+  $('b-go').disabled = false;
+};
+function show(img, stars, r) {
+  const c = $('shot').getContext('2d'), id = c.createImageData(S, S); const lo = r.bg - 2 * r.sigma, hi = r.bg + 12 * r.sigma;
+  for (let i = 0; i < S * S; i++) { const v = Math.max(0, Math.min(255, (img[i] - lo) / (hi - lo) * 255)); id.data[4 * i] = id.data[4 * i + 1] = id.data[4 * i + 2] = v; id.data[4 * i + 3] = 255; }
+  const t = document.createElement('canvas'); t.width = S; t.height = S; t.getContext('2d').putImageData(id, 0, 0); c.imageSmoothingEnabled = false; c.drawImage(t, 0, 0, 720, 720);
+  c.strokeStyle = '#e8251a'; c.lineWidth = 2; stars.forEach(s => { c.beginPath(); c.arc(s.x * 2, s.y * 2, 9, 0, 7); c.stroke(); });
+}
+function drawHist() {
+  const best = Math.max(1, ...hist.map(h => h.stars));
+  $('hist').innerHTML = hist.length ? hist.map(h => `<li><div style="display:flex;flex-direction:column"><b>${esc(h.place)}</b><span class="lbl">${new Date(h.ts).toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></div><span style="min-width:110px"><b>${ar(h.stars)}</b> نجمة<div class="meter" style="height:6px;border-radius:3px;background:var(--line)"><i style="display:block;height:100%;width:${h.stars / best * 100}%;background:var(--ok)"></i></div></span></li>`).join('') : '<li>لسه مفيش.</li>';
+}
+drawHist();
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تلاتي الأبعاد من الضل</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.pat{position:fixed;inset:0;z-index:40;background:#000;display:none}.pat.on{display:block}
+.pat i{position:absolute;background:#fff;display:none}
+.pat.L .l,.pat.R .r,.pat.T .t,.pat.B .b{display:block}
+.pat .l{left:0;top:0;bottom:0;width:33.3%}.pat .r{right:0;top:0;bottom:0;width:33.3%}.pat .t{left:0;right:0;top:0;height:33.3%}.pat .b{left:0;right:0;bottom:0;height:33.3%}
+.pat span{position:absolute;left:0;right:0;top:45%;text-align:center;color:#444;font-size:15px}
+.view3{width:100%;aspect-ratio:1;background:#000;border-radius:14px;margin-top:10px;display:block;touch-action:none}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}.thumbs canvas{width:100%;aspect-ratio:1;border-radius:8px;background:#000}
+</style>
+</head>
+<body>
+<div class="pat" id="pat"><i class="l"></i><i class="r"></i><i class="t"></i><i class="b"></i><span id="patT"></span></div>
+<div class="wrap">
+<h1>تلاتي الأبعاد من الضل</h1>
+<p class="sub">من غير LiDAR: الشاشة تنوّر من الشمال، وبعدين اليمين، وبعدين فوق وتحت. الكاميرا الأمامية تصوّر الضل والنور على وشك أو إيدك أو أي حاجة قدامها، ومن الفرق بينهم الصفحة تحسب اتجاه كل نقطة على السطح، وتبني شكلها <b>تلاتي الأبعاد</b>.</p>
+<div class="card">
+  <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
+    <li>أوضة <b>ضلمة</b> قد ما تقدر، وسطوع الشاشة على الآخر.</li>
+    <li>امسك التليفون قدام وشك (أو قدام الحاجة) على المسافة اللي تحت، والكاميرا الأمامية في النص.</li>
+    <li>اضغط «صوّر» وماتتحركش ٤ ثواني والشاشة بتنوّر.</li>
+  </ol>
+  <label>المسافة بين الشاشة والحاجة <b id="dV"></b><input type="range" id="dist" min="12" max="45" step="1" value="25"></label>
+  <div class="row"><button id="b-go">صوّر</button></div>
+  <div class="msg" id="st"></div>
+</div>
+<canvas class="view3" id="view" width="720" height="720"></canvas>
+<p class="lbl">اسحب بصباعك عشان تلف الشكل.</p>
+<div class="row"><button class="ghost" id="b-mode">لون الأعماق</button></div>
+<div class="thumbs" id="thumbs"></div>
+<p class="lbl">الصور الأربعة: نور من الشمال، اليمين، فوق، تحت.</p>
+<details style="margin-top:14px"><summary>إزاي بيشتغل؟ وإيه حدوده؟</summary>
+<ul>
+<li>اسمها <b>Photometric Stereo</b>: السطح اللي باصص ناحية النور بيبان أنور. لما النور ييجي من الشمال واليمين، الفرق بين الصورتين بيقول كل نقطة مايلة شمال ولا يمين وقد إيه. ونفس الكلام بين فوق وتحت.</li>
+<li>من الميل في كل نقطة، الصفحة بتجمّع السطح كله بطريقة رياضية اسمها Frankot–Chellappa (عن طريق تحويل فورييه).</li>
+<li>بتصوّر كمان صورة والشاشة سودا، وبتطرحها، عشان تشيل أي نور تاني في الأوضة.</li>
+<li><b>الحدود:</b> مصادر النور قريبة من بعض (الشاشة صغيرة)، فالشكل بيطلع ناعم وأقل عمق من الحقيقة، والتفاصيل الصغيرة بتضيع. الكاميرا بتظبط الإضاءة لوحدها، والصفحة بتعدّل ده تقريبياً. الحاجات اللي بتلمع (زي النضارة أو العرق) بتبوّظ النقط اللي هي فيها.</li>
+</ul></details>
+</div>
+<video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+// ==PS== screen photometric stereo: 4 lit regions + dark frame -> slopes -> depth (Frankot-Chellappa)
+// imgs: {L,R,T,B,D} Float32Array N*N; geom: {d, xL, xR, yT, yB} in cm (camera at origin, image x right/y down already mapped)
+function psDepth(imgs, N, geom) {
+  const n2 = N * N, I = {}, mask = new Uint8Array(n2), lit = new Float32Array(n2);
+  for (const k of ['L', 'R', 'T', 'B']) { I[k] = new Float32Array(n2); for (let i = 0; i < n2; i++) I[k][i] = Math.max(0, imgs[k][i] - imgs.D[i]); }
+  for (let i = 0; i < n2; i++) lit[i] = I.L[i] + I.R[i] + I.T[i] + I.B[i];
+  const mx = lit.reduce((a, b) => Math.max(a, b), 0); for (let i = 0; i < n2; i++) mask[i] = lit[i] > 0.3 * mx ? 1 : 0;
+  // auto-exposure gain per image: equalise means over the mask
+  const mean = a => { let s = 0, c = 0; for (let i = 0; i < n2; i++) if (mask[i]) { s += a[i]; c++; } return s / Math.max(1, c); };
+  const mL = mean(I.L), mR = mean(I.R), mT = mean(I.T), mB = mean(I.B), mm = (mL + mR + mT + mB) / 4;
+  for (let i = 0; i < n2; i++) { I.L[i] *= mm / mL; I.R[i] *= mm / mR; I.T[i] *= mm / mT; I.B[i] *= mm / mB; }
+  const p = new Float64Array(n2), q = new Float64Array(n2), { d, xL, xR, yT, yB } = geom;
+  for (let i = 0; i < n2; i++) { if (!mask[i]) continue;
+    const rx = (I.R[i] - I.L[i]) / (I.R[i] + I.L[i] + 1e-6), ry = (I.T[i] - I.B[i]) / (I.T[i] + I.B[i] + 1e-6);
+    const tx = 2 * d * rx / ((xR - xL) - rx * (xR + xL)), ty = 2 * d * ry / ((yT - yB) - ry * (yT + yB));
+    p[i] = Math.max(-3, Math.min(3, tx)); q[i] = Math.max(-3, Math.min(3, ty)); }
+  let z = integrate(p, q, N);
+  // sign ambiguity per axis (mirrored camera, unknown orientation): objects in front of a screen are convex -> pick the convex option
+  const conv = zz => { let c = 0, e = 0, nc = 0, ne = 0; const cx = N / 2, r = N * 0.18; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const i = y * N + x; if (!mask[i]) continue; const rr = Math.hypot(x - cx, y - cx); if (rr < r) { c += zz[i]; nc++; } else if (rr > 2 * r) { e += zz[i]; ne++; } } return (nc ? c / nc : 0) - (ne ? e / ne : 0); };
+  let best = z, bs = conv(z), flips = [1, 1];
+  for (const [sx, sy] of [[-1, 1], [1, -1], [-1, -1]]) { const zz = integrate(p.map(v => v * sx), q.map(v => v * sy), N); const c = conv(zz); if (c > bs) { bs = c; best = zz; flips = [sx, sy]; } }
+  let albedo = lit; return { z: best, mask, albedo: lit, flips };
+}
+function fft2(re, im, N, inv) { const r = new Float64Array(N), i2 = new Float64Array(N);
+  for (let pass = 0; pass < 2; pass++) for (let a = 0; a < N; a++) { for (let b = 0; b < N; b++) { const k = pass ? b * N + a : a * N + b; r[b] = re[k]; i2[b] = inv ? -im[k] : im[k]; } fftR(r, i2); for (let b = 0; b < N; b++) { const k = pass ? b * N + a : a * N + b; re[k] = r[b]; im[k] = inv ? -i2[b] : i2[b]; } }
+  if (inv) for (let k = 0; k < N * N; k++) { re[k] /= N * N; im[k] /= N * N; } }
+function integrate(p, q, N) { // Frankot-Chellappa
+  const P = Float64Array.from(p), Pi = new Float64Array(N * N), Q = Float64Array.from(q), Qi = new Float64Array(N * N); fft2(P, Pi, N); fft2(Q, Qi, N);
+  const Zr = new Float64Array(N * N), Zi = new Float64Array(N * N);
+  for (let v = 0; v < N; v++) for (let u = 0; u < N; u++) { const k = v * N + u, wu = 2 * Math.PI * (u < N / 2 ? u : u - N) / N, wv = 2 * Math.PI * (v < N / 2 ? v : v - N) / N, den = wu * wu + wv * wv; if (!den) continue;
+    // Z = (-j wu P - j wv Q) / den
+    Zr[k] = (wu * Pi[k] + wv * Qi[k]) / den; Zi[k] = (-wu * P[k] - wv * Q[k]) / den; }
+  fft2(Zr, Zi, N, true); return Zr;
+}
+
+const N = 128; let res = null, rot = { a: 0.5, b: 0.25 }, mode = 0;
+$('dist').oninput = () => $('dV').textContent = ar($('dist').value) + ' سم'; $('dist').oninput();
+const cv = document.createElement('canvas'); cv.width = N; cv.height = N; const cg = cv.getContext('2d', { willReadFrequently: true });
+function grab(v, acc) { const vw = v.videoWidth, vh = v.videoHeight, m = Math.min(vw, vh) * 0.8; cg.drawImage(v, (vw - m) / 2, (vh - m) / 2, m, m, 0, 0, N, N); const d = cg.getImageData(0, 0, N, N).data; for (let i = 0; i < N * N; i++) acc[i] += 0.299 * d[4 * i] + 0.587 * d[4 * i + 1] + 0.114 * d[4 * i + 2]; }
+$('b-go').onclick = async () => {
+  let stream;
+  try {
+    stream = await camera('user', 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
+    if (!v.requestVideoFrameCallback) throw new Error('المتصفح ده مش بيدعم قراءة كل فريم. حدّث iOS.');
+    const pat = $('pat'); pat.className = 'pat on'; $('patT').textContent = 'ماتتحركش…'; await sleepMs(1500); $('patT').textContent = '';
+    const acc = {}, cnt = {}; for (const k of 'DLRTB') { acc[k] = new Float32Array(N * N); cnt[k] = 0; }
+    let curK = 'D', since = performance.now();
+    const onF = now => { if (!pat.classList.contains('on')) return; v.requestVideoFrameCallback(onF); if (now - since > 110) { grab(v, acc[curK]); cnt[curK]++; } };
+    v.requestVideoFrameCallback(onF);
+    for (let cyc = 0; cyc < 4; cyc++) for (const k of 'DLRTB') { curK = k; pat.className = 'pat on ' + (k === 'D' ? '' : k); since = performance.now(); await sleepMs(260); }
+    pat.className = 'pat'; stream.getTracks().forEach(t => t.stop());
+    if (Object.values(cnt).some(c => c < 2)) throw new Error('الكاميرا ماصورتش فريمات كفاية. جرّب تاني.');
+    const imgs = {}; for (const k of 'DLRTB') { imgs[k] = acc[k].map(x => x / cnt[k]); }
+    const d = +$('dist').value, sw = 7.0, sh = 14.6, camY = 0.8; // screen size (cm), camera ~0.8 cm below the top edge
+    res = psDepth(imgs, N, { d, xL: -sw / 3, xR: sw / 3, yT: -(camY + sh / 6), yB: -(camY + sh * 5 / 6) });
+    res.imgs = imgs; thumbs(imgs); render();
+    const lit = imgs.L.reduce((a, b) => a + b) + imgs.R.reduce((a, b) => a + b), dk = imgs.D.reduce((a, b) => a + b) * 2;
+    $('st').innerHTML = lit < dk * 1.3 ? '<span class="bad">نور الشاشة كان ضعيف جنب نور الأوضة. طفّي النور أو قرّب.</span>' : '<span class="ok">اتبنى.</span> لف الشكل بصباعك.';
+  } catch (e) { $('pat').className = 'pat'; $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; try { stream && stream.getTracks().forEach(t => t.stop()); } catch (_) {} }
+};
+function thumbs(imgs) { $('thumbs').innerHTML = ''; for (const k of 'LRTB') { const c = document.createElement('canvas'); c.width = N; c.height = N; const g = c.getContext('2d'), id = g.createImageData(N, N), a = imgs[k], mx = Math.max(...a); for (let i = 0; i < N * N; i++) { const v = a[i] / mx * 255; id.data[4 * i] = id.data[4 * i + 1] = id.data[4 * i + 2] = v; id.data[4 * i + 3] = 255; } g.putImageData(id, 0, 0); $('thumbs').appendChild(c); } }
+function render() {
+  if (!res) return; const c = $('view').getContext('2d'), W = 720; c.fillStyle = '#000'; c.fillRect(0, 0, W, W);
+  const { z, mask, albedo } = res; let zm = 0, zs = [], amx = 0; for (let i = 0; i < N * N; i++) if (mask[i]) { zs.push(z[i]); amx = Math.max(amx, albedo[i]); }
+  zs.sort((a, b) => a - b); const zlo = zs[Math.floor(zs.length * 0.02)], zhi = zs[Math.floor(zs.length * 0.98)], zr = (zhi - zlo) || 1;
+  const ca = Math.cos(rot.a), sa = Math.sin(rot.a), cb = Math.cos(rot.b), sb = Math.sin(rot.b), pts = [];
+  for (let y = 0; y < N; y += 1) for (let x = 0; x < N; x += 1) { const i = y * N + x; if (!mask[i]) continue;
+    const X = (x - N / 2) / N, Y = (y - N / 2) / N, Z = (Math.max(zlo, Math.min(zhi, z[i])) - zlo) / zr * 0.35;
+    const x1 = X * ca + Z * sa, z1 = -X * sa + Z * ca, y1 = Y * cb - z1 * sb, z2 = Y * sb + z1 * cb;
+    pts.push([x1, y1, z2, mode ? (z[i] - zlo) / zr : albedo[i] / amx]); }
+  pts.sort((p, q) => p[2] - q[2]);
+  for (const p of pts) { const s = W * 0.85, px = W / 2 + p[0] * s, py = W / 2 + p[1] * s; const v = Math.max(0, Math.min(1, p[3]));
+    c.fillStyle = mode ? `hsl(${(1 - v) * 240},80%,${30 + v * 30}%)` : `rgb(${v * 255 | 0},${v * 235 | 0},${v * 220 | 0})`; c.fillRect(px - 3, py - 3, 6.5, 6.5); }
+}
+$('b-mode').onclick = () => { mode = 1 - mode; $('b-mode').textContent = mode ? 'لون الصورة' : 'لون الأعماق'; render(); };
+let drag = null; const vw = $('view');
+vw.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY, rot.a, rot.b]; vw.setPointerCapture(e.pointerId); });
+vw.addEventListener('pointermove', e => { if (!drag) return; rot.a = drag[2] + (e.clientX - drag[0]) / 120; rot.b = Math.max(-1.3, Math.min(1.3, drag[3] + (e.clientY - drag[1]) / 120)); render(); });
+vw.addEventListener('pointerup', () => drag = null);
+</script>
+</body>
+</html>

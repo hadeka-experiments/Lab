@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تصوير الزمن</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Time Slice Camera</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -36,28 +37,29 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .stage canvas{display:block;width:100%;height:auto}
 .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}.modes button{min-height:44px;font-size:14px;background:transparent;color:var(--ink);border:1px solid var(--line)}.modes button.on{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>تصوير الزمن</h1>
-<p class="sub">الكاميرا العادية بتصوّر كل الصورة في نفس اللحظة. هنا كل خط في الصورة بيتصوّر في لحظة مختلفة، فالزمن نفسه بيتحول لمكان: الناس اللي بتتحرك بتتمط وتتلوي، والإيد بتبقى أخطبوط، والعربيات بتبقى خطوط.</p>
+<h1>Time Slice Camera</h1>
+<p class="sub">A normal camera captures the whole picture at one instant. Here every line of the picture is captured at a different moment, so time itself turns into space: moving people stretch and twist, a hand becomes an octopus, cars become streaks.</p>
 <div class="modes" id="modes">
-  <button data-m="h" class="on">الزمن من اليمين للشمال</button>
-  <button data-m="v">الزمن من فوق لتحت</button>
-  <button data-m="r">النص دلوقتي، والأطراف الماضي</button>
-  <button data-m="f">خط النهاية (Photo finish)</button>
+  <button data-m="h" class="on">Time: right to left</button>
+  <button data-m="v">Time: top to bottom</button>
+  <button data-m="r">Centre is now, edges are the past</button>
+  <button data-m="f">Photo finish</button>
 </div>
-<label>قد إيه الماضي يرجع <b id="dV"></b><input type="range" id="depth" min="10" max="90" step="5" value="60"></label>
-<div class="row"><button id="b-go">افتح الكاميرا</button><button class="ghost" id="b-flip" disabled>اقلب الكاميرا</button><button class="ghost" id="b-snap" disabled>احفظ صورة</button></div>
+<label>How far back time goes <b id="dV"></b><input type="range" id="depth" min="10" max="90" step="5" value="60"></label>
+<div class="row"><button id="b-go">Open camera</button><button class="ghost" id="b-flip" disabled>Flip camera</button><button class="ghost" id="b-snap" disabled>Save image</button></div>
 <div class="msg" id="st"></div>
 <div class="stage"><canvas id="out"></canvas></div>
-<details style="margin-top:14px"><summary>إيه اللي بيحصل بالظبط؟ وجرّب إيه؟</summary>
+<details style="margin-top:14px"><summary>What exactly is happening, and what to try?</summary>
 <ul>
-<li><b>الزمن من اليمين للشمال:</b> العمود اللي على اليمين هو دلوقتي، وكل ما تروح شمال العمود بيكون من لحظة أقدم، لحد حوالي ٣ ثواني ورا. حرّك إيدك أو لف وشك ببطء، وشوف إزاي بيتمطّوا.</li>
-<li><b>من فوق لتحت:</b> نفس الفكرة بالطول. ميّل راسك يمين وشمال، وشوف رقبتك بتبقى ثعبان.</li>
-<li><b>النص والأطراف:</b> نص الصورة دلوقتي، وكل ما تبعد عن النص بترجع في الزمن. أي حاجة بتتحرك بتعمل حلقات زي الموج.</li>
-<li><b>خط النهاية:</b> الصفحة بتصوّر خط واحد بس في نص الصورة، كل لحظة جنب اللي قبلها، زي كاميرات خط النهاية في سباقات الجري. الحاجات الثابتة بتبقى خطوط، واللي بيعدّي قدام الخط بس هو اللي بيظهر. حط التليفون ثابت قدام شارع أو طرقة، وشوف الناس والعربيات بتظهر لوحدها.</li>
-<li>كل ده بيتحسب على تليفونك وقت ما بتصوّر، ومفيش حاجة بتترفع.</li>
+<li><b>Time right to left:</b> The column on the right is now, and the further left you go the older the moment, up to about 3 seconds ago. Move your hand or turn your head slowly and watch them stretch.</li>
+<li><b>Top to bottom:</b> The same idea vertically. Tilt your head left and right and watch your neck become a snake.</li>
+<li><b>Centre and edges:</b> The centre is now, and the further from the centre, the further back in time. Anything moving makes ripples like waves.</li>
+<li><b>Photo finish:</b> The page captures only one line in the middle of the frame, each moment next to the previous one, like photo‑finish cameras at races. Still things become streaks; only what passes the line appears. Put the phone still facing a street or corridor and watch people and cars appear by themselves.</li>
+<li>Everything is computed on your phone as you shoot; nothing is uploaded.</li>
 </ul></details>
 </div>
 <video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
@@ -68,16 +70,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -92,14 +94,14 @@ const W = 270, H = 360; let N = 60, mode = 'h', facing = 'environment', stream =
 const src = document.createElement('canvas'); src.width = W; src.height = H; const sg = src.getContext('2d', { willReadFrequently: true });
 const out = $('out'); out.width = W; out.height = H; const og = out.getContext('2d'); const img = og.createImageData(W, H);
 const FW = 720; const fin = document.createElement('canvas'); fin.width = FW; fin.height = H; const fg = fin.getContext('2d'); let finX = 0;
-$('depth').oninput = () => { N = +$('depth').value; $('dV').textContent = '≈ ' + ar((N / 30).toFixed(1)) + ' ثانية'; ring = []; head = -1; filled = 0; }; $('depth').oninput();
+$('depth').oninput = () => { N = +$('depth').value; $('dV').textContent = '≈ ' + ar((N / 30).toFixed(1)) + ' s'; ring = []; head = -1; filled = 0; }; $('depth').oninput();
 $('modes').onclick = e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.m; document.querySelectorAll('#modes button').forEach(x => x.classList.toggle('on', x === b)); out.width = mode === 'f' ? FW : W; finX = 0; fg.fillStyle = '#000'; fg.fillRect(0, 0, FW, H); };
 async function open() {
   if (stream) stream.getTracks().forEach(t => t.stop());
   stream = await camera(facing, 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
   ring = []; head = -1; filled = 0; cancelAnimationFrame(raf); tick();
 }
-$('b-go').onclick = async () => { try { await open(); $('b-go').hidden = true; $('b-flip').disabled = false; $('b-snap').disabled = false; $('st').textContent = 'حرّك حاجة قدام الكاميرا ببطء.'; } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; } };
+$('b-go').onclick = async () => { try { await open(); $('b-go').hidden = true; $('b-flip').disabled = false; $('b-snap').disabled = false; $('st').textContent = 'Move something slowly in front of the camera.'; } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; } };
 $('b-flip').onclick = async () => { facing = facing === 'environment' ? 'user' : 'environment'; try { await open(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; } };
 function grab() {
   const v = $('v'), vw = v.videoWidth, vh = v.videoHeight; if (!vw) return null;

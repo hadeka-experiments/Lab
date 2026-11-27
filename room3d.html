@@ -125,7 +125,9 @@ function grab(yaw,pitch,idx){
   const v=$('v');if(!v.videoWidth)return false;
   const t=document.createElement('canvas');t.width=480;t.height=640;
   const tc=t.getContext('2d');
+  tc.translate(480,0);tc.scale(-1,1); // mirror: the sphere is viewed from inside, which flips the image
   tc.drawImage(v,0,0,480,640);
+  tc.setTransform(1,0,0,1,0,0);
   // feather edges so tiles blend
   tc.globalCompositeOperation='destination-in';
   let g=tc.createLinearGradient(0,0,480,0);

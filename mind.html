@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>قارئ الأرقام</title>
+<script src="shell.js"></script>
+<title>Number Reader</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
-/* VOICE: معمل هادي ودقيق
-   IDEA: اختبار المعلومة المخفية؛ الشاشة البيضا هي مصدر النور
-   PICTURE: الرقم الكبير في النص، وبعدين أعمدة ردود الفعل لكل رقم
-   COLOUR and TYPE: أبيض ناصع عشان ينوّر الوش، حبر أسود، أحمر للحكم؛ IBM Plex Sans Arabic
-   LAYOUT: عمود واحد، الأزرار تحت في متناول الإبهام */
+/* VOICE: a calm, precise lab
+   IDEA: concealed information test; the white screen is the light source
+   PICTURE: the big number in the middle, then reaction bars for each number
+   COLOUR and TYPE: bright white to light the face, black ink, red for the verdict
+   LAYOUT: one column, buttons at the bottom within thumb reach */
 :root{--bg:#fff;--ink:#0d0f11;--mute:#5a6470;--line:#d9dee3;--red:#d6201a;--soft:#f3f5f7}
 *{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
@@ -55,31 +56,32 @@ tr.top td{background:#fff1f0}tr.top .bar i{background:var(--red)}
 .fb{min-height:1.6em;text-align:center;font-weight:600}
 details{margin-top:16px;background:var(--soft);border-radius:12px;padding:10px 14px}summary{font-weight:600;cursor:pointer}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
 
 <section class="scr on" id="s-intro">
-  <h1>قارئ الأرقام</h1>
-  <p>اختار رقم من ١ لـ ٩ في سرك. الكاميرا هتراقب وشك وعينك ونبضك والشاشة بتعرض الأرقام، وفي الآخر التليفون يخمّن رقمك. مفيش أي زرار هتدوسه أثناء الاختبار.</p>
-  <p class="mute">الأوضة ممكن تكون ضلمة، لأن الشاشة البيضا هي اللي هتنوّر وشك. علّي السطوع على الآخر، واقفل دوران الشاشة على الطولي، وثبّت التليفون قدام وشك على بعد حوالي ٣٠ سم. الأحسن تسنده على حاجة، لأن أي حركة بتبوّظ قراءة العين والنبض.</p>
+  <h1>Number Reader</h1>
+  <p>Secretly choose a number from 1 to 9. The camera watches your face, eyes and pulse while the screen shows numbers, and at the end the phone guesses your number. You won’t press any button during the test.</p>
+  <p class="mute">The room can be dark, because the white screen lights your face. Set brightness to maximum, lock rotation to portrait, and keep the phone about 30 cm from your face. Resting it on something is best, since any movement spoils the eye and pulse readings.</p>
   <div class="cam"><video id="vid" playsinline muted autoplay></video></div>
   <ul class="stat">
-    <li><span>الكاميرا</span><span id="st-cam">لسه</span></li>
-    <li><span>وشك متشاف</span><span id="st-face">—</span></li>
-    <li><span>النور على وشك</span><span id="st-light">—</span></li>
-    <li><span>نبضك من وشك</span><span id="st-hr">—</span></li>
+    <li><span>Camera</span><span id="st-cam">Not yet</span></li>
+    <li><span>Face detected</span><span id="st-face">—</span></li>
+    <li><span>Light on your face</span><span id="st-light">—</span></li>
+    <li><span>Pulse from Face</span><span id="st-hr">—</span></li>
   </ul>
   <p class="mute" id="st-msg"></p>
-  <div class="row"><button id="b-cam">شغّل الكاميرا</button><button id="b-go" disabled>اخترت رقم في سري، ابدأ</button></div>
-  <details><summary>بيعرف إزاي؟</summary>
-  <p>الاختبار ٣ مراحل، حوالي دقيقتين ونص:</p>
+  <div class="row"><button id="b-cam">Start camera</button><button id="b-go" disabled>I’ve chosen a number, start</button></div>
+  <details><summary>How does it know?</summary>
+  <p>The test has 3 stages, about two and a half minutes:</p>
   <ul>
-  <li><b>معايرة العين (١٢ ثانية):</b> نقطة حمرا بتتنقل على ٩ أماكن، وانت بتتابعها بعينك. كده الصفحة بتتعلم شكل عينك وهي باصّة على كل مكان.</li>
-  <li><b>نظرة حرة (١٥ ثانية):</b> الأرقام كلها بتظهر، وانت بتفكر في رقمك وتبص براحتك. الناس غالباً بتبص على الحاجة اللي في دماغها أكتر من غيرها من غير ما تقصد، والصفحة بتحسب عينك كانت فين كل لحظة.</li>
-  <li><b>الأرقام واحد واحد (حوالي دقيقتين):</b> كل رقم بيظهر ٤ مرات. لما رقمك يظهر، نبضك بيبطأ لحظة، وعضلات وشك بتتحرك حركات صغيرة. الكاميرا بتقيس الاتنين.</li>
+  <li><b>Eye calibration (12 s):</b> A red dot moves through 9 positions and you follow it with your eyes, so the page learns what your eyes look like at each position.</li>
+  <li><b>Free viewing (15 s):</b> All numbers appear and you think about yours and look freely. People tend to look at what’s on their mind more than other things without meaning to, and the page tracks where your eyes were at each moment.</li>
+  <li><b>Numbers one by one (about 2 minutes):</b> Each number appears 4 times. When yours appears, your pulse slows for a moment and your face makes tiny movements. The camera measures both.</li>
   </ul>
-  <p>الحكم هو متوسط الإشارات الواضحة بس. لو إشارة ضعيفة، زي إن المعايرة طلعت مش دقيقة، بتتشال من الحكم. ولو مفيش رقم باين بفرق كافي، الصفحة هتقولك إنها مش قادرة تحدد.</p></details>
+  <p>The verdict averages only the clear signals. A weak signal, such as an inaccurate calibration, is dropped. If no number stands out enough, the page tells you it can’t decide.</p></details>
 </section>
 
 <section class="scr" id="s-run">
@@ -93,11 +95,11 @@ details{margin-top:16px;background:var(--soft);border-radius:12px;padding:10px 1
   <div class="verdict" id="verdict"></div>
   <table id="tbl"></table>
   <p class="mute" id="res-note"></p>
-  <h2>كان رقمك كام؟</h2>
-  <p class="mute">اختياري. لو قلتلي، الصفحة هتحسب هي بتصيب قد إيه فعلاً.</p>
+  <h2>What was your number?</h2>
+  <p class="mute">Optional. If you tell it, the page computes how often it’s actually right.</p>
   <div class="pick" id="truth"></div>
   <p id="hist"></p>
-  <div class="row"><button id="b-again">جرّب تاني</button></div>
+  <div class="row"><button id="b-again">Try again</button></div>
 </section>
 
 </div>
@@ -285,7 +287,7 @@ let lm = null, video = $('vid'), samples = [], frames = [], blinks = [], faceOk 
 const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
 
 async function loadModel() {
-  $('st-msg').textContent = 'بيحمّل موديل تتبع الوش (حوالي ٤ ميجا)…';
+  $('st-msg').textContent = 'Loading the face‑tracking model (about 4 MB)…';
   const V = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs');
   const files = await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm');
   const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'VIDEO', numFaces: 1, outputFaceBlendshapes: true, outputFacialTransformationMatrixes: true });
@@ -346,27 +348,27 @@ function frame() {
 
 function liveStatus() {
   if (!$('s-intro').classList.contains('on')) return;
-  $('st-face').innerHTML = faceOk ? '<span class="ok">أيوه</span>' : '<span class="bad">لأ، قرّب وبص للشاشة</span>';
-  $('st-light').innerHTML = !faceOk ? '—' : lightOk ? '<span class="ok">كفاية</span>' : '<span class="bad">ضعيف، علّي السطوع</span>';
+  $('st-face').innerHTML = faceOk ? '<span class="ok">Yes</span>' : '<span class="bad">No, come closer and look at the screen</span>';
+  $('st-light').innerHTML = !faceOk ? '—' : lightOk ? '<span class="ok">Good</span>' : '<span class="bad">Weak, raise the brightness</span>';
   const t = now(), recent = samples.filter(s => s.t > t - 12);
   const p = recent.length > 150 && recent[recent.length - 1].t - recent[0].t > 9 ? pulseFrom(recent) : null;
-  $('st-hr').innerHTML = p ? (p.q > 0.3 ? `<span class="ok">${Math.round(p.bpm)} نبضة/دقيقة</span>` : '<span class="bad">مش واضح، اثبت أكتر</span>') : 'استنى ١٠ ثواني ثابت';
+  $('st-hr').innerHTML = p ? (p.q > 0.3 ? `<span class="ok">${Math.round(p.bpm)} bpm</span>` : '<span class="bad">Unclear, hold steadier</span>') : 'Hold still for 10 seconds';
   $('b-go').disabled = !(faceOk && lightOk);
 }
 
 $('b-cam').addEventListener('click', async () => {
   const b = $('b-cam'); b.disabled = true;
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } }, audio: false });
     video.srcObject = st; await video.play();
-    $('st-cam').innerHTML = '<span class="ok">شغالة</span>';
+    $('st-cam').innerHTML = '<span class="ok">Working</span>';
     await loadModel();
-    $('st-msg').textContent = 'اثبت وبص للشاشة. لما «نبضك من وشك» يظهر، يبقى كله تمام.';
+    $('st-msg').textContent = 'Hold still and look at the screen. When “Pulse from face” appears, everything’s ready.';
     frame(); setInterval(liveStatus, 1000); b.style.display = 'none';
   } catch (e) {
     b.disabled = false;
-    $('st-msg').textContent = e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e);
+    $('st-msg').textContent = e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e);
   }
 });
 
@@ -387,7 +389,7 @@ $('b-go').addEventListener('click', async () => {
   const total = 12 + 15 + 4 * 9 * 3;
   let el = 0; const prog = s => { el += s; $('prog').style.width = (100 * el / total) + '%'; };
   // 1) calibration
-  $('run-lbl').textContent = 'تابع النقطة الحمرا بعينك من غير ما تحرك راسك';
+  $('run-lbl').textContent = 'Follow the red dot with your eyes without moving your head';
   drawGrid('cal', -1); await wait(1500);
   const calOrder = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]), calWin = [];
   for (const c of calOrder) { drawGrid('cal', c); const t = now(); await wait(1300); calWin.push({ c, a: t + 0.45, b: now() }); prog(1.3); }
@@ -395,14 +397,14 @@ $('b-go').addEventListener('click', async () => {
   for (const w of calWin) for (const f of frames) if (f.gz && f.t > w.a && f.t < w.b) cal.push({ cell: w.c, f: f.gz });
   const gm = cal.length > 40 ? gazeModel(cal) : null;
   // 2) free viewing
-  $('run-lbl').textContent = 'فكّر في رقمك، وبص على الأرقام براحتك';
+  $('run-lbl').textContent = 'Think of your number and look at the numbers freely';
   drawGrid('nums'); const fv0 = now(); await wait(15000); const fv1 = now(); prog(15);
   const dwell = {}; let nG = 0;
   if (gm) for (const f of frames) if (f.gz && f.t > fv0 + 1.5 && f.t < fv1) { const c = gm.classify(f.gz); dwell[pos[c]] = (dwell[pos[c]] || 0) + 1; nG++; }
   for (const n in dwell) dwell[n] /= nG || 1;
   // 3) one by one
   $('grid').style.display = 'none'; $('flash').style.display = '';
-  $('run-lbl').textContent = 'بص على كل رقم يظهر، وفكّر في رقمك';
+  $('run-lbl').textContent = 'Look at each number as it appears, and think of yours';
   const stim = $('stim'); stim.className = 'fix'; stim.textContent = '+'; await wait(2000);
   let seq = []; for (let r = 0; r < 4; r++) { let o = shuffle(ITEMS); if (seq.length && o[0] === seq[seq.length - 1]) o.push(o.shift()); seq = seq.concat(o); }
   const onsets = [], t0 = now();
@@ -414,7 +416,7 @@ $('b-go').addEventListener('click', async () => {
     await wait(1300 + Math.random() * 400); prog(3);
   }
   const t1 = now();
-  $('run-lbl').textContent = 'بيحلل…'; await wait(50);
+  $('run-lbl').textContent = 'Analysing…'; await wait(50);
   const win = samples.filter(s => s.t > t0 - 3 && s.t < t1 + 1);
   const pulse = win.length > 300 ? pulseFrom(win) : null;
   const gazeOk = !!gm && gm.acc >= 0.45 && nG > 100;
@@ -426,19 +428,19 @@ $('b-go').addEventListener('click', async () => {
 
 function render({ res, pulse, gm, gazeOk, dwell }) {
   let v;
-  if (!res.nSig) v = `<h2>مش هقدر أحكم</h2><p>ولا إشارة طلعت واضحة كفاية. غالباً النور ضعيف أو التليفون كان بيتحرك.</p>`;
-  else if (res.margin >= 0.8) v = `<p class="mute">الرقم اللي في دماغك</p><div class="big">${res.top}</div><p>ثقة ${res.margin >= 1.3 ? 'عالية' : 'متوسطة'}</p>`;
-  else if (res.margin >= 0.5) v = `<p class="mute">أغلب ظني</p><div class="big">${res.top}</div><p>بس ثقتي ضعيفة. التاني في الترتيب: ${res.second}</p>`;
-  else v = `<h2>مش قادر أحدد</h2><p>مفيش رقم باين بفرق كافي. أقرب احتمالات: ${res.ranked.slice(0, 3).join(' أو ')}.</p>`;
+  if (!res.nSig) v = `<h2>Can’t judge</h2><p>No signal was clear enough. Probably the light was weak or the phone was moving.</p>`;
+  else if (res.margin >= 0.8) v = `<p class="mute">The number in your head</p><div class="big">${res.top}</div><p>Confidence ${res.margin >= 1.3 ? 'high' : 'medium'}</p>`;
+  else if (res.margin >= 0.5) v = `<p class="mute">My best guess</p><div class="big">${res.top}</div><p>but my confidence is low. Runner‑up: ${res.second}</p>`;
+  else v = `<h2>Can’t determine</h2><p>No number stands out enough. Closest candidates: ${res.ranked.slice(0, 3).join(' or ')}.</p>`;
   $('verdict').innerHTML = v;
   const f1 = x => isNaN(x) ? '—' : x.toFixed(1), called = res.nSig && res.margin >= 0.5;
-  $('tbl').innerHTML = '<tr><th>الرقم</th><th>نظرك</th><th>تغيّر النبض</th><th>رد فعل الوش</th><th>رمشات</th></tr>' +
+  $('tbl').innerHTML = '<tr><th>Number</th><th>Gaze</th><th>Pulse change</th><th>Face reaction</th><th>Blinks</th></tr>' +
     res.ranked.map(n => { const i = ITEMS.indexOf(n);
       return `<tr class="${called && n === res.top ? 'top' : ''}"><td class="n">${n}</td><td>${gazeOk ? Math.round(100 * (dwell[n] || 0)) + '%' : '—'}</td><td>${isNaN(res.dh[i]) ? '—' : (res.dh[i] > 0 ? '+' : '') + res.dh[i].toFixed(1)}</td><td>${isNaN(res.face[i]) ? '—' : (100 * res.face[i]).toFixed(0)}</td><td>${f1(res.bl[i])}</td></tr>`; }).join('');
   const parts = [];
-  parts.push(gm ? `دقة معايرة العين ${Math.round(100 * gm.acc)}% (الصدفة ١١%)${gazeOk ? '' : '، ضعيفة فاتشالت من الحكم'}.` : 'معايرة العين ما نجحتش، فالنظر اتشال من الحكم.');
-  parts.push(pulse ? `نبضك حوالي ${Math.round(pulse.bpm)}${res.used.hr ? '' : '، بس الإشارة مش واضحة فاتشال من الحكم'}.` : 'النبض ما اتقاسش.');
-  parts.push(`الحكم مبني على: ${[res.used.gaze && 'النظر', res.used.hr && 'النبض', res.used.face && 'رد فعل الوش'].filter(Boolean).join(' + ') || 'مفيش'}. الرمشات معروضة بس.`);
+  parts.push(gm ? `Eye calibration accuracy ${Math.round(100 * gm.acc)}% (chance 11%)${gazeOk ? '' : ', weak so dropped from the verdict'}.` : 'Eye calibration failed, so gaze was dropped from the verdict.');
+  parts.push(pulse ? `Your pulse about ${Math.round(pulse.bpm)}${res.used.hr ? '' : ', but the signal is unclear so it was dropped from the verdict'}.` : 'Pulse wasn’t measured.');
+  parts.push(`Verdict based on: ${[res.used.gaze && 'gaze', res.used.hr && 'Heart rate', res.used.face && 'Face reaction'].filter(Boolean).join(' + ') || 'nothing'}. Blinks are shown only.`);
   $('res-note').textContent = parts.join(' ');
   $('truth').innerHTML = ITEMS.map(n => `<button data-n="${n}">${n}</button>`).join('');
   $('hist').textContent = histText();
@@ -447,14 +449,14 @@ function render({ res, pulse, gm, gazeOk, dwell }) {
 function getHist() { try { return JSON.parse(localStorage.getItem('mindHist2') || '[]'); } catch (e) { return []; } }
 function histText() {
   const h = getHist().filter(x => x.called); if (!h.length) return '';
-  return `الصفحة حكمت ${h.length} مرة، وصابت ${h.filter(x => x.hit).length} منهم. التخمين العشوائي بيصيب حوالي مرة من ٩.`;
+  return `The page has judged ${h.length} times and was right ${h.filter(x => x.hit).length} times. Random guessing is right about 1 in 9.`;
 }
 $('truth').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !lastRes) return;
   const n = +b.dataset.n, r = lastRes.res, called = !!r.nSig && r.margin >= 0.5;
   const h = getHist(); h.push({ t: Date.now(), truth: n, guess: r.top, called, hit: called && n === r.top, margin: r.margin, used: r.used });
   try { localStorage.setItem('mindHist2', JSON.stringify(h.slice(-200))); } catch (e) {}
-  $('truth').innerHTML = `<p>${called ? (n === r.top ? '<span class="ok">صابت.</span>' : '<span class="bad">غلطت.</span>') : 'الصفحة ما حكمتش المرة دي، فمش محسوبة.'} رقمك كان ${n}.</p>`;
+  $('truth').innerHTML = `<p>${called ? (n === r.top ? '<span class="ok">Correct.</span>' : '<span class="bad">Wrong.</span>') : 'The page didn’t give a verdict this time, so it doesn’t count.'} Your number was ${n}.</p>`;
   $('hist').textContent = histText();
 });
 $('b-again').addEventListener('click', () => show('s-intro'));

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تصوير الزمن</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:680px;margin:auto;padding:16px max(4vw,14px) 40px}
+h1{font-size:30px;line-height:1.1;margin:6px 0 4px}h2{font-size:20px;margin:24px 0 6px}
+.sub{color:var(--mute);margin:0 0 12px}.lbl{color:var(--mute);font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.big{font-size:clamp(40px,12vw,64px);font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--mute);font-weight:400}
+button{font:inherit;font-weight:600;min-height:48px;padding:0 18px;border-radius:12px;border:0;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.45}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+input[type=text],select{font:inherit;font-size:16px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);width:100%}
+input[type=range]{width:100%;height:32px;accent-color:var(--red)}
+label{display:block;font-size:14px;color:var(--mute);margin-top:8px}label b{color:var(--ink);float:left;font-variant-numeric:tabular-nums}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px}
+.fig{position:relative;height:200px;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.msg{min-height:1.4em;color:var(--mute);margin:8px 0}.msg.err{color:var(--red)}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--red);font-weight:600}
+ul.list{list-style:none;padding:0;margin:8px 0;display:grid;gap:6px}ul.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+ul.list button{min-height:40px;padding:0 12px}
+.cam{width:120px;height:90px;border-radius:10px;overflow:hidden;background:#000;margin:8px 0}.cam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+details{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}summary{cursor:pointer;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.pulse{animation:p 1s infinite}@keyframes p{50%{opacity:.4}}}
+
+.stage{position:relative;margin-top:10px;background:#000;border-radius:14px;overflow:hidden}
+.stage canvas{display:block;width:100%;height:auto}
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px}.modes button{min-height:44px;font-size:14px;background:transparent;color:var(--ink);border:1px solid var(--line)}.modes button.on{background:var(--red);color:#fff;border-color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>تصوير الزمن</h1>
+<p class="sub">الكاميرا العادية بتصوّر كل الصورة في نفس اللحظة. هنا كل خط في الصورة بيتصوّر في لحظة مختلفة، فالزمن نفسه بيتحول لمكان: الناس اللي بتتحرك بتتمط وتتلوي، والإيد بتبقى أخطبوط، والعربيات بتبقى خطوط.</p>
+<div class="modes" id="modes">
+  <button data-m="h" class="on">الزمن من اليمين للشمال</button>
+  <button data-m="v">الزمن من فوق لتحت</button>
+  <button data-m="r">النص دلوقتي، والأطراف الماضي</button>
+  <button data-m="f">خط النهاية (Photo finish)</button>
+</div>
+<label>قد إيه الماضي يرجع <b id="dV"></b><input type="range" id="depth" min="10" max="90" step="5" value="60"></label>
+<div class="row"><button id="b-go">افتح الكاميرا</button><button class="ghost" id="b-flip" disabled>اقلب الكاميرا</button><button class="ghost" id="b-snap" disabled>احفظ صورة</button></div>
+<div class="msg" id="st"></div>
+<div class="stage"><canvas id="out"></canvas></div>
+<details style="margin-top:14px"><summary>إيه اللي بيحصل بالظبط؟ وجرّب إيه؟</summary>
+<ul>
+<li><b>الزمن من اليمين للشمال:</b> العمود اللي على اليمين هو دلوقتي، وكل ما تروح شمال العمود بيكون من لحظة أقدم، لحد حوالي ٣ ثواني ورا. حرّك إيدك أو لف وشك ببطء، وشوف إزاي بيتمطّوا.</li>
+<li><b>من فوق لتحت:</b> نفس الفكرة بالطول. ميّل راسك يمين وشمال، وشوف رقبتك بتبقى ثعبان.</li>
+<li><b>النص والأطراف:</b> نص الصورة دلوقتي، وكل ما تبعد عن النص بترجع في الزمن. أي حاجة بتتحرك بتعمل حلقات زي الموج.</li>
+<li><b>خط النهاية:</b> الصفحة بتصوّر خط واحد بس في نص الصورة، كل لحظة جنب اللي قبلها، زي كاميرات خط النهاية في سباقات الجري. الحاجات الثابتة بتبقى خطوط، واللي بيعدّي قدام الخط بس هو اللي بيظهر. حط التليفون ثابت قدام شارع أو طرقة، وشوف الناس والعربيات بتظهر لوحدها.</li>
+<li>كل ده بيتحسب على تليفونك وقت ما بتصوّر، ومفيش حاجة بتترفع.</li>
+</ul></details>
+</div>
+<video id="v" playsinline muted style="position:absolute;width:1px;height:1px;opacity:0"></video>
+<script>
+// ==SENS== shared helpers for sensing pages
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const sleepMs = ms => new Promise(r => setTimeout(r, ms));
+const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
+async function motionPerm() { // must run inside a tap on iOS
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
+}
+async function camera(facing, w = 1280, h = 720) {
+  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
+}
+const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
+const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
+  for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
+// Welch power spectrum of x at fs; returns {f, P}
+function welchPS(x, fs, nseg) {
+  let n = 1; while (n * 2 <= nseg) n *= 2; const hop = n >> 1, P = new Float64Array(n / 2 + 1); let cnt = 0;
+  const w = Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (n - 1)));
+  for (let s = 0; s + n <= x.length; s += hop) { let m = 0; for (let i = 0; i < n; i++) m += x[s + i]; m /= n; const re = new Float64Array(n), im = new Float64Array(n); for (let i = 0; i < n; i++) re[i] = (x[s + i] - m) * w[i]; fftR(re, im); for (let k = 0; k <= n / 2; k++) P[k] += re[k] * re[k] + im[k] * im[k]; cnt++; }
+  for (let k = 0; k < P.length; k++) P[k] /= Math.max(1, cnt); return { f: Array.from(P, (_, k) => k * fs / n), P };
+}
+
+const W = 270, H = 360; let N = 60, mode = 'h', facing = 'environment', stream = null, ring = [], head = -1, filled = 0, raf = 0;
+const src = document.createElement('canvas'); src.width = W; src.height = H; const sg = src.getContext('2d', { willReadFrequently: true });
+const out = $('out'); out.width = W; out.height = H; const og = out.getContext('2d'); const img = og.createImageData(W, H);
+const FW = 720; const fin = document.createElement('canvas'); fin.width = FW; fin.height = H; const fg = fin.getContext('2d'); let finX = 0;
+$('depth').oninput = () => { N = +$('depth').value; $('dV').textContent = '≈ ' + ar((N / 30).toFixed(1)) + ' ثانية'; ring = []; head = -1; filled = 0; }; $('depth').oninput();
+$('modes').onclick = e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.m; document.querySelectorAll('#modes button').forEach(x => x.classList.toggle('on', x === b)); out.width = mode === 'f' ? FW : W; finX = 0; fg.fillStyle = '#000'; fg.fillRect(0, 0, FW, H); };
+async function open() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = await camera(facing, 1280, 720); const v = $('v'); v.srcObject = stream; await v.play();
+  ring = []; head = -1; filled = 0; cancelAnimationFrame(raf); tick();
+}
+$('b-go').onclick = async () => { try { await open(); $('b-go').hidden = true; $('b-flip').disabled = false; $('b-snap').disabled = false; $('st').textContent = 'حرّك حاجة قدام الكاميرا ببطء.'; } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; } };
+$('b-flip').onclick = async () => { facing = facing === 'environment' ? 'user' : 'environment'; try { await open(); } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; } };
+function grab() {
+  const v = $('v'), vw = v.videoWidth, vh = v.videoHeight; if (!vw) return null;
+  const s = Math.min(vw / W, vh / H), cw = W * s, ch = H * s;
+  sg.save(); if (facing === 'user') { sg.translate(W, 0); sg.scale(-1, 1); }
+  sg.drawImage(v, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, W, H); sg.restore();
+  return sg.getImageData(0, 0, W, H).data;
+}
+let lastT = 0;
+function tick() {
+  raf = requestAnimationFrame(tick); const now = performance.now(); if (now - lastT < 30) return; lastT = now;
+  const d = grab(); if (!d) return;
+  if (mode === 'f') { // photo finish: the centre column, one per frame, scrolling
+    const col = og.createImageData(1, H); for (let y = 0; y < H; y++) { const i = (y * W + (W >> 1)) * 4; col.data.set(d.subarray(i, i + 4), y * 4); }
+    if (finX >= FW) { fg.drawImage(fin, -1, 0); finX = FW - 1; } fg.putImageData(col, finX++, 0);
+    og.drawImage(fin, 0, 0); return;
+  }
+  head = (head + 1) % N; if (ring.length < N) ring.push(new Uint8ClampedArray(d)); else ring[head].set(d); filled = Math.min(N, filled + 1);
+  const o = img.data, maxD = filled - 1, cx = W / 2, cy = H / 2, rmax = Math.hypot(cx, cy);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    let f; if (mode === 'h') f = (W - 1 - x) / (W - 1); else if (mode === 'v') f = y / (H - 1); else f = Math.hypot(x - cx, y - cy) / rmax;
+    const k = Math.round(f * maxD), fr = ring[(head - k + N * 4) % ring.length], i = (y * W + x) * 4;
+    o[i] = fr[i]; o[i + 1] = fr[i + 1]; o[i + 2] = fr[i + 2]; o[i + 3] = 255;
+  }
+  og.putImageData(img, 0, 0);
+}
+$('b-snap').onclick = () => { out.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'time-' + Date.now() + '.png'; document.body.appendChild(a); a.click(); a.remove(); }, 'image/png'); };
+</script>
+</body>
+</html>

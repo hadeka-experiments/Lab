@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>الشاشة بتصوّر</title>
+<script src="shell.js"></script>
+<title>Screen Camera</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -42,49 +43,50 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .seg{display:flex;gap:8px;margin-top:8px}.seg button{flex:1}.seg button[aria-pressed=false]{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .vid{position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;bottom:0;left:0}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <canvas id="pat"></canvas><div id="prog"><i></i></div>
 <video id="vid" class="vid" playsinline muted autoplay></video>
 <div class="wrap">
-<h1>الشاشة بتصوّر</h1>
-<p class="sub">الكاميرا هنا هتبقى متغطية ومش شايفة أي صورة، هي بس بتحس النور الكلي زيادة ولا نقصان، زي عين مقفولة بتحس بالشمس. الشاشة بتنوّر الورقة اللي قدامها بمئات الأنماط الأبيض والأسود ورا بعض، ومن تغيّر كمية النور الكلي مع كل نمط بتتبني صورة للورقة. الطريقة دي اسمها single-pixel camera.</p>
+<h1>Screen Camera</h1>
+<p class="sub">Here the camera is covered and sees no image. It only senses whether total light goes up or down, like a closed eye sensing the sun. The screen lights the paper in front of it with hundreds of black‑and‑white patterns in a row, and from how the total light changes with each pattern, an image of the paper is reconstructed. This method is called a single‑pixel camera.</p>
 
 <div class="card">
-  <b>جهّز التجربة</b>
+  <b>Set up the experiment</b>
   <ol>
-  <li>اطفي نور الأوضة. لازم تبقى ضلمة على قد ما تقدر.</li>
-  <li>ارسم على ورقة بيضا شكل كبير وتقيل بقلم أسود عريض، زي حرف X أو دايرة، يملا الورقة تقريباً.</li>
-  <li><b>غطي الكاميرا الأمامية</b> بحتة منديل أو ورقة رفيعة متطبقة ومتلزقة بشريط لاصق، عشان الكاميرا ما تشوفش الرسمة. هي محتاجة تحس بالنور بس.</li>
-  <li>حط التليفون على ضهره والشاشة لفوق، وحط علبتين كبريت أو أي حاجة بارتفاع ٢–٤ سم على الطرفين، ونيّم الورقة عليهم والرسمة لتحت ناحية الشاشة.</li>
+  <li>Turn off the room lights. It must be as dark as possible.</li>
+  <li>On white paper, draw a large, bold shape with a thick black marker, like an X or a circle, filling most of the page.</li>
+  <li><b>Cover the front camera</b> with a folded piece of tissue or thin paper taped over it, so the camera can’t see the drawing. It only needs to sense light.</li>
+  <li>Lay the phone on its back, screen up, put two matchboxes or anything 2–4 cm tall at either end, and rest the paper on them with the drawing facing down toward the screen.</li>
   </ol>
 </div>
 
-<div class="row"><button id="b-cam">شغّل الكاميرا</button></div>
+<div class="row"><button id="b-cam">Start camera</button></div>
 <div class="msg" id="msg"></div>
 
-<div class="seg"><button id="r8" aria-pressed="true">سريع ٨×٨ (حوالي ٢٠ ث)</button><button id="r16" aria-pressed="false">أوضح ١٦×١٦ (حوالي دقيقة ونص)</button></div>
+<div class="seg"><button id="r8" aria-pressed="true">Fast 8×8 (about 20 s)</button><button id="r16" aria-pressed="false">Sharper 16×16 (about 1.5 min)</button></div>
 <div class="row">
-  <button class="ghost" id="b-base" disabled>١. من غير الورقة</button>
-  <button id="b-shot" disabled>٢. صوّر الورقة</button>
+  <button class="ghost" id="b-base" disabled>1. Without the paper</button>
+  <button id="b-shot" disabled>2. Capture the paper</button>
 </div>
-<p class="lbl">الخطوة الأولى اختيارية بس بتفرق: من غير الورقة، والشاشة باصة لفراغ أو للسقف، الصفحة بتسجّل النور اللي بيتسرّب من الشاشة للكاميرا مباشرة، وبتطرحه من الصورة بعدين.</p>
+<p class="lbl">Step 1 is optional but helps: without the paper, with the screen facing empty space or the ceiling, the page records the light leaking from the screen straight into the camera and subtracts it later.</p>
 
 <div class="res">
-  <figure><canvas id="out"></canvas><figcaption>الصورة اللي اتبنت من النور الكلي</figcaption></figure>
-  <figure><canvas id="raw"></canvas><figcaption>نفس الصورة بالبكسلات من غير تنعيم</figcaption></figure>
+  <figure><canvas id="out"></canvas><figcaption>Image built from total light</figcaption></figure>
+  <figure><canvas id="raw"></canvas><figcaption>Same image as raw pixels, no smoothing</figcaption></figure>
 </div>
-<div class="row"><button class="ghost" id="b-flip" disabled>اقلب يمين وشمال</button><button class="ghost" id="b-inv" disabled>اعكس الألوان</button></div>
+<div class="row"><button class="ghost" id="b-flip" disabled>Flip left/right</button><button class="ghost" id="b-inv" disabled>Invert colours</button></div>
 <p class="lbl" id="note"></p>
 
-<details><summary>إزاي بتطلع صورة من غير كاميرا؟</summary>
+<details><summary>How does an image appear without a camera?</summary>
 <ul>
-<li>الشاشة بتتقسم لمربعات، وكل نمط بينوّر نص المربعات ويطفي النص التاني بترتيب معين اسمه Hadamard.</li>
-<li>المربعات اللي قدام حتة بيضا في الورقة بترجّع نور أكتر من اللي قدام الحبر الأسود. فكل نمط بيدّي رقم واحد: قد إيه نور رجع.</li>
-<li>كل نمط ليه نمط معكوس بيتعرض بعده على طول، والفرق بينهم بيلغي النور اللي في الأوضة وتغيرات الكاميرا. ومن مئات الأرقام دي بتتحل معادلة بتطلّع صورة.</li>
-<li>الصورة بتطلع مبهمة، لأن كل مربع في الشاشة بينوّر مساحة أكبر منه من الورقة. وكل ما الورقة تقرّب، الصورة بتوضح.</li>
-<li>الصورة بتبقى من «وجهة نظر الشاشة»، فممكن تحتاج تقلبها يمين وشمال عشان تطابق الورقة.</li>
-<li>⚠ دي أصعب تجربة. لو الكاميرا عدّلت إضاءتها لوحدها في النص، أو التليفون اتحرك، الصورة هتطلع مشوشة.</li>
+<li>The screen is divided into squares, and each pattern lights half of them and darkens the other half in a special order called Hadamard.</li>
+<li>Squares facing a white part of the paper reflect more light than those facing black ink. So each pattern gives one number: how much light came back.</li>
+<li>Every pattern is followed immediately by its inverse, and the difference cancels room light and camera drift. From hundreds of these numbers, an equation is solved that produces an image.</li>
+<li>The image is blurry, because each screen square lights a larger area of the paper. The closer the paper, the sharper the image.</li>
+<li>The image is from the screen’s point of view, so you may need to flip it left/right to match the paper.</li>
+<li>⚠ This is the hardest experiment. If the camera adjusts its exposure midway, or the phone moves, the image will be noisy.</li>
 </ul></details>
 </div>
 <script>
@@ -120,12 +122,12 @@ function onFrame(nowT) {
 }
 $('b-cam').addEventListener('click', async () => {
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 }, frameRate: { ideal: 30 } }, audio: false });
     video.srcObject = st; await video.play(); onFrame();
     $('b-cam').style.display = 'none'; $('b-base').disabled = $('b-shot').disabled = false;
-    $('msg').textContent = 'الكاميرا شغالة. جهّز الورقة وغطي الكاميرا، وعلّي سطوع الشاشة للآخر.';
-  } catch (e) { $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e)) + '</span>'; }
+    $('msg').textContent = 'Camera running. Prepare the paper, cover the camera, and set screen brightness to maximum.';
+  } catch (e) { $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e)) + '</span>'; }
 });
 
 function show(row) {
@@ -168,15 +170,15 @@ function render() {
   for (const [c, smooth] of [[$('out'), true], [$('raw'), false]]) { c.width = c.height = 256; const g = c.getContext('2d'); g.imageSmoothingEnabled = smooth; g.imageSmoothingQuality = 'high'; g.drawImage(small, 0, 0, 256, 256); }
 }
 async function capture(isBase) {
-  $('b-base').disabled = $('b-shot').disabled = true; $('msg').textContent = 'ما تلمسش التليفون لحد ما الشاشة ترجع.';
+  $('b-base').disabled = $('b-shot').disabled = true; $('msg').textContent = 'Don’t touch the phone until the screen returns.';
   const r = await run();
   const span = r.white.v - r.black.v;
-  if (!(span > 2)) { $('msg').innerHTML = `<span class="bad">الكاميرا مش حاسة بنور الشاشة كفاية (الفرق بين أبيض وأسود ${isFinite(span) ? span.toFixed(1) : '؟'}). اتأكد إن الأوضة ضلمة، وإن الغطا مش تقيل أوي، وإن السطوع على الآخر.</span>`; }
-  else if (r.white.mx > 250) { $('msg').innerHTML = '<span class="bad">الكاميرا متشبّعة من النور، والصورة ممكن تبوظ. خلي الغطا أتقل شوية.</span>'; }
-  else $('msg').textContent = `خلص. الفرق بين شاشة بيضا وسودا ${span.toFixed(1)} درجة.`;
-  if (isBase) { base[n] = r.meas; $('msg').textContent += ' اتسجل النور المتسرّب. حط الورقة ودوس «صوّر الورقة».'; }
+  if (!(span > 2)) { $('msg').innerHTML = `<span class="bad">The camera isn’t sensing enough screen light (white–black difference ${isFinite(span) ? span.toFixed(1) : '?'}). Make sure the room is dark, the cover isn’t too thick, and brightness is at maximum.</span>`; }
+  else if (r.white.mx > 250) { $('msg').innerHTML = '<span class="bad">The camera is saturated with light and the image may fail. Make the cover a bit thicker.</span>'; }
+  else $('msg').textContent = `Done. White vs. black screen difference: ${span.toFixed(1)} levels.`;
+  if (isBase) { base[n] = r.meas; $('msg').textContent += ' Leak light recorded. Place the paper and tap “Capture the paper”.'; }
   else { last = { img: reconstruct(r.meas, n), useBase: !!base[n] }; render(); $('b-flip').disabled = $('b-inv').disabled = false;
-    $('note').textContent = (base[n] ? 'اتطرح منها النور المتسرّب.' : 'من غير طرح النور المتسرّب، فممكن تلاقي بقعة منورة ناحية مكان الكاميرا.') + ` الصورة ${n}×${n} من ${r.meas.length * 2} نمط.`; }
+    $('note').textContent = (base[n] ? 'Leak light subtracted.' : 'Leak light not subtracted, so you may see a bright patch near the camera.') + ` ${n}×${n} image from ${r.meas.length * 2} patterns.`; }
   $('b-base').disabled = $('b-shot').disabled = false;
 }
 $('b-base').addEventListener('click', () => capture(true));

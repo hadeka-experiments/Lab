@@ -1,37 +1,68 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>التجارب</title>
-<style>body{margin:0;font:18px/1.6 system-ui,sans-serif;background:#fff;color:#0d0f11}main{max-width:520px;margin:auto;padding:28px 18px}
-h1{font-size:30px;margin:0 0 18px}a{display:block;padding:18px;margin:10px 0;border-radius:14px;background:#f3f5f7;color:inherit;text-decoration:none;font-weight:600}
-a span{display:block;font-weight:400;font-size:15px;color:#5a6470}</style></head>
-<body><main><h1>التجارب</h1>
-<a href="roomwalk.html">امشي جوه أوضتك<span>صوّر لفة واحدة، والذكاء الاصطناعي يخمّن العمق ويبني أوضتك 3D تمشي فيها فعلاً</span></a>
-<a href="room3d.html">الأوضة 3D<span>لف التليفون حواليك ١٠ ثواني، والكاميرا تلزق الأوضة على كورة تلف جواها</span></a>
-<a href="timeslit.html">تصوير الزمن<span>كل خط في الصورة لحظة مختلفة: الحركة بتتمط وتتلوي والزمن بيبقى مكان</span></a>
-<a href="sungps.html">GPS من الشمس<span>يعرف انت فين على الأرض من زاوية الشمس والساعة، من غير GPS</span></a>
-<a href="bridge.html">نبض الكوبري<span>يلقط النغمة اللي الكوبري أو العمارة بتتهز عليها</span></a>
-<a href="elevator.html">عداد الأدوار<span>يحسب طلعت كام متر وبقيت في الدور الكام من حركة الأسانسير</span></a>
-<a href="skyglow.html">ظلمة السما<span>يعدّ النجوم ويقيس تلوث الضوء في أي مكان</span></a>
-<a href="pupil.html">رد فعل الحدقة<span>يقيس حدقة عينك بتضيق بعد كام مللي ثانية من النور</span></a>
-<a href="pipes.html">سمّاعة المواسير<span>يسمع الميه جوه الحيطان ويعرف مصدرها، ويراقب التسريب</span></a>
-<a href="shadow3d.html">تلاتي الأبعاد من الضل<span>الشاشة تنوّر من كل ناحية والكاميرا تبني شكل وشك 3D</span></a>
-<a href="dayback.html">ارجع ليوم<span>سجّل أصوات أماكنك، والتليفون يشغّلها وانت في مرحلة الأحلام عشان مخك يرجع لها</span></a>
-<a href="sleep.html">معمل النوم<span>التليفون على الكومودينو: شخير، كلام، كحة، دوشة، ونَفَسك وحركتك</span></a>
-<a href="nightbirds.html">محادثة الليل مع الطيور<span>سيبه وروح نام: بيسمع ويرد لوحده ويطلّعلك تقرير الصبح</span></a>
-<a href="birds.html">محادثة مع طائر<span>يعرف نوع الطائر من صوته بموديل BirdNET، ويسجّل المحادثة، وترد عليه</span></a>
-<a href="eyes.html">اللي في عينك<span>يطلّع انعكاس المكان من قرنية العين أو النضارة الشمس</span></a>
-<a href="screencam.html">الشاشة بتصوّر<span>الكاميرا متغطية، والشاشة نفسها بتبني صورة للورقة اللي قدامها</span></a>
-<a href="pulse.html">نبضك من وشك<span>الكاميرا بتقيس نبضك من تغيّر لون وشك</span></a>
-<a href="echoface.html">وشك بالصوت<span>تكّات صغيرة بتشوف طبقات وشك وتعرف وش مين</span></a>
-<a href="whisper.html">رسايل مش مسموعة<span>تليفون يبعت رسالة لتليفون تاني بصفير فوق سمعي</span></a>
-<a href="ble.html">اختبار البلوتوث<span>افتحه من Bluefy: هل نقدر نقرا قوة إشارة البلوتوث؟</span></a>
-<a href="silent.html">كلام من غير صوت<span>تحرك شفايفك من غير صوت، والكاميرا تكتب الكلمة</span></a>
-<a href="heart.html">قلبك من غير سماعة<span>حط التليفون على صدرك، فيحس بنبضك ونَفَسك من الاهتزاز</span></a>
-<a href="breath.html">رادار النَّفَس<span>صوت مش مسموع بيشوف صدر حد بيتنفس من بعيد (ما تشغلوش جنب الأطفال)</span></a>
-<a href="vmic.html">الكاميرا بتسمع<span>يطلّع الصوت من فيديو صامت لورقة بتتهز</span></a>
-<a href="mind.html">قارئ الأرقام<span>يخمّن الرقم اللي في دماغك من عينك ونبضك ووشك، من غير ما تدوس حاجة</span></a>
-<a href="mind-buttons.html">قارئ الأرقام بالأزرار<span>النسخة اللي صابت رقم ٧: بتدوس لأ على كل رقم، وسرعة ردك بتفضحك</span></a>
-<a href="who.html">مين ماسكه؟<span>يعرف مين اللي ماسك التليفون من طريقة مسكته وحركته</span></a>
-<a href="focus.html">خريطة التركيز<span>اقرا نص أو قلّب كاروسيل، ويعرف ركزت فين وسرحت فين</span></a>
-<a href="sonar.html">سونار الأوضة<span>يقيس المسافات ويرسم الأوضة بالصدى</span></a>
-</main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Phone Sensing Experiments</title>
+<meta name="description" content="27 experiments that turn an ordinary phone into a sonar, a radar, a star counter, a sleep lab and more. Everything runs in the browser, on your device.">
+<script src="shell.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f3f4f6,#0f1216);--panel:light-dark(#fff,#181c22);--ink:light-dark(#101318,#eef1f5);--mute:light-dark(#5b6573,#9aa5b1);--line:light-dark(#e1e5ea,#2a3038)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:1080px;margin:auto;padding:28px max(4vw,16px) 60px}
+.hero{padding:28px 24px;border-radius:22px;background:linear-gradient(135deg,#101318 0%,#1d2430 55%,#2b2140 100%);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;border:2px solid #ffffff22;box-shadow:0 0 0 30px #ffffff0d,0 0 0 60px #ffffff08,0 0 0 90px #ffffff05}
+.hero h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:clamp(32px,7vw,52px);line-height:1.02;margin:0 0 10px;letter-spacing:-.02em;max-width:14ch}
+.hero p{margin:0;color:#c9d1dc;max-width:58ch;font-size:17px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.facts span{font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff22}
+.filters{display:flex;gap:8px;overflow-x:auto;margin:22px 0 6px;padding-bottom:4px}
+.filters button{flex:0 0 auto;font:inherit;font-size:14px;font-weight:600;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.filters button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+input[type=search]{font:inherit;font-size:16px;width:100%;min-height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px;margin-top:16px}
+.app{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:18px;background:var(--panel);border:1px solid var(--line);text-decoration:none;color:inherit;position:relative;transition:transform .12s,box-shadow .12s}
+.app:hover{transform:translateY(-2px);box-shadow:0 8px 24px -12px rgba(0,0,0,.35)}
+.app .k{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.app .k i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.app h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:21px;margin:0;line-height:1.15}
+.app p{margin:0;color:var(--mute);font-size:14.5px}
+.app .s{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:6px}.app .s span{font-size:11.5px;padding:3px 8px;border-radius:7px;border:1px solid var(--line);color:var(--mute)}
+.note{margin-top:28px;padding:18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);color:var(--mute);font-size:14.5px}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+  <h1>Your phone is a laboratory.</h1>
+  <p>Sonar, radar, a single‑pixel camera, a star counter, a sleep lab, a navigator that finds you from the sun. Each experiment uses only the sensors already inside an ordinary phone, and runs entirely in your browser.</p>
+  <div class="facts"><span id="count"></span><span>No app install</span><span>iPhone &amp; Android</span><span>Nothing uploaded</span></div>
+</section>
+<div class="filters" id="filters"></div>
+<input type="search" id="q" placeholder="Search experiments…" aria-label="Search experiments">
+<div class="grid" id="grid"></div>
+<div class="note">
+  <b>Before you start.</b> Open these pages from an https link in an up‑to‑date browser (Chrome, Safari, Edge or Samsung Internet). Allow the permissions each experiment asks for: microphone, camera or motion sensors. On iPhone, turn the silent switch off for experiments that play sound. AI models download once on first use, so Wi‑Fi helps.<br><br>
+  <b>Honesty.</b> Every experiment explains what is really measured, what is inferred, and its limits. None of them is a medical or safety device. Ultrasonic experiments can be heard by children and pets.
+</div>
+</main>
+<script>
+const { apps, cats, sensors } = window.__EXPERIMENTS;
+const order = ['sound', 'camera', 'motion', 'sleep', 'nature', 'radio'];
+const list = Object.entries(apps).sort((a, b) => order.indexOf(a[1].c) - order.indexOf(b[1].c));
+document.getElementById('count').textContent = list.length + ' experiments';
+let cur = 'all';
+const F = document.getElementById('filters');
+F.innerHTML = `<button data-c="all" class="on">All</button>` + order.filter(c => list.some(x => x[1].c === c)).map(c => `<button data-c="${c}">${cats[c].name}</button>`).join('');
+F.onclick = e => { const b = e.target.closest('button'); if (!b) return; cur = b.dataset.c; F.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); draw(); };
+document.getElementById('q').oninput = draw;
+function draw() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  document.getElementById('grid').innerHTML = list.filter(([f, a]) => (cur === 'all' || a.c === cur) && (!q || (a.t + ' ' + a.d).toLowerCase().includes(q))).map(([f, a]) => `<a class="app" href="${f}"><div class="k" style="color:${cats[a.c].acc}"><i style="background:${cats[a.c].acc}"></i>${cats[a.c].name}</div><h2>${a.t}</h2><p>${a.d}</p><div class="s">${a.s.map(k => `<span>${sensors[k]}</span>`).join('')}</div></a>`).join('') || '<p style="color:var(--mute)">No experiment matches.</p>';
+}
+draw();
+</script>
+</body>
+</html>

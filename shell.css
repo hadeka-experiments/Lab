@@ -1,0 +1,39 @@
+/* Experiments design system (loaded after each app's own styles) */
+:root{color-scheme:light dark;--acc:#e8251a;
+  --bg:light-dark(#f3f4f6,#0f1216);--panel:light-dark(#ffffff,#181c22);--panel2:light-dark(#f7f8fa,#1e232a);
+  --ink:light-dark(#101318,#eef1f5);--mute:light-dark(#5b6573,#9aa5b1);--line:light-dark(#e1e5ea,#2a3038);
+  --red:var(--acc);--ok:#14946a;--shadow:light-dark(0 1px 2px rgba(16,19,24,.06),0 1px 2px rgba(0,0,0,.4))}
+html.force-light{color-scheme:light}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px}
+h1,h2,h3,.xp-title{font-family:"Space Grotesk",Inter,system-ui,sans-serif;letter-spacing:-.01em}
+h2{font-size:19px;margin:26px 0 8px}
+.xp-hidden{display:none!important}
+.card,details,.fig,ul.list li{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow)}
+.card{border-radius:16px;padding:16px}
+button{border-radius:12px;background:var(--acc);font-weight:600;letter-spacing:.01em;transition:transform .08s,filter .15s}
+button:active{transform:scale(.98)}button:hover{filter:brightness(1.06)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+input[type=text],select,textarea{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:12px}
+input[type=range]{accent-color:var(--acc)}
+label b{float:right}
+.big{font-family:"Space Grotesk",Inter,sans-serif}
+.sub{font-size:15px}
+.kpi div{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow)}
+details summary{font-weight:600}
+/* header */
+.xp-hero{margin:4px 0 18px}
+.xp-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px}
+.xp-back{color:var(--mute);text-decoration:none;font-size:14px;font-weight:500}.xp-back:hover{color:var(--ink)}
+.xp-chip{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);padding:4px 10px;border-radius:999px}
+.xp-title{font-size:clamp(30px,8vw,40px);line-height:1.05;margin:0 0 8px;font-weight:700}
+.xp-tag{font-size:17px;color:var(--mute);margin:0 0 12px;max-width:60ch}
+.xp-sensors{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.xp-sensors span{font-size:12.5px;font-weight:500;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.xp-how{margin-top:0;border-left:4px solid var(--acc)}
+.xp-how ol{margin:10px 0 6px;padding-left:22px}.xp-how li{margin:4px 0}
+.xp-warn{color:var(--acc);font-weight:600;margin:8px 0 4px;font-size:14px}
+.xp-fine{color:var(--mute);font-size:13px;margin:6px 0 0}
+.xp-orig-sub{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--ink)!important}
+html.force-light{--bg:#ffffff;--panel:#ffffff;--panel2:#f6f7f9}

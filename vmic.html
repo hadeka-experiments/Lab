@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الكاميرا بتسمع</title>
+<script src="shell.js"></script>
+<title>Camera Microphone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -37,31 +38,32 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .view video{width:100%;height:100%;object-fit:cover}
 .view i{position:absolute;inset:10% 35%;border:2px solid var(--red);border-radius:6px}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>الكاميرا بتسمع</h1>
-<p class="sub">الصوت بيهز كل حاجة حواليه اهتزازات أصغر من إن العين تشوفها. كاميرا التليفون مش بتصوّر الصورة مرة واحدة، بتقراها سطر ورا سطر (rolling shutter)، فكل صورة فيها آلاف اللحظات. الصفحة بتستخدم ده عشان تطلّع الصوت من فيديو صامت، من غير مايك خالص.</p>
+<h1>Camera Microphone</h1>
+<p class="sub">Sound shakes everything around it by amounts too small to see. A phone camera doesn’t capture a frame all at once; it reads it line by line (rolling shutter), so every frame contains thousands of moments. The page uses this to recover sound from a silent video, with no microphone at all.</p>
 
 <div class="view"><video id="vid" playsinline muted autoplay></video><i></i></div>
-<div class="msg" id="msg">شغّل الكاميرا الخلفية، وخلي المربع الأحمر على حاجة فيها خطوط أو حروف واضحة، زي ورقة مطبوعة أو كيس شيبسي.</div>
-<div class="row"><button id="b-cam">شغّل الكاميرا</button><button class="ghost" id="b-cal" disabled>معايرة</button><button id="b-rec" disabled>اسمع ٤ ثواني</button></div>
+<div class="msg" id="msg">Start the rear camera and keep the red box on something with clear lines or text, like a printed page or a crisp packet.</div>
+<div class="row"><button id="b-cam">Start camera</button><button class="ghost" id="b-cal" disabled>Calibrate</button><button id="b-rec" disabled>Listen 4 s</button></div>
 
 <div class="card" style="margin-top:12px">
-  <div class="lbl">اللي الكاميرا سمعته</div>
+  <div class="lbl">What the camera heard</div>
   <div class="big" id="res">—</div>
   <div class="lbl" id="resNote"></div>
-  <div class="row"><button class="ghost" id="b-play" disabled>اسمع الصوت اللي طلع من الفيديو</button></div>
+  <div class="row"><button class="ghost" id="b-play" disabled>Play the sound recovered from video</button></div>
 </div>
 <div class="fig"><canvas id="cv"></canvas></div>
 
-<details open><summary>إزاي تجرّبها</summary>
+<details open><summary>How to try it</summary>
 <ol>
-<li><b>معايرة (مرة واحدة):</b> حط التليفون على ترابيزة والكاميرا على الورقة، ودوس «معايرة». التليفون هيطلّع نغمة ٤ ثواني وهو بيصوّر، فيتهز هو نفسه، والصفحة تعرف سرعة قراية الكاميرا للسطور من النغمة اللي هي عارفاها.</li>
-<li><b>اسمع:</b> شغّل نغمة عالية أو أغنية فيها بيز تقيل من سماعة تانية أو لابتوب، وحط الورقة <b>على السماعة أو لازقة فيها</b>. ثبّت التليفون على حاجة مش لامسة السماعة، ودوس «اسمع ٤ ثواني».</li>
-<li>لو الكاميرا لقطت نغمة، هتلاقي ترددها مكتوب، وقمة واضحة في الرسمة.</li>
+<li><b>Calibration (once):</b> Put the phone on a table with the camera on the paper and tap “Calibrate”. The phone plays a tone for 4 seconds while filming, so it shakes itself, and the page learns how fast the camera reads lines from a tone it already knows.</li>
+<li><b>Listen:</b> Play a loud tone or a song with heavy bass from another speaker or laptop, and put the paper <b>on the speaker or pressed against it</b>. Hold the phone on something that doesn’t touch the speaker, and tap “Listen 4 s”.</li>
+<li>If the camera picks up a tone, its frequency is shown along with a clear peak in the chart.</li>
 </ol>
-<p><b>حدوده:</b> دي أصعب تجربة في المجموعة. بكاميرا المتصفح، الصفحة تقدر تطلّع نغمات قوية وإيقاع، لكن كلام مفهوم تقريباً مستحيل. والصوت اللي بيطلع من الفيديو بيبقى فيه طنين من فواصل الصور، لأن الكاميرا ما بتقراش وهي بتنقل من صورة للتانية.</p></details>
+<p><b>Limits:</b> This is the hardest experiment in the set. With a browser camera the page can recover strong tones and rhythm, but intelligible speech is almost impossible. The recovered sound also has a hum from frame gaps, because the camera doesn’t read while moving from one frame to the next.</p></details>
 </div>
 <script>
 
@@ -109,13 +111,13 @@ let lastSeries = null;
 
 $('b-cam').addEventListener('click', async () => {
   try {
-    if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+    if (!window.isSecureContext) throw new Error('This page must be opened over https.');
     const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 60 } }, audio: false });
     video.srcObject = st; await video.play();
     $('b-cam').style.display = 'none'; $('b-cal').disabled = $('b-rec').disabled = false;
     const s = st.getVideoTracks()[0].getSettings();
-    say(`الكاميرا شغالة: ${s.width || video.videoWidth}×${s.height || video.videoHeight}، ${Math.round(s.frameRate || 30)} صورة في الثانية.`);
-  } catch (e) { say(e && e.name === 'NotAllowedError' ? 'محتاج إذن الكاميرا: الإعدادات ← Chrome ← الكاميرا.' : 'حصلت مشكلة: ' + (e && e.message || e), true); }
+    say(`Camera running: ${s.width || video.videoWidth}×${s.height || video.videoHeight}, ${Math.round(s.frameRate || 30)} fps.`);
+  } catch (e) { say(e && e.name === 'NotAllowedError' ? 'Camera permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong: ' + (e && e.message || e), true); }
 });
 
 async function record(sec) {
@@ -161,31 +163,31 @@ async function tone(f, sec) {
   return ac;
 }
 $('b-cal').addEventListener('click', async () => {
-  $('b-cal').disabled = $('b-rec').disabled = true; say('بيعاير… سيب التليفون ثابت على الترابيزة.');
+  $('b-cal').disabled = $('b-rec').disabled = true; say('Calibrating… keep the phone still on the table.');
   try {
     const F0 = 330, ac = await tone(F0, 4.6); await wait(300);
     const fr = await record(4); ac.close();
     const k0 = { r: 0.75, c: 0.75 }, out = {};
     for (const ax of ['r', 'c']) { const s = vmSeries(fr[ax], 0.75), sp = vmSpectrum(s, 150, 1200); const p = sp.peaks.find(p => p.snr > 15); if (p) out[ax] = { k: 0.75 * p.f / F0, snr: p.snr }; }
     const ax = Object.keys(out).sort((a, b) => out[b].snr - out[a].snr)[0];
-    if (!ax) { say('الكاميرا ما لقطتش النغمة. علّي صوت التليفون للآخر، وخلي الكاميرا على حاجة فيها خطوط حادة، وجرّب تاني.', true); }
-    else { K[ax] = Math.min(1, Math.max(0.2, out[ax].k)); try { localStorage.setItem('vmK', JSON.stringify(K)); } catch (e) {} say(`المعايرة نجحت: الكاميرا بتقرا ${ax === 'r' ? 'السطور' : 'الأعمدة'} في ${Math.round(K[ax] * 100)}% من وقت الصورة. دلوقتي جرّب «اسمع».`); }
-  } catch (e) { say('حصلت مشكلة: ' + (e && e.message || e), true); }
+    if (!ax) { say('The camera didn’t catch the tone. Turn the phone’s volume to max, aim the camera at something with sharp lines, and try again.', true); }
+    else { K[ax] = Math.min(1, Math.max(0.2, out[ax].k)); try { localStorage.setItem('vmK', JSON.stringify(K)); } catch (e) {} say(`Calibration succeeded: the camera reads ${ax === 'r' ? 'rows' : 'columns'} during ${Math.round(K[ax] * 100)}% of each frame. Now try “Listen”.`); }
+  } catch (e) { say('Something went wrong: ' + (e && e.message || e), true); }
   $('b-cal').disabled = $('b-rec').disabled = false;
 });
 $('b-rec').addEventListener('click', async () => {
-  $('b-cal').disabled = $('b-rec').disabled = true; say('بيسمع بالكاميرا… ما تلمسش التليفون.');
+  $('b-cal').disabled = $('b-rec').disabled = true; say('Listening with the camera… don’t touch the phone.');
   try {
     const fr = await record(4), b = best(fr, K);
-    if (!b) { say('الصور اللي اتسجلت قليلة.', true); }
+    if (!b) { say('Too few frames were recorded.', true); }
     else {
       lastSeries = b.s; $('b-play').disabled = false;
       const p = b.sp.peaks[0];
-      if (p && p.snr > 20) { $('res').textContent = `${Math.round(p.f)} Hz`; $('resNote').textContent = `الكاميرا لقطت نغمة واضحة: أعلى من الخلفية ${Math.round(p.snr)} مرة. لو انت مشغّل نغمة معروفة، قارن ترددها بالرقم ده.`; }
-      else { $('res').textContent = 'مفيش نغمة واضحة'; $('resNote').textContent = p ? `أعلى قمة كانت عند ${Math.round(p.f)} Hz، بس مش أعلى من الخلفية بفرق كافي.` : ''; }
-      drawSpec(b.sp, p && p.snr > 20 ? p.f : null); say('خلص. الرسمة فيها الترددات اللي الكاميرا شافتها.');
+      if (p && p.snr > 20) { $('res').textContent = `${Math.round(p.f)} Hz`; $('resNote').textContent = `The camera caught a clear tone, ${Math.round(p.snr)}× above the background. If you’re playing a known tone, compare its frequency with this number.`; }
+      else { $('res').textContent = 'No clear tone'; $('resNote').textContent = p ? `The highest peak was at ${Math.round(p.f)} Hz, but not far enough above the background.` : ''; }
+      drawSpec(b.sp, p && p.snr > 20 ? p.f : null); say('Done. The chart shows the frequencies the camera saw.');
     }
-  } catch (e) { say('حصلت مشكلة: ' + (e && e.message || e), true); }
+  } catch (e) { say('Something went wrong: ' + (e && e.message || e), true); }
   $('b-cal').disabled = $('b-rec').disabled = false;
 });
 $('b-play').addEventListener('click', async () => {

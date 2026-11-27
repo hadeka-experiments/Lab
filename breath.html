@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>رادار النَّفَس</title>
+<script src="shell.js"></script>
+<title>Breathing Radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{color-scheme:light dark;--bg:light-dark(#d5dbe0,#16191c);--panel:light-dark(#e7ebee,#1f2327);--ink:light-dark(#0d0f11,#eef1f3);--mute:light-dark(#4d5761,#9aa4ad);--line:light-dark(#b4bcc4,#333a41);--red:#e8251a;--ok:#1d9e75}
 *{box-sizing:border-box;min-width:0}
@@ -35,35 +36,36 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 
 .warn{border-color:var(--red)}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>رادار النَّفَس</h1>
-<p class="sub">التليفون بيطلّع صوت تردده عالي جداً، الكبار ما بيسمعوهوش تقريباً، ويسمع صداه. لما صدر حد قدامه بيطلع وينزل، تردد الصدى بيتغير تغيير صغير جداً (Doppler)، ومنه الصفحة بترسم نَفَسه، من غير ما تلمسه ولا تشوفه.</p>
+<h1>Breathing Radar</h1>
+<p class="sub">The phone plays a very high‑pitched tone that most adults can’t hear, and listens to its echo. As someone’s chest rises and falls, the echo’s frequency shifts very slightly (Doppler), and the page draws their breathing without touching or seeing them.</p>
 
-<div class="card warn"><b>قبل ما تبدأ:</b> الأطفال والحيوانات الأليفة بيسمعوا الترددات دي، والصوت ممكن يضايقهم أو يصحّيهم. ما تشغّلهاش جنب ابنك وهو نايم.</div>
+<div class="card warn"><b>Before you start:</b> Children and pets can hear these frequencies, and the sound may bother or wake them. Don’t run it next to a sleeping child or pet.</div>
 
 <div class="card" style="margin-top:10px">
-  <div class="lbl">النَّفَس</div>
-  <div class="big" id="bpm">—<small> نَفَس/د</small></div>
+  <div class="lbl">Breathing</div>
+  <div class="big" id="bpm">—<small> breaths/min</small></div>
   <div class="lbl" id="q">—</div>
 </div>
 <div class="fig"><canvas id="cv"></canvas></div>
-<div class="msg" id="msg">حط التليفون على ترابيزة، والسماعة اللي تحت ناحية صدر الشخص على بعد نص متر لمتر ونص. والشخص يقعد أو ينام ثابت.</div>
+<div class="msg" id="msg">Put the phone on a table with its bottom speaker facing the person’s chest, 0.5–1.5 m away. The person sits or lies still.</div>
 
 <div class="grid2">
-  <label>التردد<select id="F"><option value="17500">17.5 كيلوهرتز</option><option value="18500" selected>18.5 كيلوهرتز</option><option value="19500">19.5 كيلوهرتز</option></select></label>
-  <label>علو الصوت <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.6"></label>
+  <label>Frequency<select id="F"><option value="17500">17.5 kHz</option><option value="18500" selected>18.5 kHz</option><option value="19500">19.5 kHz</option></select></label>
+  <label>Volume <b id="vV"></b><input type="range" id="V" min="0.1" max="1" step="0.05" value="0.6"></label>
 </div>
-<div class="row"><button id="go">ابدأ</button></div>
+<div class="row"><button id="go">Start</button></div>
 
-<details><summary>بيعرف إزاي؟ وإيه حدوده؟</summary>
+<details><summary>How does it know, and what are the limits?</summary>
 <ul>
-<li>طول موجة الصوت عند ١٨.٥ كيلوهرتز حوالي ٢ سم، وصدر الإنسان وهو بيتنفس بيتحرك كام ملّي. الحركة دي بتغيّر «طور» الصدى تغيير كبير يتقاس بسهولة.</li>
-<li>الصفحة بتشيل الصدى الثابت (الحيطان والعفش)، وبتفضّل الجزء اللي بيتحرك ببطء بين ٦ و٤٢ مرة في الدقيقة، وده النَّفَس.</li>
-<li>أي حركة تانية في الأوضة، زي حد ماشي أو إيد بتتحرك، بتغطي على النَّفَس، والصفحة هتكتب «حركة».</li>
-<li>لو الصوت مسموع ليك، جرّب تردد أعلى. ولو الإشارة ضعيفة، قرّب التليفون أو علّي الصوت.</li>
-<li>دي تجربة، مش جهاز طبي.</li>
+<li>At 18.5 kHz the sound’s wavelength is about 2 cm, and a breathing chest moves a few millimetres. That movement shifts the echo’s “phase” by a large, easily measured amount.</li>
+<li>The page removes the still echo (walls, furniture) and keeps the slowly moving part between 6 and 42 cycles per minute: the breathing.</li>
+<li>Any other movement in the room, like someone walking or a moving hand, drowns out the breathing, and the page will show “Movement”.</li>
+<li>If you can hear the tone, try a higher frequency. If the signal is weak, move the phone closer or raise the volume.</li>
+<li>This is an experiment, not a medical device.</li>
 </ul></details>
 </div>
 <script>
@@ -148,7 +150,7 @@ let ctx, stream, osc, gain, src, proc, mute, on = false, timer, iq = [], ph = 0;
 const FS = 100;
 $('V').addEventListener('input', () => { $('vV').textContent = $('V').value; if (gain) gain.gain.value = +$('V').value; }); $('vV').textContent = $('V').value;
 async function start() {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
   ctx = new (window.AudioContext || window.webkitAudioContext)(); await ctx.resume();
   const f = +$('F').value, sr = ctx.sampleRate, D = Math.round(sr / FS), w = 2 * Math.PI * f / sr;
@@ -165,21 +167,21 @@ async function start() {
 function stop() { try { osc.stop(); } catch (e) {} try { src.disconnect(); proc.disconnect(); } catch (e) {} if (stream) stream.getTracks().forEach(t => t.stop()); if (ctx) ctx.close(); ctx = null; }
 function tick() {
   const s = iq.slice(-FS * 30);
-  if (s.length < FS * 10) { $('msg').textContent = `بيجمّع… (${Math.round(s.length / FS)} من ١٠ ثواني)`; return; }
+  if (s.length < FS * 10) { $('msg').textContent = `Collecting… (${Math.round(s.length / FS)} of 10 seconds)`; return; }
   const level = Math.hypot(s[s.length - 1].i, s[s.length - 1].q);
-  if (level < 1e-4) { $('msg').innerHTML = '<span class="bad">المايك مش سامع الصوت العالي. علّي الصوت، وشيل الصامت، أو جرّب تردد أوطى.</span>'; return; }
+  if (level < 1e-4) { $('msg').innerHTML = '<span class="bad">The microphone can’t hear the high tone. Raise the volume, turn off silent mode, or try a lower frequency.</span>'; return; }
   const r = doppler(s, FS); if (!r) return;
-  $('bpm').innerHTML = (r.q > 0.35 && !r.motion ? Math.round(r.bpm) : '—') + '<small> نَفَس/د</small>';
-  $('q').innerHTML = r.motion ? '<span class="bad">فيه حركة في المكان</span>' : r.q > 0.5 ? '<span class="ok">وضوح الإشارة عالي</span>' : r.q > 0.35 ? 'وضوح الإشارة متوسط' : '<span class="bad">الإشارة ضعيفة</span>';
-  $('msg').textContent = 'بيقيس. المنحنى بيطلع لما الصدر بيقرّب وينزل لما يبعد.';
-  drawWave($('cv'), r.wave, 'حركة الصدر (آخر ٣٠ ثانية)');
+  $('bpm').innerHTML = (r.q > 0.35 && !r.motion ? Math.round(r.bpm) : '—') + '<small> breaths/min</small>';
+  $('q').innerHTML = r.motion ? '<span class="bad">Movement detected</span>' : r.q > 0.5 ? '<span class="ok">Signal clarity: high</span>' : r.q > 0.35 ? 'Signal clarity: medium' : '<span class="bad">Weak signal</span>';
+  $('msg').textContent = 'Measuring. The curve rises as the chest moves closer and falls as it moves away.';
+  drawWave($('cv'), r.wave, 'Chest movement (last 30 seconds)');
 }
 $('go').addEventListener('click', async () => {
-  if (on) { on = false; clearInterval(timer); stop(); $('go').textContent = 'ابدأ'; return; }
-  try { iq = []; await start(); on = true; $('go').textContent = 'وقّف'; timer = setInterval(tick, 1000); try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {} }
-  catch (e) { $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'محتاج إذن المايك: الإعدادات ← Chrome ← الميكروفون.' : 'حصلت مشكلة.') + '</span>'; }
+  if (on) { on = false; clearInterval(timer); stop(); $('go').textContent = 'Start'; return; }
+  try { iq = []; await start(); on = true; $('go').textContent = 'Stop'; timer = setInterval(tick, 1000); try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) {} }
+  catch (e) { $('msg').innerHTML = '<span class="bad">' + (e && e.name === 'NotAllowedError' ? 'Microphone permission needed: allow it in your browser’s site settings, then reload.' : 'Something went wrong.') + '</span>'; }
 });
-drawWave($('cv'), null, 'حركة الصدر');
+drawWave($('cv'), null, 'Chest movement');
 }
 </script>
 </body>

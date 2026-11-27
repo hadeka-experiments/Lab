@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GPS من الشمس</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="shell.js"></script>
+<title>Sun GPS</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -42,42 +43,43 @@ details{margin-top:22px;background:var(--panel);border:1px solid var(--line);bor
 .view .hud{position:absolute;inset:auto 0 0 0;padding:8px 10px;background:#0009;color:#fff;font-size:14px;font-variant-numeric:tabular-nums}
 .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;width:0;background:var(--ok)}
 </style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 <div class="wrap">
-<h1>GPS من الشمس</h1>
-<p class="sub">من غير GPS ولا إنترنت ولا شبكة: التليفون يعرف انت فين على الكرة الأرضية من زاوية الشمس والساعة بس، بنفس طريقة البحارة من ٢٠٠ سنة.</p>
+<h1>Sun GPS</h1>
+<p class="sub">No GPS, no internet, no network: the phone finds where you are on the globe from just the sun’s angle and the clock, the way sailors did 200 years ago.</p>
 <div class="card">
-  <b>إزاي</b>
+  <b>How to</b>
   <ol style="margin:6px 0;padding-inline-start:20px;font-size:15px">
-    <li>اقف في مكان مكشوف والشمس ظاهرة.</li>
-    <li>وجّه <b>ضهر التليفون</b> ناحية الشمس، و<b>بُص على الشاشة مش على الشمس</b>.</li>
-    <li>امسك التليفون <b>بالطول</b>، وحرّكه لحد ما الشمس تدخل الدايرة اللي في النص وتفضل جواها حوالي ثانيتين. هيتسجل لوحده، أو اضغط «سجّل دلوقتي».</li>
-    <li>قياس واحد بيدّي مكان تقريبي (مئات الكيلومترات). <b>قياسين بينهم ساعة على الأقل</b> بيدّوا دقة أحسن بكتير، لأن الشمس بتكون اتحركت.</li>
+    <li>Stand somewhere open with the sun visible.</li>
+    <li>Point the <b>back of the phone</b> toward the sun, and<b>look at the screen, not at the sun</b>.</li>
+    <li>Hold the phone <b>upright (portrait)</b>, and move it until the sun enters the central circle and stays there for about 2 seconds. It records automatically, or tap “Record now”.</li>
+    <li>One measurement gives a rough location (hundreds of km). <b>Two measurements at least an hour apart</b> are far more accurate, because the sun will have moved.</li>
   </ol>
-  <div class="row"><button id="b-go">افتح الكاميرا</button><button class="ghost" id="b-clear">امسح القياسات</button></div>
+  <div class="row"><button id="b-go">Open camera</button><button class="ghost" id="b-clear">Clear measurements</button></div>
   <div class="msg" id="st"></div>
 </div>
 <div class="view" id="view" hidden><video id="v" playsinline muted></video><div class="ring" id="ring"></div><div class="dot" id="dot"></div><div class="hud" id="hud"></div></div>
 <div class="bar" id="barW" hidden><i id="bar"></i></div>
-<div class="row"><button class="ghost" id="b-now" hidden disabled>سجّل دلوقتي</button></div>
+<div class="row"><button class="ghost" id="b-now" hidden disabled>Record now</button></div>
 
-<h2>القياسات</h2>
+<h2>Measurements</h2>
 <ul class="list" id="obs"></ul>
 <div id="res"></div>
-<div id="mapW" hidden><div id="map" style="height:360px;border-radius:14px;margin-top:10px;z-index:0"></div><p class="lbl" id="mapSt">الأحمر: المكان المحتمل. الأزرق: الـGPS الحقيقي لو قارنت.</p></div>
-<div class="row"><button class="ghost" id="b-gps" hidden>قارن بالـGPS الحقيقي</button></div>
+<div id="mapW" hidden><div id="map" style="height:360px;border-radius:14px;margin-top:10px;z-index:0"></div><p class="lbl" id="mapSt">Red: likely area. Blue: real GPS if you compare.</p></div>
+<div class="row"><button class="ghost" id="b-gps" hidden>Compare with real GPS</button></div>
 <div class="msg" id="gpsSt"></div>
 
-<h2>المواقع اللي اتحسبت</h2>
+<h2>Computed locations</h2>
 <ul class="list" id="fixes"></ul>
-<details style="margin-top:14px"><summary>إزاي بيحسبها؟ وليه مش دقيقة زي الـGPS؟</summary>
+<details style="margin-top:14px"><summary>How is it calculated, and why isn’t it as precise as GPS?</summary>
 <ul>
-<li><b>حساس الميل</b> بيقيس الشمس على ارتفاع كام درجة فوق الأفق، و<b>البوصلة</b> بتقيس هي في أنهي اتجاه تقريباً.</li>
-<li><b>من الساعة</b> الصفحة بتحسب الشمس واقفة فوق أنهي نقطة على الأرض بالظبط في اللحظة دي (معادلات NOAA).</li>
-<li>كل قياس ارتفاع بيقول إنك على <b>دايرة</b> حوالين النقطة دي. قياسين في وقتين مختلفين = دايرتين، وانت عند تقاطعهم. والبوصلة بتختار أنهي تقاطع.</li>
-<li><b>درجة غلط واحدة في الميل = حوالي ١١٠ كيلو.</b> حساس التليفون دقته حوالي درجة، فعشان كده الدقة بالعشرات أو المئات من الكيلومترات، مش أمتار. الصفحة بتحسب وبتوريك نص قطر المنطقة اللي انت غالباً فيها.</li>
-<li>الصفحة بتصحّح انكسار الضوء في الجو قرب الأفق. ومحتاجة ساعة التليفون تكون مظبوطة (أوتوماتيك).</li>
+<li><b>The tilt sensor</b> measures how many degrees the sun is above the horizon, and the<b>compass</b> roughly which direction it’s in.</li>
+<li><b>From the clock</b> the page calculates exactly which point on Earth the sun is directly above at that moment (NOAA equations).</li>
+<li>Each altitude measurement says you are on a <b>circle</b> around that point. Two measurements at different times = two circles, and you’re where they intersect. The compass picks which intersection.</li>
+<li><b>One degree of tilt error ≈ 110 km.</b> The phone’s sensor is accurate to about a degree, so the result is accurate to tens or hundreds of kilometres, not metres. The page calculates and shows the radius of the area you’re most likely in.</li>
+<li>The page corrects for atmospheric refraction near the horizon, and needs the phone’s clock to be correct (automatic time).</li>
 </ul></details>
 </div>
 <script>
@@ -87,16 +89,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const sleepMs = ms => new Promise(r => setTimeout(r, ms));
 const LS = (ns => ({ get(k, d) { try { const v = localStorage.getItem(ns + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(ns + k, JSON.stringify(v)); } catch (e) {} } }))(location.pathname.split('/').pop() + '.');
 async function motionPerm() { // must run inside a tap on iOS
-  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('محتاج إذن الحركة والاتجاه: اضغط «سماح» لما يطلب.'); } };
+  const ask = async C => { if (C && typeof C.requestPermission === 'function') { const r = await C.requestPermission(); if (r !== 'granted') throw new Error('Motion & orientation permission needed: tap “Allow” when asked.'); } };
   await ask(window.DeviceMotionEvent); await ask(window.DeviceOrientationEvent);
 }
 async function camera(facing, w = 1280, h = 720) {
-  if (!window.isSecureContext) throw new Error('الصفحة لازم تتفتح من لينك https.');
+  if (!window.isSecureContext) throw new Error('This page must be opened over https.');
   return navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: w }, height: { ideal: h } }, audio: false });
 }
-const errText = e => e && e.name === 'NotAllowedError' ? 'الإذن اترفض. افتح الإعدادات ← Chrome واسمح بالكاميرا/المايك، أو اعمل ريفرش للصفحة.' : (e && e.message) || 'حصلت مشكلة';
+const errText = e => e && e.name === 'NotAllowedError' ? 'Permission denied. Allow camera/microphone/motion for this site in your browser settings, then reload the page.' : (e && e.message) || 'Something went wrong';
 function fitCanvas(cv) { const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = Math.max(1, r.width * d); cv.height = Math.max(1, r.height * d); const g = cv.getContext('2d'); g.setTransform(d, 0, 0, d, 0, 0); return [g, r.width, r.height]; }
-const ar = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const ar = n => String(n).replace(/\d/g, d => '0123456789'[d]);
 function fftR(re, im) { const n = re.length; for (let i = 1, j = 0; i < n; i++) { let b = n >> 1; for (; j & b; b >>= 1) j ^= b; j ^= b; if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; } }
   for (let len = 2; len <= n; len <<= 1) { const a = -2 * Math.PI / len, wr = Math.cos(a), wi = Math.sin(a), h = len >> 1; for (let i = 0; i < n; i += len) { let cr = 1, ci = 0; for (let k = 0; k < h; k++) { const p = i + k, q = p + h, tr = re[q] * cr - im[q] * ci, ti = re[q] * ci + im[q] * cr; re[q] = re[p] - tr; im[q] = im[p] - ti; re[p] += tr; im[p] += ti; const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr; } } } }
 // Welch power spectrum of x at fs; returns {f, P}
@@ -161,10 +163,10 @@ function probRaster(obs, sAlt, sAz, best, G = 160) {
   return { P, G, bounds: [[la0, lo0], [la1, lo1]], area68 };
 }
 
-const CITIES = [['القاهرة', 30.04, 31.24], ['الجيزة', 30.01, 31.21], ['الإسكندرية', 31.2, 29.92], ['بورسعيد', 31.26, 32.3], ['السويس', 29.97, 32.53], ['الإسماعيلية', 30.6, 32.27], ['المنصورة', 31.04, 31.38], ['طنطا', 30.79, 31.0], ['الزقازيق', 30.59, 31.5], ['دمياط', 31.42, 31.81], ['الفيوم', 29.31, 30.84], ['بني سويف', 29.07, 31.1], ['المنيا', 28.11, 30.74], ['أسيوط', 27.18, 31.18], ['سوهاج', 26.56, 31.69], ['قنا', 26.16, 32.72], ['الأقصر', 25.69, 32.64], ['أسوان', 24.09, 32.9], ['الغردقة', 27.26, 33.81], ['شرم الشيخ', 27.92, 34.33], ['العريش', 31.13, 33.8], ['مرسى مطروح', 31.35, 27.24], ['سيوة', 29.2, 25.52], ['الواحات الخارجة', 25.44, 30.55], ['الرياض', 24.71, 46.68], ['جدة', 21.49, 39.19], ['مكة', 21.39, 39.86], ['عمّان', 31.95, 35.93], ['بيروت', 33.89, 35.5], ['القدس', 31.77, 35.21], ['دمشق', 33.51, 36.29], ['بغداد', 33.31, 44.37], ['الكويت', 29.38, 47.98], ['الدوحة', 25.29, 51.53], ['دبي', 25.2, 55.27], ['الخرطوم', 15.5, 32.56], ['طرابلس', 32.89, 13.19], ['تونس', 36.81, 10.18], ['الجزائر', 36.75, 3.06], ['الرباط', 34.02, -6.84], ['إسطنبول', 41.01, 28.98], ['أثينا', 37.98, 23.73], ['روما', 41.9, 12.5], ['باريس', 48.86, 2.35], ['لندن', 51.51, -0.13], ['برلين', 52.52, 13.4], ['نيروبي', -1.29, 36.82], ['أديس أبابا', 9.03, 38.74], ['موسكو', 55.76, 37.62], ['نيويورك', 40.71, -74.01]];
+const CITIES = [['Cairo', 30.04, 31.24], ['Giza', 30.01, 31.21], ['Alexandria', 31.2, 29.92], ['Port Said', 31.26, 32.3], ['Suez', 29.97, 32.53], ['Ismailia', 30.6, 32.27], ['Mansoura', 31.04, 31.38], ['Tanta', 30.79, 31.0], ['Zagazig', 30.59, 31.5], ['Damietta', 31.42, 31.81], ['Faiyum', 29.31, 30.84], ['Beni Suef', 29.07, 31.1], ['Minya', 28.11, 30.74], ['Asyut', 27.18, 31.18], ['Sohag', 26.56, 31.69], ['Qena', 26.16, 32.72], ['Luxor', 25.69, 32.64], ['Aswan', 24.09, 32.9], ['Hurghada', 27.26, 33.81], ['Sharm El Sheikh', 27.92, 34.33], ['Arish', 31.13, 33.8], ['Marsa Matruh', 31.35, 27.24], ['Siwa', 29.2, 25.52], ['Kharga Oasis', 25.44, 30.55], ['Riyadh', 24.71, 46.68], ['Jeddah', 21.49, 39.19], ['Mecca', 21.39, 39.86], ['Amman', 31.95, 35.93], ['Beirut', 33.89, 35.5], ['Jerusalem', 31.77, 35.21], ['Damascus', 33.51, 36.29], ['Baghdad', 33.31, 44.37], ['Kuwait City', 29.38, 47.98], ['Doha', 25.29, 51.53], ['Dubai', 25.2, 55.27], ['Khartoum', 15.5, 32.56], ['Tripoli', 32.89, 13.19], ['Tunis', 36.81, 10.18], ['Algiers', 36.75, 3.06], ['Rabat', 34.02, -6.84], ['Istanbul', 41.01, 28.98], ['Athens', 37.98, 23.73], ['Rome', 41.9, 12.5], ['Paris', 48.86, 2.35], ['London', 51.51, -0.13], ['Berlin', 52.52, 13.4], ['Nairobi', -1.29, 36.82], ['Addis Ababa', 9.03, 38.74], ['Moscow', 55.76, 37.62], ['New York', 40.71, -74.01]];
 let obs = LS.get('obs', []).filter(o => Date.now() - o.ms < 36 * 3600e3);
 let ori = null, stream = null, raf = 0, hold = [];
-const dirName = a => ['شمال', 'شمال شرق', 'شرق', 'جنوب شرق', 'جنوب', 'جنوب غرب', 'غرب', 'شمال غرب'][Math.round(((a % 360) + 360) % 360 / 45) % 8];
+const dirName = a => ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(((a % 360) + 360) % 360 / 45) % 8];
 // camera axis (back camera = -Z) from W3C deviceorientation angles
 function camDir(e) {
   const a = (e.webkitCompassHeading != null ? (360 - e.webkitCompassHeading) : e.alpha) * D2R, b = e.beta * D2R, g = e.gamma * D2R;
@@ -178,7 +180,7 @@ $('b-go').onclick = async () => {
     await motionPerm();
     stream = await camera('environment');
     $('v').srcObject = stream; await $('v').play(); $('view').hidden = false; $('barW').hidden = false; $('b-now').hidden = false; $('b-go').hidden = true;
-    $('st').textContent = 'دوّر على الشمس بضهر التليفون… ماتبصش عليها.';
+    $('st').textContent = 'Find the sun with the back of the phone… don’t look at it.';
     loop();
   } catch (e) { $('st').innerHTML = `<span class="bad">${esc(errText(e))}</span>`; }
 };
@@ -214,14 +216,14 @@ function goodNow() { const t = performance.now(); hold = hold.filter(h => t - h.
 function loop() {
   raf = requestAnimationFrame(loop);
   const s = findSun(), dot = $('dot'), ring = $('ring');
-  let txt = ori ? '' : 'حساس الاتجاه مش شغال: اقفل الصفحة وافتحها تاني واسمح بالحركة. ';
+  let txt = ori ? '' : 'Orientation sensor isn’t working: reload the page and allow motion access. ';
   if (s && !s.big) {
     dot.style.display = 'block'; dot.style.left = s.x * 100 + '%'; dot.style.top = s.y * 100 + '%';
     const box = $('view').getBoundingClientRect(), dist = Math.hypot((s.x - 0.5) * box.width, (s.y - 0.5) * box.height) / box.width;
     const ok = dist < 0.12 && ori; ring.classList.toggle('ok', !!ok);
-    if (ok) { const c = sunDir(ori, s); hold.push({ t: performance.now(), ...c }); txt += `الشمس: ارتفاع ${c.alt.toFixed(1)}° · ${dirName(c.az)} (${Math.round(c.az)}°)`; }
-    else txt += 'قرّب الشمس من الدايرة';
-  } else { dot.style.display = 'none'; ring.classList.remove('ok'); txt += s && s.big ? 'الصورة كلها منورة: دوّر على قرص الشمس' : 'مش لاقي الشمس'; }
+    if (ok) { const c = sunDir(ori, s); hold.push({ t: performance.now(), ...c }); txt += `Sun: altitude ${c.alt.toFixed(1)}° · ${dirName(c.az)} (${Math.round(c.az)}°)`; }
+    else txt += 'Move the sun into the circle';
+  } else { dot.style.display = 'none'; ring.classList.remove('ok'); txt += s && s.big ? 'The whole image is bright: look for the sun’s disc' : 'Sun not found'; }
   const n = goodNow(); $('bar').style.width = Math.min(1, n / NEED) * 100 + '%';
   $('hud').textContent = txt; $('b-now').disabled = n < 10;
   if (n >= NEED) record();
@@ -233,8 +235,8 @@ function record() {
   const spread = alts[Math.floor(alts.length * 0.9)] - alts[Math.floor(alts.length * 0.1)];
   obs.push({ ms: Date.now(), alt: +med.toFixed(2), az: +((Math.atan2(sx, sy) * R2D + 360) % 360).toFixed(1), spread: +spread.toFixed(2), sAlt: +Math.max(0.8, Math.min(3, 0.6 + spread)).toFixed(2), n: hold.length });
   LS.set('obs', obs); hold = [];
-  cancelAnimationFrame(raf); stream.getTracks().forEach(t => t.stop()); $('view').hidden = true; $('barW').hidden = true; $('b-now').hidden = true; $('b-go').hidden = false; $('b-go').textContent = 'قياس كمان';
-  $('st').innerHTML = `<span class="ok">اتسجل.</span> ${obs.length < 2 ? 'ارجع بعد ساعة على الأقل واعمل قياس تاني عشان المنطقة تصغر.' : ''}`;
+  cancelAnimationFrame(raf); stream.getTracks().forEach(t => t.stop()); $('view').hidden = true; $('barW').hidden = true; $('b-now').hidden = true; $('b-go').hidden = false; $('b-go').textContent = 'Measure again';
+  $('st').innerHTML = `<span class="ok">Saved.</span> ${obs.length < 2 ? 'Come back in at least an hour and measure again to shrink the area.' : ''}`;
   render();
 }
 let map = null, layers = [];
@@ -243,41 +245,41 @@ function ensureMap() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 12, attribution: '© OpenStreetMap' }).addTo(map); return map;
 }
 function drawMap(f, R, gps) {
-  if (!ensureMap()) { $('mapSt').textContent = 'الخريطة محتاجة إنترنت عشان تتحمّل.'; return; }
+  if (!ensureMap()) { $('mapSt').textContent = 'The map needs internet to load.'; return; }
   layers.forEach(l => map.removeLayer(l)); layers = [];
   const c = document.createElement('canvas'); c.width = R.G; c.height = R.G; const g = c.getContext('2d'), id = g.createImageData(R.G, R.G);
   for (let i = 0; i < R.G * R.G; i++) { const d = R.P[i]; const p = Math.exp(-d / 2); const a = d < 2.3 ? 0.55 : d < 6 ? 0.28 : d < 11.8 ? 0.1 : 0; id.data[4 * i] = 232; id.data[4 * i + 1] = 37; id.data[4 * i + 2] = 26; id.data[4 * i + 3] = Math.round(255 * Math.max(a, 0.5 * p)); }
   g.putImageData(id, 0, 0);
   layers.push(L.imageOverlay(c.toDataURL(), R.bounds, { opacity: 1, interactive: false }).addTo(map));
-  layers.push(L.circleMarker([f.lat, f.lon], { radius: 6, color: '#fff', weight: 2, fillColor: '#e8251a', fillOpacity: 1 }).addTo(map).bindPopup('أكتر نقطة محتملة'));
-  if (gps) layers.push(L.circleMarker([gps[0], gps[1]], { radius: 6, color: '#fff', weight: 2, fillColor: '#2f6fde', fillOpacity: 1 }).addTo(map).bindPopup('الـGPS الحقيقي'));
+  layers.push(L.circleMarker([f.lat, f.lon], { radius: 6, color: '#fff', weight: 2, fillColor: '#e8251a', fillOpacity: 1 }).addTo(map).bindPopup('Most likely point'));
+  if (gps) layers.push(L.circleMarker([gps[0], gps[1]], { radius: 6, color: '#fff', weight: 2, fillColor: '#2f6fde', fillOpacity: 1 }).addTo(map).bindPopup('Real GPS'));
   map.fitBounds(gps ? L.latLngBounds(R.bounds).extend(gps) : R.bounds, { padding: [10, 10] });
   setTimeout(() => map.invalidateSize(), 50);
 }
 let lastGps = LS.get('gps', null);
 function render() {
-  $('obs').innerHTML = obs.length ? obs.map((o, i) => `<li><span>${new Date(o.ms).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</span><span>ارتفاع ${ar(o.alt.toFixed(1))}° · ${dirName(o.az)}${o.spread > 1.5 ? ' · <span class="bad">إيدك كانت بتتهز</span>' : ''} <button class="ghost" data-del="${i}">امسح</button></span></li>`).join('') : '<li>لسه مفيش.</li>';
+  $('obs').innerHTML = obs.length ? obs.map((o, i) => `<li><span>${new Date(o.ms).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span><span>altitude ${ar(o.alt.toFixed(1))}° · ${dirName(o.az)}${o.spread > 1.5 ? ' · <span class="bad">your hand was shaking</span>' : ''} <button class="ghost" data-del="${i}">Delete</button></span></li>`).join('') : '<li>Nothing yet.</li>';
   $('b-gps').hidden = !obs.length; $('mapW').hidden = !obs.length;
   if (!obs.length) { $('res').innerHTML = ''; return; }
   const span = (obs[obs.length - 1].ms - obs[0].ms) / 60000, sAz = obs.length >= 2 && span >= 45 ? 25 : 10;
   const f = fixPosition(obs, 0.9, sAz), R = probRaster(obs, 0.9, sAz, f);
   const near = CITIES.map(c => [c[0], km(f.lat, f.lon, c[1], c[2])]).sort((a, b) => a[1] - b[1])[0];
   const req = Math.sqrt(R.area68 / Math.PI);
-  $('res').innerHTML = `<div class="card" style="margin-top:10px"><b>انت غالباً هنا</b>
-  <div class="big" style="font-size:30px">${f.lat.toFixed(2)}° ${f.lat >= 0 ? 'شمال' : 'جنوب'} · ${Math.abs(f.lon).toFixed(2)}° ${f.lon >= 0 ? 'شرق' : 'غرب'}</div>
-  <p>أقرب مدينة للنقطة دي: <b>${near[0]}</b> (حوالي ${Math.round(near[1])} كم).</p>
-  <p class="lbl">على الخريطة: الأحمر الغامق هو المنطقة اللي احتمال ٦٨% تكون فيها (مساحتها زي دايرة نص قطرها حوالي <b>${Math.round(req)} كم</b>)، والأفتح ٩٥%. ${obs.length < 2 ? 'ده من قياس واحد، فالمنطقة بتبقى قوس طويل. القياس التاني بعد ساعة هيقطع القوس ده ويصغّر المنطقة جداً.' : span < 45 ? 'القياسين قريبين في الوقت، فالدواير متقاطعة بزاوية صغيرة. قياس كمان بعد ساعة هيحسّنها.' : ''}</p></div>`;
+  $('res').innerHTML = `<div class="card" style="margin-top:10px"><b>You’re probably here</b>
+  <div class="big" style="font-size:30px">${f.lat.toFixed(2)}° ${f.lat >= 0 ? 'N' : 'S'} · ${Math.abs(f.lon).toFixed(2)}° ${f.lon >= 0 ? 'E' : 'W'}</div>
+  <p>Nearest city to this point: <b>${near[0]}</b> (about ${Math.round(near[1])} km).</p>
+  <p class="lbl">On the map, dark red is the area with a 68% chance of containing you (equal to a circle of radius about <b>${Math.round(req)} km</b>), lighter red is 95%. ${obs.length < 2 ? 'This is from a single measurement, so the area is a long arc. A second measurement an hour later will cut across that arc and shrink the area dramatically.' : span < 45 ? 'The two measurements are close in time, so the circles cross at a shallow angle. Another measurement an hour later will improve it.' : ''}</p></div>`;
   window.__fix = f; drawMap(f, R, lastGps);
   const hist = LS.get('fixes', []); if (!hist.length || hist[0].n !== obs.length || hist[0].t0 !== obs[0].ms) { hist.unshift({ ts: Date.now(), t0: obs[0].ms, n: obs.length, lat: +f.lat.toFixed(3), lon: +f.lon.toFixed(3), r: Math.round(req) }); LS.set('fixes', hist.slice(0, 30)); }
-  $('fixes').innerHTML = LS.get('fixes', []).map(h => `<li><span>${new Date(h.ts).toLocaleString('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · ${ar(h.n)} قياس</span><span>${h.lat.toFixed(2)}°، ${h.lon.toFixed(2)}° · ±${ar(h.r)} كم</span></li>`).join('');
+  $('fixes').innerHTML = LS.get('fixes', []).map(h => `<li><span>${new Date(h.ts).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · ${ar(h.n)} measurements</span><span>${h.lat.toFixed(2)}°, ${h.lon.toFixed(2)}° · ±${ar(h.r)} km</span></li>`).join('');
 }
 $('obs').onclick = e => { const b = e.target.closest('button[data-del]'); if (!b) return; obs.splice(+b.dataset.del, 1); LS.set('obs', obs); render(); };
 $('b-now').onclick = () => record();
 $('b-clear').onclick = () => { obs = []; LS.set('obs', obs); lastGps = null; LS.set('gps', null); render(); $('gpsSt').textContent = ''; };
 $('b-gps').onclick = () => {
-  if (!navigator.geolocation) { $('gpsSt').textContent = 'الـGPS مش متاح هنا.'; return; }
-  $('gpsSt').textContent = 'بيسأل الـGPS…';
-  navigator.geolocation.getCurrentPosition(p => { const f = window.__fix; const d = km(f.lat, f.lon, p.coords.latitude, p.coords.longitude); lastGps = [p.coords.latitude, p.coords.longitude]; LS.set('gps', lastGps); render(); $('gpsSt').innerHTML = `الـGPS بيقول: ${p.coords.latitude.toFixed(2)}°، ${p.coords.longitude.toFixed(2)}°. يعني الشمس غلطت بحوالي <b>${Math.round(d)} كم</b>.`; }, e => { $('gpsSt').textContent = 'الـGPS ماردش أو الإذن اترفض.'; }, { enableHighAccuracy: true, timeout: 15000 });
+  if (!navigator.geolocation) { $('gpsSt').textContent = 'GPS isn’t available here.'; return; }
+  $('gpsSt').textContent = 'Asking GPS…';
+  navigator.geolocation.getCurrentPosition(p => { const f = window.__fix; const d = km(f.lat, f.lon, p.coords.latitude, p.coords.longitude); lastGps = [p.coords.latitude, p.coords.longitude]; LS.set('gps', lastGps); render(); $('gpsSt').innerHTML = `GPS says: ${p.coords.latitude.toFixed(2)}°, ${p.coords.longitude.toFixed(2)}°. So the sun was off by about <b>${Math.round(d)} km</b>.`; }, e => { $('gpsSt').textContent = 'GPS didn’t respond or permission was denied.'; }, { enableHighAccuracy: true, timeout: 15000 });
 };
 render();
 </script>
